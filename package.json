@@ -1,0 +1,50 @@
+{
+  "name": "homebridge-grumptech-timetriggers",
+  "version": "0.1.0",
+  "description": "Time-based triggers for use with Homebridge",
+  "main": "dist/homegridge-grumptech-timetriggers.mjs",
+  "files": [
+    "dist/homebridge-grumptech-timetriggers.js",
+    "config.schema.json",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE.md",
+    "SECURITY.md",
+    "assets/",
+    "docs/"
+  ],
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "NODE_OPTIONS=--experimental-vm-modules npx jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "todo"
+  },
+  "keywords": [
+    "homebridge",
+    "time"
+  ],
+  "author": "GrumpTech (Michael J. Price)",
+  "license": "MIT",
+  "dependencies": {
+    "debug": "^4.3.4",
+    "is-it-check": "^1.0.11"
+  },
+  "devDependencies": {
+    "docdash": "^2.0.0",
+    "eslint": "^8.31.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-jsdoc": "^39.6.4",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^6.1.1",
+    "jest": "^29.3.1",
+    "jsdoc": "^4.0.0",
+    "string-replace-loader": "^3.1.0",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1"
+  }
+}

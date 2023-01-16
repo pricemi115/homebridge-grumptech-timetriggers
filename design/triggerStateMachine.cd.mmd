@@ -1,0 +1,44 @@
+classDiagram
+    class TriggerActions{
+        <<enumeration>>
+        Next
+        Abort
+    }
+    class Trigger{
+        -TriggerStateIdle _stateIdle
+        -TriggerStateArmed _stateArmed
+        -TriggerStateTripped _stateTripped
+        -TriggerStateBase _currentState
+
+        +EnterIdle()
+        +EnterArmed()
+        +EnterTripped()
+    }
+    class TriggerStateBase{
+       <<Abstract>>
+       -Trigger owner
+       -doNext()
+       -doAbort()
+       +constructor(Object config)
+       +Evaluate(TriggerActions action)
+       +OnEntrance()
+       +OnExit()
+    }
+    class TriggerStateIdle{
+
+    }
+    class TriggerStateArmed{
+
+    }
+    class TriggerStateTripped{
+
+    }
+    Trigger "1" *-- TriggerStateIdle
+    Trigger "1" *-- TriggerStateArmed
+    Trigger "1" *-- TriggerStateTripped
+    Trigger "1" o-- "1" TriggerActions
+    TriggerStateBase "1" o-- "1" TriggerActions
+    TriggerStateBase "1" o-- Trigger
+    TriggerStateBase <|-- TriggerStateIdle
+    TriggerStateBase <|-- TriggerStateArmed
+    TriggerStateBase <|-- TriggerStateTripped

@@ -2,7 +2,7 @@
  * @description Manages a time-based trigger event.
  * @copyright January 2023
  * @author Mike Price <dev.grumptech@gmail.com>
- * @module VolumeInterrogatorBaseModule
+ * @module TimeTriggerModule
  * @requires debug
  * @see {@link https://github.com/debug-js/debug#readme}
  * @requires events
@@ -45,7 +45,7 @@ const DEFAULT_TIMEOUT_MS = 10000;
  * @enum {string}
  * @property {string} EVENT_STATE_CHANGED - Identification for the event published when the trigger state changes.
  */
-const TIME_TRIGGER_EVENTS = {
+export const TIME_TRIGGER_EVENTS = {
     /* eslint-disable key-spacing */
     EVENT_STATE_CHANGED   : 'state_changed',
     /* eslint-enable key-spacing */
@@ -92,34 +92,27 @@ export class TimeTrigger extends EventEmitter {
      */
     constructor(config) {
         // Validate arguments
-        if (_is.not.object(config) ||
-            (_is.not.undefined(config.identifier) && _is.not.string(config.identifier))) {
+        if (_is.not.undefined(config) &&
+            (_is.not.object(config) ||
+             (_is.not.undefined(config.identifier) && _is.not.string(config.identifier)))) {
             throw new TypeError(`Invalid configuration.`);
         }
 
+        // Initialize the base class.
+        super();
+
         // Callbacks bound to this object.
-        this._CB__timerTripped     = this._on_timerTripped.bind(this);
+        this._CB__timerTripped = this._on_timerTripped.bind(this);
 
         this._state = TRIGGER_STATES.Inactive;
         this._timeout_ms = DEFAULT_TIMEOUT_MS;
         this._timeoutID = INVALID_TIMEOUT_ID;
 
-        // Use the identifier provided or set a new one.
-        if (_is.undefined(config.identifier)) {
-            // Create an identifier based on the time and random numbers.
-            const hash = _crypto.createHash('sha256');
-            // Get the current time and update the hash.
-            const now = Date.now();
-            hash.update(now);
-            // Get some random numbers and update the hash.
-            const randNumbers = new Uint8Array(64);
-            _crypto.webcrypto.getRandomValues(randNumbers);
-            for (const rand in randNumbers) {
-                hash.update(now);
-            }
-            // Set the unique identifier.
-            this._uuid = hash.digest('hex');
-            console.log(`UUID: ${this._uuid}`);
+        // Use the identifier provided or generate a new one.
+        if (_is.undefined(config) ||
+            _is.undefined(config.identifier)) {
+            // Create a unique identifier
+            this._uuid = _crypto.randomUUID({disableEntropyCache: true});
         }
         else {
             // Use the identifier provided.
@@ -141,7 +134,7 @@ export class TimeTrigger extends EventEmitter {
      */
     get Identifier() {
         return this._uuid;
-    }   
+    }
 
     /**
      * @description API to start/restart the timer.
@@ -170,7 +163,7 @@ export class TimeTrigger extends EventEmitter {
 
             // Manage the state
             _doStateChange(TRIGGER_STATES.Inactive);
-        }       
+        }
     }
 
     /**

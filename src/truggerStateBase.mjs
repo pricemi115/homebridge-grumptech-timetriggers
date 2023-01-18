@@ -67,6 +67,16 @@ export class TriggerStateBase {
         this._owner = config.owner;
     }
 
+   /**
+     * @description Read-only property for the name of the state.
+     * @returns {string} - name
+     * @throws {Error} - Thrown when calling the base class
+     * @private
+     */    
+    get Name() {
+        throw new Error(`Abstract Property: Name`);
+    }
+
     /**
      * @description Evaluate the trigger action
      * @param {TRIGGER_ACTIONS} action - Action to evaluate for the current state.
@@ -109,7 +119,7 @@ export class TriggerStateBase {
      * @private
      */
     OnEntrance() {
-        _debug(`TriggerStateBase::OnEntrance() called.`);
+        _debug(`${this.Name}::OnEntrance() called.`);
     }
 
     /**
@@ -118,7 +128,7 @@ export class TriggerStateBase {
      * @private
      */
     OnExit() {
-        _debug(`TriggerStateBase::OnExit() called.`);
+        _debug(`${this.Name}::OnExit() called.`);
     }
 
     /**
@@ -127,7 +137,7 @@ export class TriggerStateBase {
      * @private
      */
     _doNext() {
-        _debug(`TriggerStateBase::_doNext() called.`);
+        _debug(`${this.Name}::_doNext() called.`);
         return false;
     }
 
@@ -137,7 +147,7 @@ export class TriggerStateBase {
      * @private
      */
     _doAbort() {
-        _debug(`TriggerStateBase::_doAbort() called.`);
+        _debug(`${this.Name}::_doAbort() called.`);
         return false;
     }
 

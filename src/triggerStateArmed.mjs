@@ -1,8 +1,8 @@
 /**
- * @description Class for managing idle trigger states.
+ * @description Class for managing armed trigger states.
  * @copyright January 2023
  * @author Mike Price <dev.grumptech@gmail.com>
- * @module TriggerStateIdleModule
+ * @module TriggerStateArmedodule
  * @requires debug
  * @see {@link https://github.com/debug-js/debug#readme}
  * @requires is-it-check
@@ -25,7 +25,7 @@ const _debug = _debugModule('time_trigger_state');
  * @description Base class for managing trigger states.
  * @augments TriggerStateBase
  */
-export class TriggerStateIdle extends TriggerStateBase {
+export class TriggerStateArmed extends TriggerStateBase {
     /**
      * @description Constructor
      * @param {object} config - Configuration data
@@ -44,7 +44,7 @@ export class TriggerStateIdle extends TriggerStateBase {
      * @private
      */    
     get Name() {
-        return `StateIdle`;
+        return `StateArmed`;
     }
 
     /**
@@ -55,8 +55,8 @@ export class TriggerStateIdle extends TriggerStateBase {
     _doNext() {
         let handled = false;
         if (_is.not.undefined(this._owner)) {
-            // Transitioon to armed.
-            handled = this._owner.EnterArmed();
+            // Transitioon to tripped.
+            handled = this._owner.EnterTripped();
         }
     }
 
@@ -66,8 +66,11 @@ export class TriggerStateIdle extends TriggerStateBase {
      * @private
      */
     _doAbort() {
-        // There is nothing to do. Aborting idle, remains idle.
-        return true;
+        let handled = false;
+        if (_is.not.undefined(this._owner)) {
+            // Transitioon to idle.
+            handled = this._owner.EnterIdle();
+        }
     }
 
 }

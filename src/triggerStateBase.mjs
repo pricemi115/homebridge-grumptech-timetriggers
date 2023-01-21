@@ -12,7 +12,7 @@
 import _debugModule from 'debug';
 import _is from 'is-it-check';
 
-import TimeTrigger from './timeTrigger.mjs';
+import { TimeTrigger } from './timeTrigger.mjs';
 
 /**
  * @description Debugging function pointer for runtime related diagnostics.
@@ -37,13 +37,30 @@ export const TRIGGER_ACTIONS = {
 };
 
 /**
+ * @description Enumeration of the trigger states
+ * @private
+ * @readonly
+ * @enum {number}
+ * @property {number} Inactive- Trigger Inactive
+ * @property {number} Armed - Trigger Armed
+ * @property {number} Triggered - Trigger Tripped
+ */
+export const TRIGGER_STATES = {
+    /* eslint-disable key-spacing */
+    Inactive  : 0,
+    Armed     : 1,
+    Triggered : 2,
+    /* eslint-enable key-spacing */
+};
+
+/**
  * @description Base class for managing trigger states.
  */
 export class TriggerStateBase {
     /**
      * @description Constructor
      * @param {object} config - Configuration data
-     * @param {string=} config.owner - Owning Trigger
+     * @param {TimeTrigger} config.owner - Owning Trigger
      * @throws {TypeError} - Thrown if 'config' is invalid.
      * @throws {Error} - Thrown if instantiating the base class.
      * @class
@@ -54,7 +71,7 @@ export class TriggerStateBase {
         if (_is.undefined(config) ||
             _is.not.object(config) ||
             _is.undefined(config.owner) ||
-            _is.not.sameType(config.owner, TimeTrigger)) {
+            !(config.owner instanceof TimeTrigger)) {
             throw new TypeError(`Invalid configuration.`);
         }
 
@@ -75,6 +92,16 @@ export class TriggerStateBase {
      */    
     get Name() {
         throw new Error(`Abstract Property: Name`);
+    }
+
+   /**
+     * @description Read-only property for the name of the state.
+     * @returns {TRIGGER_STATES} - state identifier
+     * @throws {Error} - Thrown when calling the base class
+     * @private
+     */  
+    get State() {
+        throw new Error(`Abstract Property: State`);
     }
 
     /**
@@ -100,7 +127,7 @@ export class TriggerStateBase {
             break;
 
             case TRIGGER_ACTIONS.Abort: {
-                handled = this._doNext();
+                handled = this._doAbort();
             }
             break;
 
@@ -109,26 +136,39 @@ export class TriggerStateBase {
             }
             break;
         }
+        _debug(`State Eval: ${this.Name} evaluating action:${action} result:${handled}`);
 
         return handled;
     }
 
     /**
      * @description Perform actions when entering this state.
+     * @param {TriggerStateBase} oldState - State being transitioned from.
      * @returns {void}
+     * @throws {TypeError} thrown if 'oldState' is not a TriggerStateBase object.
      * @private
      */
-    OnEntrance() {
-        _debug(`${this.Name}::OnEntrance() called.`);
+    OnEntrance(oldState) {
+        if (!(oldState instanceof TriggerStateBase)) {
+            throw new TypeError(`${this.Name}::OnEntrance(). oldState is invalid.`)
+        }
+
+        _debug(`${this.Name}::OnEntrance() called. Transitioning from state ${oldState.Name}`);
     }
 
     /**
      * @description Perform actions when exiting this state.
+     * @param {TriggerStateBase} newState - State being transitioned to.
      * @returns {void}
+     * @throws {TypeError} thrown if 'oldState' is not a TriggerStateBase object.
      * @private
      */
-    OnExit() {
-        _debug(`${this.Name}::OnExit() called.`);
+    OnExit(newState) {
+        if (!(newState instanceof TriggerStateBase)) {
+            throw new TypeError(`${this.Name}::OnEntrance(). newState is invalid.`)
+        }
+
+        _debug(`${this.Name}::OnExit() called. Transitioning to state ${newState.Name}`);
     }
 
     /**

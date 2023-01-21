@@ -1,8 +1,14 @@
 classDiagram
-    class TriggerActions{
+    class TimeTriggerActions{
         <<enumeration>>
         Next
         Abort
+    }
+    class TimeTriggerStates{
+        <<enumeration>>
+        Inactive
+        Armed
+        Triggered
     }
     class Trigger{
         -TriggerStateIdle _stateIdle
@@ -10,35 +16,60 @@ classDiagram
         -TriggerStateTripped _stateTripped
         -TriggerStateBase _currentState
 
+        +State() number
+        +Identifier() string
+
+        +Start()
+        +Stop()
+        
         +EnterIdle()
         +EnterArmed()
         +EnterTripped()
+
+        -_doStart()
+        -_doStop()
+        -_on_timerTripped()
+        -_on_timerTripped()
     }
     class TriggerStateBase{
        <<Abstract>>
        -Trigger owner
-       -doNext()
-       -doAbort()
+       -doNext() boolean
+       -doAbort() boolean
        +constructor(Object config)
-       +String Name()
-       +Evaluate(TriggerActions action)
+       +Name() string
+       +Evaluate(TriggerActions action) boolean
        +OnEntrance()
        +OnExit()
     }
     class TriggerStateIdle{
-
+       +constructor(Object config)
+       +Name() string
+       +State number
+       -doNext() boolean
+       -doAbort() boolean
     }
     class TriggerStateArmed{
-
+       +constructor(Object config)
+       +Name() string
+       +State number
+       -doNext() boolean
+       -doAbort() boolean
     }
     class TriggerStateTripped{
-
+       +constructor(Object config)
+       +Name() string
+       +State number
+       -doNext() boolean
+       -doAbort() boolean
     }
     Trigger "1" *-- TriggerStateIdle
     Trigger "1" *-- TriggerStateArmed
     Trigger "1" *-- TriggerStateTripped
-    Trigger "1" o-- "1" TriggerActions
-    TriggerStateBase "1" o-- "1" TriggerActions
+    Trigger "1" o-- "1" TimeTriggerActions
+    Trigger "1" o-- "1" TimeTriggerStates
+    TriggerStateBase "1" o-- "1" TimeTriggerActions
+    TriggerStateBase "1" o-- "1" TimeTriggerStates
     TriggerStateBase "1" o-- Trigger
     TriggerStateBase <|-- TriggerStateIdle
     TriggerStateBase <|-- TriggerStateArmed

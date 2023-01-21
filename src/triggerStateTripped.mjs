@@ -12,7 +12,7 @@
 import _debugModule from 'debug';
 import _is from 'is-it-check';
 
-import { TriggerStateBase } from './truggerStateBase.mjs';
+import { TriggerStateBase, TRIGGER_STATES } from './triggerStateBase.mjs';
 
 /**
  * @description Debugging function pointer for runtime related diagnostics.
@@ -47,6 +47,16 @@ export class TriggerStateTripped extends TriggerStateBase {
         return `StateTripped`;
     }
 
+   /**
+     * @description Read-only property for the name of the state.
+     * @returns {TRIGGER_STATES} - state identifier
+     * @throws {Error} - Thrown when calling the base class
+     * @private
+     */  
+    get State() {
+        return TRIGGER_STATES.Triggered;
+    }
+
     /**
      * @description Perform actions for the transition to the next state.
      * @returns {boolean} - true if handled.
@@ -58,6 +68,8 @@ export class TriggerStateTripped extends TriggerStateBase {
             // Transitioon to armed.
             handled = this._owner.EnterArmed();
         }
+
+        return handled;
     }
 
     /**
@@ -71,6 +83,7 @@ export class TriggerStateTripped extends TriggerStateBase {
             // Transitioon to idle.
             handled = this._owner.EnterIdle();
         }
-    }
 
+        return handled;
+    }
 }

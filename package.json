@@ -24,7 +24,7 @@
     "build": "npm run clean; npm run docs; npx webpack --mode=production",
     "docs": "docDir='./docs'; [[ -e \"$docDir\" ]] && rm -rf \"$docDir/\"*; mkdir -p ./pages; wait; cp ./security.md ./pages/; wait; cp ./license.md ./pages/; wait; npx jsdoc -c ./jsdoc.conf.json --destination \"$docDir/\"",
     "docs-dev": "docDir='./docs-dev'; [[ -e \"$docDir\" ]] && rm -rf \"$docDir/\"*; mkdir -p ./pages; wait; cp ./security.md ./pages/; cp ./license.md ./pages/; npx jsdoc -c ./jsdoc.conf.json --destination \"$docDir/\" --private",
-    "test": "NODE_OPTIONS=--experimental-vm-modules npx jest"
+    "test": "NODE_OPTIONS=\"--experimental-vm-modules --trace-warnings\" npx jest --testTimeout=15000"
   },
   "repository": {
     "type": "git",

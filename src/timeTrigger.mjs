@@ -1,3 +1,4 @@
+/* eslint-disable new-cap */
 /**
  * @description Manages a time-based trigger event.
  * @copyright January 2023
@@ -20,17 +21,17 @@ import _debugModule from 'debug';
 import _is from 'is-it-check';
 
 // Internal dependencies
-import { TRIGGER_STATES } from './triggerTypes.mjs';
-import { TRIGGER_ACTIONS, TriggerStateBase } from './triggerStateBase.mjs';
-import { TriggerStateIdle } from './triggerStateIdle.mjs';
-import { TriggerStateArmed } from './triggerStateArmed.mjs';
-import { TriggerStateTripped } from './triggerStateTripped.mjs';
+import {TRIGGER_STATES} from './triggerTypes.mjs';
+import {TRIGGER_ACTIONS, TriggerStateBase} from './triggerStateBase.mjs';
+import {TriggerStateIdle} from './triggerStateIdle.mjs';
+import {TriggerStateArmed} from './triggerStateArmed.mjs';
+import {TriggerStateTripped} from './triggerStateTripped.mjs';
 
 /**
  * @description Debugging function pointer for runtime related diagnostics.
  * @private
  */
-// eslint-disable-next-line camelcase
+// eslint-disable-next-line camelcase, no-unused-vars
 const _debug_proces = _debugModule('time_trigger');
 
 /**
@@ -198,7 +199,7 @@ export class TimeTrigger extends EventEmitter {
      * @returns {number} - Duration in milliseconds.
      */
     get Duration() {
-        return this._trippedDuration_ms
+        return this._trippedDuration_ms;
     }
 
     /**
@@ -280,7 +281,7 @@ export class TimeTrigger extends EventEmitter {
             throw new RangeError(`'timeout' is not positive`);
         }
 
-        //Sanity. Stop, if needed.
+        // Sanity. Stop, if needed.
         this._doStop();
 
         // Set the timer.
@@ -354,7 +355,7 @@ export class TimeTrigger extends EventEmitter {
 
     /**
      * @description Helper to validate range configuration parameters,
-     * @param {object} range - Configuration parameter
+     * @param {object} range - range object to be validated.
      * @param {number} range.mimumum - Minimum value
      * @param {number} range.maximum - Maximum value
      * @returns {void}
@@ -377,10 +378,21 @@ export class TimeTrigger extends EventEmitter {
         }
     }
 
+    /**
+     * @description Helper to get the next value from range specified
+     * @param {object} range - Configuration parameter
+     * @param {number} range.mimumum - Minimum value
+     * @param {number} range.maximum - Maximum value
+     * @returns {number} - next value from the range
+     * @throws {TypeError} - Thrown if the types are not as expected.
+     * @throws {RangeError} - Thrown if wither the max or min are negative or if the max is less than the min.
+     * @private
+     */
     static _getNextValue(range) {
         // Validate
         TimeTrigger._checkRange(range);
 
+        // Compute the next value from the range.
         const nextVal = (Math.floor(Math.random()) * (range.max - range.min)) + range.min;
 
         return nextVal;

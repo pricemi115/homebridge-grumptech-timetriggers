@@ -20,7 +20,8 @@ import _debugModule from 'debug';
 import _is from 'is-it-check';
 
 // Internal dependencies
-import { TRIGGER_ACTIONS, TRIGGER_STATES, TriggerStateBase } from './triggerStateBase.mjs';
+import { TRIGGER_STATES } from './triggerTypes.mjs';
+import { TRIGGER_ACTIONS, TriggerStateBase } from './triggerStateBase.mjs';
 import { TriggerStateIdle } from './triggerStateIdle.mjs';
 import { TriggerStateArmed } from './triggerStateArmed.mjs';
 import { TriggerStateTripped } from './triggerStateTripped.mjs';
@@ -66,29 +67,12 @@ export const TIME_TRIGGER_EVENTS = {
 };
 
 /**
- * @description Enumeration of the trigger states
- * @private
- * @readonly
- * @enum {number}
- * @property {number} Inactive- Trigger Inactive
- * @property {number} Armed - Trigger Armed
- * @property {number} Triggered - Trigger Tripped
- */
-export const TIME_TRIGGER_STATES = {
-    /* eslint-disable key-spacing */
-    Inactive  : TRIGGER_STATES.Inactive,
-    Armed     : TRIGGER_STATES.Armed,
-    Triggered : TRIGGER_STATES.Triggered,
-    /* eslint-enable key-spacing */
-};
-
-/**
  * @description Time Trigger state changed notification
  * @event module:TimeTriggerModule#event:state_changed
  * @type {object}
  * @param {string} e.uuid - Unique identifier of the trigger
- * @param {TIME_TRIGGER_STATES} e.new_state - New trigger state
- * @param {TIME_TRIGGER_STATES} e.old_state - Previous trigger state
+ * @param {TRIGGER_STATES} e.new_state - New trigger state
+ * @param {TRIGGER_STATES} e.old_state - Previous trigger state
  * @private
  */
 /**
@@ -96,7 +80,7 @@ export const TIME_TRIGGER_STATES = {
  * @event module:TimeTriggerModule#event:state_notify
  * @type {object}
  * @param {string} e.uuid - Unique identifier of the trigger
- * @param {TIME_TRIGGER_STATES} e.current_state - Current trigger state
+ * @param {TRIGGER_STATES} e.current_state - Current trigger state
  * @private
  */
 /**
@@ -187,7 +171,7 @@ export class TimeTrigger extends EventEmitter {
 
     /**
      * @description Read-only property accessor for the trigger state
-     * @returns {TIME_TRIGGER_STATES} - Trigger state.
+     * @returns {TRIGGER_STATES} - Trigger state.
      */
     get State() {
         return this._currentState.State;
@@ -313,7 +297,7 @@ export class TimeTrigger extends EventEmitter {
         if (this._timeoutID !== INVALID_TIMEOUT_ID) {
             clearTimeout(this._timeoutID);
             this._timeoutID = INVALID_TIMEOUT_ID;
-        }        
+        }
     }
 
     /**
@@ -362,7 +346,7 @@ export class TimeTrigger extends EventEmitter {
             });
         }
         else {
-            // No state change necessary. 
+            // No state change necessary.
             // Raise the state notify event, as a convenience to the client.
             this.emit(TIME_TRIGGER_EVENTS.EVENT_STATE_NOTIFY, {uuid: this.Identifier, current_state: this.State});
         }
@@ -377,7 +361,7 @@ export class TimeTrigger extends EventEmitter {
      * @throws {TypeError} - Thrown if the types are not as expected.
      * @throws {RangeError} - Thrown if wither the max or min are negative or if the max is less than the min.
      * @private
-     */    
+     */
     static _checkRange(range) {
         if (_is.not.undefined(range)) {
             if (_is.not.object(range) ||

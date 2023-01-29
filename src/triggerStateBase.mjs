@@ -12,6 +12,7 @@
 import _debugModule from 'debug';
 import _is from 'is-it-check';
 
+import { TRIGGER_STATES } from './triggerTypes.mjs';
 import { TimeTrigger } from './timeTrigger.mjs';
 
 /**
@@ -33,23 +34,6 @@ export const TRIGGER_ACTIONS = {
     /* eslint-disable key-spacing */
     Next  : 'next',
     Abort : 'abort',
-    /* eslint-enable key-spacing */
-};
-
-/**
- * @description Enumeration of the trigger states
- * @private
- * @readonly
- * @enum {number}
- * @property {number} Inactive- Trigger Inactive
- * @property {number} Armed - Trigger Armed
- * @property {number} Triggered - Trigger Tripped
- */
-export const TRIGGER_STATES = {
-    /* eslint-disable key-spacing */
-    Inactive  : 0,
-    Armed     : 1,
-    Triggered : 2,
     /* eslint-enable key-spacing */
 };
 
@@ -89,7 +73,7 @@ export class TriggerStateBase {
      * @returns {string} - name
      * @throws {Error} - Thrown when calling the base class
      * @private
-     */    
+     */
     get Name() {
         throw new Error(`Abstract Property: Name`);
     }
@@ -99,7 +83,7 @@ export class TriggerStateBase {
      * @returns {TRIGGER_STATES} - state identifier
      * @throws {Error} - Thrown when calling the base class
      * @private
-     */  
+     */
     get State() {
         throw new Error(`Abstract Property: State`);
     }

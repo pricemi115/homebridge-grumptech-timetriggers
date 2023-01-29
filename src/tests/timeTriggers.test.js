@@ -3,7 +3,8 @@
 /* eslint-disable brace-style */
 /* eslint-disable semi */
 /* eslint-disable new-cap */
-import {TimeTrigger, TIME_TRIGGER_EVENTS, TIME_TRIGGER_STATES} from '../timeTrigger.mjs';
+import { TRIGGER_STATES } from '../triggerTypes.mjs';
+import {TimeTrigger, TIME_TRIGGER_EVENTS} from '../timeTrigger.mjs';
 import _is from 'is-it-check';
 
 describe('Module-level tests', ()=>{
@@ -13,7 +14,6 @@ describe('Module-level tests', ()=>{
     });
     test('Module Enumerations export expected value', ()=>{
         expect(TIME_TRIGGER_EVENTS).toBeInstanceOf(Object);
-        expect(TIME_TRIGGER_STATES).toBeInstanceOf(Object);
     });
 
     describe('Module TIME_TRIGGER_EVENTS expected value(s)', ()=>{
@@ -26,21 +26,6 @@ describe('Module-level tests', ()=>{
         ])('Enumeration exists.', (desc, input, result) =>{
             test(desc, ()=>{
                 expect(TIME_TRIGGER_EVENTS).toHaveProperty(input, result);
-            });
-        });
-    });
-
-    describe('Module TRIGGER_STATES expected value(s)', ()=>{
-        test('TIME_TRIGGER_EVENTS size test', ()=>{
-            expect(Object.values(TIME_TRIGGER_STATES).length).toBe(3);
-        });
-        describe.each([
-            ['Inactive', 'Inactive',   0],
-            ['Armed',     'Armed',     1],
-            ['Triggered', 'Triggered', 2],
-        ])('Enumeration exists.', (desc, input, result) =>{
-            test(desc, ()=>{
-                expect(TIME_TRIGGER_STATES).toHaveProperty(input, result);
             });
         });
     });
@@ -61,7 +46,7 @@ describe('TimeTrigger class tests', ()=>{
         });
         test('State', ()=>{
             expect(timeTrigger).toHaveProperty('State');
-            expect(timeTrigger.State).toBe(TIME_TRIGGER_STATES.Inactive);
+            expect(timeTrigger.State).toBe(TRIGGER_STATES.Inactive);
         });
         test('Identifier', ()=>{
             expect(timeTrigger).toHaveProperty('Identifier');
@@ -117,7 +102,7 @@ describe('TimeTrigger class tests', ()=>{
         describe.each([
             ['Default', {}],
             ['1 Sec',   {timeout: {min: 1000, max: 1000}}],
-        ])('Start Tests.', (desc, config) =>{        
+        ])('Start Tests.', (desc, config) =>{
             test(desc, done =>{
                 function handlerStateChanged(e) {
                     try {
@@ -127,18 +112,18 @@ describe('TimeTrigger class tests', ()=>{
 
                         /* old_state */
                         expect(e).toHaveProperty('old_state');
-                        expect(_is.sameType(e.old_state, TIME_TRIGGER_STATES.Inactive)).toBeTruthy();
+                        expect(_is.sameType(e.old_state, TRIGGER_STATES.Inactive)).toBeTruthy();
 
                         /* new_state */
                         expect(e).toHaveProperty('new_state');
-                        expect(_is.sameType(e.new_state, TIME_TRIGGER_STATES.Inactive)).toBeTruthy();
+                        expect(_is.sameType(e.new_state, TRIGGER_STATES.Inactive)).toBeTruthy();
 
                         /* state changed */
                         expect((e.new_state !== e.old_state)).toBeTruthy();
 
                         /* Manage Trigger Life Cycle */
-                        if ((e.old_state === TIME_TRIGGER_STATES.Triggered) &&
-                            (e.new_state === TIME_TRIGGER_STATES.Armed)) {
+                        if ((e.old_state === TRIGGER_STATES.Triggered) &&
+                            (e.new_state === TRIGGER_STATES.Armed)) {
                             // compute the measured timeout period.
                             const timeNow = Date.now();
                             const timeout = Date.now() - startTimestamp;
@@ -150,8 +135,8 @@ describe('TimeTrigger class tests', ()=>{
                                 error = true;
                             }
                         }
-                        if ((e.old_state === TIME_TRIGGER_STATES.Armed) &&
-                            (e.new_state === TIME_TRIGGER_STATES.Inactive)) {
+                        if ((e.old_state === TRIGGER_STATES.Armed) &&
+                            (e.new_state === TRIGGER_STATES.Inactive)) {
                             // Cleanup and end the test.
                             timeTrigger.off(TIME_TRIGGER_EVENTS.EVENT_STATE_CHANGED, handlerStateChanged);
                             done(error);
@@ -181,8 +166,8 @@ describe('TimeTrigger class tests', ()=>{
 
                     /* current_state */
                     expect(e).toHaveProperty('current_state');
-                    expect(_is.sameType(e.current_state, TIME_TRIGGER_STATES.Inactive)).toBeTruthy();
-                    expect(e.current_state === TIME_TRIGGER_STATES.Inactive).toBeTruthy();
+                    expect(_is.sameType(e.current_state, TRIGGER_STATES.Inactive)).toBeTruthy();
+                    expect(e.current_state === TRIGGER_STATES.Inactive).toBeTruthy();
 
                     // Cleanup and end the test.
                     timeTrigger.off(TIME_TRIGGER_EVENTS.EVENT_STATE_NOTIFY, handlerStateNotification);
@@ -210,25 +195,25 @@ describe('TimeTrigger class tests', ()=>{
 
                     /* old_state */
                     expect(e).toHaveProperty('old_state');
-                    expect(_is.sameType(e.old_state, TIME_TRIGGER_STATES.Inactive)).toBeTruthy();
+                    expect(_is.sameType(e.old_state, TRIGGER_STATES.Inactive)).toBeTruthy();
 
                     /* new_state */
                     expect(e).toHaveProperty('new_state');
-                    expect(_is.sameType(e.new_state, TIME_TRIGGER_STATES.Inactive)).toBeTruthy();
+                    expect(_is.sameType(e.new_state, TRIGGER_STATES.Inactive)).toBeTruthy();
 
                     /* state changed */
                     expect((e.new_state !== e.old_state)).toBeTruthy();
 
                     /* Manage Trigger Life Cycle */
-                    if (e.new_state === TIME_TRIGGER_STATES.Armed) {
+                    if (e.new_state === TRIGGER_STATES.Armed) {
                         // Set a timer to kill the trigger.
                         setTimeout(()=>{
                             // Abort the trigger.
                             timeTrigger.Stop();
                         }, 2500);
                     }
-                    if ((e.old_state === TIME_TRIGGER_STATES.Armed) &&
-                        (e.new_state === TIME_TRIGGER_STATES.Inactive)) {
+                    if ((e.old_state === TRIGGER_STATES.Armed) &&
+                        (e.new_state === TRIGGER_STATES.Inactive)) {
                         // Cleanup and end the test.
                         timeTrigger.off(TIME_TRIGGER_EVENTS.EVENT_STATE_CHANGED, handlerStateChanged);
                         done();

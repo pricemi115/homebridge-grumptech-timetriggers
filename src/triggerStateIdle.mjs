@@ -12,7 +12,8 @@
 import _debugModule from 'debug';
 import _is from 'is-it-check';
 
-import { TriggerStateBase, TRIGGER_STATES } from './triggerStateBase.mjs';
+import { TRIGGER_STATES } from './triggerTypes.mjs';
+import { TriggerStateBase } from './triggerStateBase.mjs';
 
 /**
  * @description Debugging function pointer for runtime related diagnostics.
@@ -42,7 +43,7 @@ export class TriggerStateIdle extends TriggerStateBase {
      * @returns {string} - name
      * @throws {Error} - Thrown when calling the base class
      * @private
-     */    
+     */
     get Name() {
         return `StateIdle`;
     }
@@ -52,7 +53,7 @@ export class TriggerStateIdle extends TriggerStateBase {
      * @returns {TRIGGER_STATES} - state identifier
      * @throws {Error} - Thrown when calling the base class
      * @private
-     */  
+     */
     get State() {
         return TRIGGER_STATES.Inactive;
     }
@@ -78,7 +79,7 @@ export class TriggerStateIdle extends TriggerStateBase {
      * @private
      */
     _doAbort() {
-        // There is nothing to do. Aborting idle, remains idle, but 
+        // There is nothing to do. Aborting idle, remains idle, but
         // tickle the owner so that the client may be notified.
         let handled = false;
         if (_is.not.undefined(this._owner)) {

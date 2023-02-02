@@ -36,19 +36,35 @@ export const TRIGGER_STATES = {
  * @property {number} Saturday - Saturday
  * @property {number} Weekday - Weekday
  * @property {number} Weekend - Weekend
- * 
+ * @property {number} AllDays - All Days
  */
 export const TRIGGER_DAYS = {
     /* eslint-disable key-spacing */
-    Sunday    :  1,
-    Monday    :  2,
-    Tuesday   :  4,
-    Wednesday :  8,
-    Thursday  : 16,
-    Friday    : 32,
-    Saturday  : 64,
+    Sunday    :   1,
+    Monday    :   2,
+    Tuesday   :   4,
+    Wednesday :   8,
+    Thursday  :  16,
+    Friday    :  32,
+    Saturday  :  64,
     /* Helpful Masks */
-    Weekday   : 62,
-    Weekend   : 65,
+    Weekday   :  62,
+    Weekend   :  65,
+    AllDays   : 127,
+    /* eslint-enable key-spacing */
+};
+
+/**
+ * @description Enumeration of published events.
+ * @readonly
+ * @private
+ * @enum {string}
+ * @property {string} EVENT_STATE_CHANGED - Identification for the event published when the trigger state changes.
+ * @property {string} EVENT_STATE_NOTIFY  - Identification for the event published when the trigger state does not change.
+ */
+export const TRIGGER_EVENTS = {
+    /* eslint-disable key-spacing */
+    EVENT_STATE_CHANGED : 'state_changed',
+    EVENT_STATE_NOTIFY  : 'state_notify',
     /* eslint-enable key-spacing */
 };

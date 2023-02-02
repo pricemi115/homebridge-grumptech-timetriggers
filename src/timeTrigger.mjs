@@ -21,7 +21,7 @@ import _debugModule from 'debug';
 import _is from 'is-it-check';
 
 // Internal dependencies
-import {TRIGGER_STATES} from './triggerTypes.mjs';
+import {TRIGGER_STATES, TRIGGER_EVENTS} from './triggerTypes.mjs';
 import {TRIGGER_ACTIONS, TriggerStateBase} from './triggerStateBase.mjs';
 import {TriggerStateIdle} from './triggerStateIdle.mjs';
 import {TriggerStateArmed} from './triggerStateArmed.mjs';
@@ -53,21 +53,6 @@ const DEFAULT_TIMEOUT_MS = {min: 10000, max: 10000};
 const DEFAULT_TRIP_DURATION_MS = {min: 250, max: 250};
 
 /**
- * @description Enumeration of published events.
- * @readonly
- * @private
- * @enum {string}
- * @property {string} EVENT_STATE_CHANGED - Identification for the event published when the trigger state changes.
- * @property {string} EVENT_STATE_NOTIFY  - Identification for the event published when the trigger state does not change.
- */
-export const TIME_TRIGGER_EVENTS = {
-    /* eslint-disable key-spacing */
-    EVENT_STATE_CHANGED : 'state_changed',
-    EVENT_STATE_NOTIFY  : 'state_notify',
-    /* eslint-enable key-spacing */
-};
-
-/**
  * @description Time Trigger state changed notification
  * @event module:TimeTriggerModule#event:state_changed
  * @type {object}
@@ -85,7 +70,7 @@ export const TIME_TRIGGER_EVENTS = {
  * @private
  */
 /**
- * @description Base class for volume interrogation (operating system agnostic).
+ * @description Trigger for periodic events.
  * @augments EventEmitter
  */
 export class TimeTrigger extends EventEmitter {
@@ -156,7 +141,6 @@ export class TimeTrigger extends EventEmitter {
             this._timeout = config.timeout;
         }
 
-        this._timeout_ms = TimeTrigger._getNextValue(this._timeout);
         // Use the tripped duration provided or generate a new one.
         if (_is.undefined(config) ||
             _is.undefined(config.duration)) {
@@ -167,7 +151,14 @@ export class TimeTrigger extends EventEmitter {
             // Use the identifier provided.
             this._trippedDuration = config.duration;
         }
-        this._trippedDuration_ms = TimeTrigger._getNextValue(this._trippedDuration);
+
+        this._timeout_ms = -1;
+        this._trippedDuration_ms = -1;
+
+        // Force a decoupled transition into the Idle State.
+        setImmediate(() => {
+            this.EnterIdle();
+        });
     }
 
     /**
@@ -233,9 +224,8 @@ export class TimeTrigger extends EventEmitter {
         // Stop the timer.
         this._doStop();
 
-        // Generate new timer values.
-        this._timeout_ms = TimeTrigger._getNextValue(this._timeout);
-        this._trippedDuration_ms = TimeTrigger._getNextValue(this._trippedDuration);
+        // Generate new timer values, in case there is a random element.
+        this._generateNewTimerValues();
 
         // Manage the state.
         this._doStateChange(this._idleState);
@@ -263,6 +253,15 @@ export class TimeTrigger extends EventEmitter {
 
         // Start the timer for the tripped duration.
         this._doStart(this._trippedDuration_ms);
+    }
+
+    /**
+     * @description Generates new timeout values for the timer.
+     * @returns {void}
+     */
+    _generateNewTimerValues() {
+        this._timeout_ms = TimeTrigger._getNextValue(this._timeout);
+        this._trippedDuration_ms = TimeTrigger._getNextValue(this._trippedDuration);
     }
 
     /**
@@ -343,13 +342,13 @@ export class TimeTrigger extends EventEmitter {
                 this._currentState.OnEntrance(oldState);
 
                 // Raise the state changed event.
-                this.emit(TIME_TRIGGER_EVENTS.EVENT_STATE_CHANGED, {uuid: this.Identifier, old_state: oldState.State, new_state: this.State});
+                this.emit(TRIGGER_EVENTS.EVENT_STATE_CHANGED, {uuid: this.Identifier, old_state: oldState.State, new_state: this.State});
             });
         }
         else {
             // No state change necessary.
             // Raise the state notify event, as a convenience to the client.
-            this.emit(TIME_TRIGGER_EVENTS.EVENT_STATE_NOTIFY, {uuid: this.Identifier, current_state: this.State});
+            this.emit(TRIGGER_EVENTS.EVENT_STATE_NOTIFY, {uuid: this.Identifier, current_state: this.State});
         }
     }
 
@@ -360,7 +359,7 @@ export class TimeTrigger extends EventEmitter {
      * @param {number} range.maximum - Maximum value
      * @returns {void}
      * @throws {TypeError} - Thrown if the types are not as expected.
-     * @throws {RangeError} - Thrown if wither the max or min are negative or if the max is less than the min.
+     * @throws {RangeError} - Thrown if e ither the max or min are negative or if the max is less than the min.
      * @private
      */
     static _checkRange(range) {

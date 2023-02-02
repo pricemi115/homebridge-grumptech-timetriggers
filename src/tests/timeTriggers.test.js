@@ -3,31 +3,14 @@
 /* eslint-disable brace-style */
 /* eslint-disable semi */
 /* eslint-disable new-cap */
-import { TRIGGER_STATES } from '../triggerTypes.mjs';
-import {TimeTrigger, TIME_TRIGGER_EVENTS} from '../timeTrigger.mjs';
+import { TRIGGER_STATES, TRIGGER_EVENTS } from '../triggerTypes.mjs';
+import {TimeTrigger} from '../timeTrigger.mjs';
 import _is from 'is-it-check';
 
 describe('Module-level tests', ()=>{
     test('Module TimeTriggers export expected value', ()=>{
         const timeTrigger = new TimeTrigger();
         expect(timeTrigger).toBeInstanceOf(TimeTrigger);
-    });
-    test('Module Enumerations export expected value', ()=>{
-        expect(TIME_TRIGGER_EVENTS).toBeInstanceOf(Object);
-    });
-
-    describe('Module TIME_TRIGGER_EVENTS expected value(s)', ()=>{
-        test('TIME_TRIGGER_EVENTS size test', ()=>{
-            expect(Object.values(TIME_TRIGGER_EVENTS).length).toBe(2);
-        });
-        describe.each([
-            ['EVENT_STATE_CHANGED', 'EVENT_STATE_CHANGED', 'state_changed'],
-            ['EVENT_STATE_NOTIFY',  'EVENT_STATE_NOTIFY',  'state_notify'],
-        ])('Enumeration exists.', (desc, input, result) =>{
-            test(desc, ()=>{
-                expect(TIME_TRIGGER_EVENTS).toHaveProperty(input, result);
-            });
-        });
     });
 });
 
@@ -55,11 +38,13 @@ describe('TimeTrigger class tests', ()=>{
         });
         test('Timeout', ()=>{
             expect(timeTrigger).toHaveProperty('Timeout');
-            expect(_is.positive(timeTrigger.Timeout)).toBe(true);
+            // Setting of the timeout to a positive value is decoupled.
+            expect(_is.positive(timeTrigger.Timeout)).toBe(false);
         });
         test('Duration', ()=>{
             expect(timeTrigger).toHaveProperty('Duration');
-            expect(_is.positive(timeTrigger.Duration)).toBe(true);
+            // Setting of the duration to a positive value is decoupled.
+            expect(_is.positive(timeTrigger.Duration)).toBe(false);
         });
     });
     describe('Instance function/property valid tests - part 2', ()=>{
@@ -138,7 +123,7 @@ describe('TimeTrigger class tests', ()=>{
                         if ((e.old_state === TRIGGER_STATES.Armed) &&
                             (e.new_state === TRIGGER_STATES.Inactive)) {
                             // Cleanup and end the test.
-                            timeTrigger.off(TIME_TRIGGER_EVENTS.EVENT_STATE_CHANGED, handlerStateChanged);
+                            timeTrigger.off(TRIGGER_EVENTS.EVENT_STATE_CHANGED, handlerStateChanged);
                             done(error);
                         }
                     }
@@ -152,9 +137,12 @@ describe('TimeTrigger class tests', ()=>{
 
                 // Initiate the trigger test.
                 timeTrigger = new TimeTrigger(config);
-                timeTrigger.on(TIME_TRIGGER_EVENTS.EVENT_STATE_CHANGED, handlerStateChanged);
+                timeTrigger.on(TRIGGER_EVENTS.EVENT_STATE_CHANGED, handlerStateChanged);
                 startTimestamp = Date.now();
-                timeTrigger.Start();
+                // Decouple the start.
+                setImmediate(() => {
+                    timeTrigger.Start();
+                });
             });
         });
         test('Stop from idle', done =>{
@@ -170,7 +158,7 @@ describe('TimeTrigger class tests', ()=>{
                     expect(e.current_state === TRIGGER_STATES.Inactive).toBeTruthy();
 
                     // Cleanup and end the test.
-                    timeTrigger.off(TIME_TRIGGER_EVENTS.EVENT_STATE_NOTIFY, handlerStateNotification);
+                    timeTrigger.off(TRIGGER_EVENTS.EVENT_STATE_NOTIFY, handlerStateNotification);
                     done();
                 }
                 catch (error) {
@@ -183,7 +171,7 @@ describe('TimeTrigger class tests', ()=>{
 
             // Initiate the trigger test.
             timeTrigger = new TimeTrigger();
-            timeTrigger.on(TIME_TRIGGER_EVENTS.EVENT_STATE_NOTIFY, handlerStateNotification);
+            timeTrigger.on(TRIGGER_EVENTS.EVENT_STATE_NOTIFY, handlerStateNotification);
             timeTrigger.Stop();
         });
         test('Stop from armed', done =>{
@@ -215,7 +203,7 @@ describe('TimeTrigger class tests', ()=>{
                     if ((e.old_state === TRIGGER_STATES.Armed) &&
                         (e.new_state === TRIGGER_STATES.Inactive)) {
                         // Cleanup and end the test.
-                        timeTrigger.off(TIME_TRIGGER_EVENTS.EVENT_STATE_CHANGED, handlerStateChanged);
+                        timeTrigger.off(TRIGGER_EVENTS.EVENT_STATE_CHANGED, handlerStateChanged);
                         done();
                     }
                 }
@@ -229,8 +217,11 @@ describe('TimeTrigger class tests', ()=>{
 
             // Initiate the trigger test.
             timeTrigger = new TimeTrigger();
-            timeTrigger.on(TIME_TRIGGER_EVENTS.EVENT_STATE_CHANGED, handlerStateChanged);
-            timeTrigger.Start();
+            timeTrigger.on(TRIGGER_EVENTS.EVENT_STATE_CHANGED, handlerStateChanged);
+            // Decouple the start.
+            setImmediate(() => {
+                timeTrigger.Start();
+            });
         });
     });
 });

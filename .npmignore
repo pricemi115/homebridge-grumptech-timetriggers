@@ -1,0 +1,24 @@
+# The following entries will prevent git-tracked files
+# from being deployed
+
+# Debug Folder
+debug/
+debug.env
+
+# Node Modules
+node_modules/
+
+# Development Files & Folders
+debug.env
+.vscode/
+.git/
+
+# Source Files
+src/
+webpack.config.js
+jsdoc.conf.json
+README.jsdoc.md
+
+# Documentation
+pages/
+docs-dev/

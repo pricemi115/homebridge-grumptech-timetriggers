@@ -18,10 +18,14 @@ classDiagram
 
         +State() number
         +Identifier() string
+        +Signature() string
+        +Name() string
+        +Timeout() number
+        +Duration() number
 
         +Start()
         +Stop()
-        
+
         +EnterIdle()
         +EnterArmed()
         +EnterTripped()
@@ -29,7 +33,10 @@ classDiagram
         -_doStart()
         -_doStop()
         -_on_timerTripped()
-        -_on_timerTripped()
+        -_doStateChange()
+        -_generateNewTimerValues()
+        -_checkRange()$
+        __getNextValue()$
     }
     class TriggerStateBase{
        <<Abstract>>

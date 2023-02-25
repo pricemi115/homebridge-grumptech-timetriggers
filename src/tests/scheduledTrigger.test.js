@@ -135,10 +135,7 @@ describe('ScheduledTrigger class tests', ()=>{
                     }
                     else {
                         let dayOffset = 1;
-                        let test = (((todayDay+1) << 1) & TRIGGER_DAYS.AllDays);
-                        if (test == 0) {
-                            test = TRIGGER_DAYS.Sunday;
-                        }
+                        let test = (1 << ((todayDay+1) % DAYS_IN_WEEK));
                         const mask = (triggerDay | additionalDays);
                         while ((test & mask) === 0) {
                             dayOffset++;

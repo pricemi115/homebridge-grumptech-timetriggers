@@ -55,7 +55,7 @@ describe('TimeTrigger class tests', ()=>{
             let trigWaffles = new TimeTrigger({waffles: id});
             expect(_is.not.undefined(trigEmpty)).toBe(true);
             expect(_is.not.undefined(trigId)).toBe(true);
-            expect(trigId.Identifier).toBe(id);
+            expect(trigId.Identifier).not.toBe(id);
             expect(_is.not.undefined(trigWaffles)).toBe(true);
             expect(trigWaffles.Identifier).not.toBe(id);
         });

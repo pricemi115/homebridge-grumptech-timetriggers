@@ -3,7 +3,7 @@
 /* eslint-disable brace-style */
 /* eslint-disable semi */
 /* eslint-disable new-cap */
-import {TRIGGER_STATES, TRIGGER_DAYS, TRIGGER_EVENTS} from '../triggerTypes.mjs';
+import {TRIGGER_STATES, TRIGGER_DAYS, TRIGGER_EVENTS, TRIGGER_TYPES} from '../triggerTypes.mjs';
 import _is from 'is-it-check';
 
 describe('Module-level tests', ()=>{
@@ -11,6 +11,21 @@ describe('Module-level tests', ()=>{
         expect(TRIGGER_STATES).toBeInstanceOf(Object);
         expect(TRIGGER_DAYS).toBeInstanceOf(Object);
         expect(TRIGGER_EVENTS).toBeInstanceOf(Object);
+        expect(TRIGGER_TYPES).toBeInstanceOf(Object);
+    });
+
+    describe('Module TRIGGER_TYPES expected value(s)', ()=>{
+        test('TRIGGER_TYPES size test', ()=>{
+            expect(Object.values(TRIGGER_TYPES).length).toBe(2);
+        });
+        describe.each([
+            ['Multi',  'MultiTrip', 0],
+            ['Daily',  'Daily',     1],
+        ])('Enumeration exists.', (desc, input, result) =>{
+            test(desc, ()=>{
+                expect(TRIGGER_TYPES).toHaveProperty(input, result);
+            });
+        });
     });
 
     describe('Module TRIGGER_STATES expected value(s)', ()=>{

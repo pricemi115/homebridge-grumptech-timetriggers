@@ -107,9 +107,9 @@ let _hap;
  * @property {string} CONTROL.name - Name of the control switch.
  * @property {string} CONTROL.udst - User defined subtype for the control switch.
  * @property {object} MOTION - Service information for the motion status for each trigger.
- * @property {string} CONTROL.uuid - Unique identifier for the motion status.
- * @property {string} CONTROL.name - Name of the motion status.
- * @property {string} CONTROL.udst - User defined subtype for the motion status.
+ * @property {string} MOTION.uuid - Unique identifier for the motion status.
+ * @property {string} MOTION.name - Name of the motion status.
+ * @property {string} MOTION.udst - User defined subtype for the motion status.
  */
 const SERVICE_INFO = {
     /* eslint-disable key-spacing, max-len */

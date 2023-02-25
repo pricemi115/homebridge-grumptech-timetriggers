@@ -1,0 +1,181 @@
+{
+    "pluginAlias": "GrumpTechHomebridgeTimeTrigger",
+    "pluginType": "platform",
+    "singular": true,
+    "headerDisplay": "This plugin is provided by [GrumpTech](https://github.com/pricemi115/)",
+    "footerDisplay": "Be kind.....to everyone",
+    "schema": {
+        "type": "object",
+        "properties": {
+            "settings": {
+                "title": "Settings",
+                "type": "object",
+                "properties": {
+                    "triggers": {
+                        "title": "Time Triggers",
+                        "description": "List of time triggers.",
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "trigger_type": {
+                                    "title": "Trigger Type",
+                                    "description": "Type of trigger",
+                                    "type": "number",
+                                    "default": 0,
+                                    "oneOf": [
+                                        { "title": "Multi-Trip", "enum": [0] },
+                                        { "title": "Daily", "enum": [1] }
+                                      ],
+                                    "required": true
+                                },
+                                "trigger_random": {
+                                    "title": "Randomize",
+                                    "description": "Randomize when the trigger trips within the specified window.",
+                                    "type": "boolean",
+                                    "default": false,
+                                    "required": true
+                                },
+                                "timeout": {
+                                    "title": "Timeout Window",
+                                    "description": "Trigger timeout window",
+                                    "type": "object",
+                                    "required": true,
+                                    "properties": {
+                                        "min": {
+                                            "title": "Minumum Trip Interval",
+                                            "description": "Start of the trip interval window, in milliseconds.",
+                                            "type": "number",
+                                            "default": 60000,
+                                            "minimum": 1
+                                        },
+                                        "max": {
+                                            "title": "Maximum Trip Interval",
+                                            "description": "End of the trip interval window, in milliseconds.",
+                                            "type": "number",
+                                            "default": 60000,
+                                            "minimum":  1,
+                                            "condition": {
+                                                "functionBody": "return (model.settings.triggers[arrayIndices] && (model.settings.triggers[arrayIndices].trigger_random));"
+                                            }
+                                        }
+                                    },
+                                    "condition": {
+                                        "functionBody": "return (model.settings.triggers[arrayIndices] && (model.settings.triggers[arrayIndices].trigger_type === 0));"
+                                    }
+                                },
+                                "days": {
+                                    "title": "Days",
+                                    "description": "Days to trip th trigger",
+                                    "type": "number",
+                                    "default": 127,
+                                    "oneOf": [
+                                        { "title": "Sunday", "enum": [1] },
+                                        { "title": "Monday", "enum": [2] },
+                                        { "title": "Tuesday", "enum": [2] },
+                                        { "title": "Wednesday", "enum": [2] },
+                                        { "title": "Thursday", "enum": [2] },
+                                        { "title": "Friday", "enum": [2] },
+                                        { "title": "Weekdays", "enum": [62] },
+                                        { "title": "Weekends", "enum": [65] },
+                                        { "title": "Every day", "enum": [127] }
+                                    ],
+                                    "condition": {
+                                        "functionBody": "return (model.settings.triggers[arrayIndices] && (model.settings.triggers[arrayIndices].trigger_type === 1));"
+                                    }
+                                },
+                                "time" : {
+                                    "title": "Time settings",
+                                    "description": "Time settings for daily triggers.",
+                                    "type": "object",
+                                    "properties": {
+                                        "min": {
+                                            "title": "Minimum Time",
+                                            "description": "Start of the trip window",
+                                            "type": "object",
+                                            "properties": {
+                                                "hour": {
+                                                    "title": "Hour",
+                                                    "description": "Hour to trip the trigger. (00-23)",
+                                                    "type": "number",
+                                                    "minimum": 0,
+                                                    "maximum": 23,
+                                                    "default": 12
+                                                },
+                                                "minute": {
+                                                    "title": "Minute",
+                                                    "description": "Minute to trip the trigger. (00-59)",
+                                                    "type": "number",
+                                                    "minimum": 0,
+                                                    "maximum": 59,
+                                                    "default": 0
+                                                }
+                                            }
+                                        },
+                                        "max": {
+                                            "title": "Maximum Time",
+                                            "description": "End of the trip window",
+                                            "type": "object",
+                                            "properties": {
+                                                "hour": {
+                                                    "title": "Hour",
+                                                    "description": "Hour to trip the trigger. (00-23)",
+                                                    "type": "number",
+                                                    "minimum": 0,
+                                                    "maximum": 23,
+                                                    "default": 12
+                                                },
+                                                "minute": {
+                                                    "title": "Minute",
+                                                    "description": "Minute to trip the trigger. (00-59)",
+                                                    "type": "number",
+                                                    "minimum": 0,
+                                                    "maximum": 59,
+                                                    "default": 0
+                                                }
+                                            },
+                                            "condition": {
+                                                "functionBody": "return (model.settings.triggers[arrayIndices] && (model.settings.triggers[arrayIndices].trigger_random));"
+                                            }
+                                        }
+                                    },
+                                    "condition": {
+                                        "functionBody": "return (model.settings.triggers[arrayIndices] && (model.settings.triggers[arrayIndices].trigger_type === 1));"
+                                    }
+                                },
+                                "duration": {
+                                    "title": "Duration Window",
+                                    "description": "Trigger trip duration window",
+                                    "type": "object",
+                                    "required": true,
+                                    "properties": {
+                                        "min": {
+                                            "title": "Minumum Trip Duration",
+                                            "description": "Start of the trip duration window, in milliseconds.",
+                                            "type": "number",
+                                            "default": 250,
+                                            "minimum": 10
+                                        },
+                                        "max": {
+                                            "title": "Maximum Trip Duration",
+                                            "description": "End of the trip duration window, in milliseconds.",
+                                            "type": "number",
+                                            "default": 250,
+                                            "minimum": 10,
+                                            "condition": {
+                                                "functionBody": "return (model.settings.triggers[arrayIndices] && (model.settings.triggers[arrayIndices].trigger_random));"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "required": true
+                    }
+                }
+            }
+        }
+    },
+    "form": null,
+    "display": null
+}

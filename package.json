@@ -1,9 +1,10 @@
 {
   "name": "homebridge-grumptech-timetriggers",
+  "displayName": "Homebridge Time Triggers",
   "version": "0.1.0",
   "description": "Time-based triggers for use with Homebridge",
   "type": "module",
-  "main": "dist/homegridge-grumptech-timetriggers.mjs",
+  "main": "dist/homegridge-grumptech-timetriggers.js",
   "files": [
     "dist/homebridge-grumptech-timetriggers.js",
     "config.schema.json",
@@ -14,6 +15,18 @@
     "assets/",
     "docs/"
   ],
+  "config_info": {
+    "remarks": [
+      "The 'plugin' and 'platform' names MUST match the names called out in the 'platforms' section of the active config.json file.",
+      "If these values are changed, the module will need to be rebuilt. Run 'npm run build'."
+    ],
+    "plugin": "homebridge-grumptech-timetriggers",
+    "platform": "GrumpTechHomebridgeTimeTrigger"
+  },
+  "jest": {
+    "testEnvironment": "jest-environment-node",
+    "transform": {}
+  },
   "directories": {
     "doc": "docs"
   },
@@ -26,13 +39,18 @@
     "docs-dev": "docDir='./docs-dev'; [[ -e \"$docDir\" ]] && rm -rf \"$docDir/\"*; mkdir -p ./pages; wait; cp ./security.md ./pages/; cp ./license.md ./pages/; npx jsdoc -c ./jsdoc.conf.json --destination \"$docDir/\" --private",
     "test": "NODE_OPTIONS=\"--experimental-vm-modules --trace-warnings\" npx jest --testTimeout=15000"
   },
+  "engines": {
+    "homebridge": ">=1.6.0"
+  },
   "repository": {
     "type": "git",
     "url": "todo"
   },
   "keywords": [
     "homebridge",
-    "time"
+    "homebridge-plugin",
+    "time",
+    "trigger"
   ],
   "author": "GrumpTech (Michael J. Price)",
   "license": "MIT",

@@ -10,6 +10,21 @@
  * @private
  * @readonly
  * @enum {number}
+ * @property {number} MultiTrip - Triggering multiple times per day
+ * @property {number} Daily - Trips once per day
+ */
+export const TRIGGER_TYPES = {
+    /* eslint-disable key-spacing */
+    MultiTrip   : 0,
+    Daily       : 1,
+    /* eslint-enable key-spacing */
+};
+
+/**
+ * @description Enumeration of the trigger states
+ * @private
+ * @readonly
+ * @enum {number}
  * @property {number} Inactive- Trigger Inactive
  * @property {number} Armed - Trigger Armed
  * @property {number} Triggered - Trigger Tripped

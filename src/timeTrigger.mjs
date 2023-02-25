@@ -77,7 +77,6 @@ export class TimeTrigger extends EventEmitter {
     /**
      * @description Constructor
      * @param {object} config - Configuration data
-     * @param {string=} config.identifier - Identifier
      * @param {object=} config.timeout - Range of times for the timeout.
      * @param {number} config.timeout.min - Minimum time, in milliseconds for the timeout.
      * @param {number} config.timeout.max - Maximum time, in milliseconds for the timeout.
@@ -91,8 +90,7 @@ export class TimeTrigger extends EventEmitter {
     constructor(config) {
         // Validate arguments
         if (_is.not.undefined(config)) {
-            if (_is.not.object(config) ||
-                (_is.not.undefined(config.identifier) && _is.not.string(config.identifier))) {
+            if (_is.not.object(config)) {
                 throw new TypeError(`Invalid configuration.`);
             }
             if (_is.not.undefined(config.timeout)) {
@@ -119,16 +117,8 @@ export class TimeTrigger extends EventEmitter {
 
         this._timeoutID = INVALID_TIMEOUT_ID;
 
-        // Use the identifier provided or generate a new one.
-        if (_is.undefined(config) ||
-            _is.undefined(config.identifier)) {
-            // Create a unique identifier
-            this._uuid = _crypto.randomUUID({disableEntropyCache: true});
-        }
-        else {
-            // Use the identifier provided.
-            this._uuid = config.identifier;
-        }
+        // Generate a new identifier
+        this._uuid = _crypto.randomUUID({disableEntropyCache: true});
 
         // Use the timeout provided or generate a new one.
         if (_is.undefined(config) ||
@@ -152,10 +142,21 @@ export class TimeTrigger extends EventEmitter {
             this._trippedDuration = config.duration;
         }
 
+        // Compute a signature for this item.
+        const hash = _crypto.createHash('sha256');
+        if (_is.not.undefined(config)) {
+            hash.update(JSON.stringify(config));
+        }
+        else {
+            hash.update(`No config`);
+        }
+        this._signature = hash.digest('hex').toLowerCase();
+
         this._timeout_ms = -1;
         this._trippedDuration_ms = -1;
 
         // Force a decoupled transition into the Idle State.
+        this._initializing = true;
         setImmediate(() => {
             this.EnterIdle();
         });
@@ -175,6 +176,22 @@ export class TimeTrigger extends EventEmitter {
      */
     get Identifier() {
         return this._uuid;
+    }
+
+    /**
+     * @description Read-only property accessor for the trigger signature
+     * @returns {string} - Trigger signature.
+     */
+    get Signature() {
+        return this._signature;
+    }
+
+    /**
+     * @description Read-only property accessor for the trigger name
+     * @returns {string} - Trigger name.
+     */
+    get Name() {
+        return this.Signature.slice(0, 6);
     }
 
     /**
@@ -198,13 +215,21 @@ export class TimeTrigger extends EventEmitter {
      * @returns {void}
      */
     Start() {
-        // Stop the trigger to bring us to the Idle State.
-        if (!(this._currentState instanceof TriggerStateIdle)) {
-            this.Stop();
+        // Decouple the request if we are still initializing.
+        if (this._initializing) {
+            setImmediate(() => {
+                this.Start();
+            });
         }
+        else {
+            // Stop the trigger to bring us to the Idle State.
+            if (!(this._currentState instanceof TriggerStateIdle)) {
+                this.Stop();
+            }
 
-        // Manage the state
-        this._currentState.Evaluate(TRIGGER_ACTIONS.Next);
+            // Manage the state
+            this._currentState.Evaluate(TRIGGER_ACTIONS.Next);
+        }
     }
 
     /**
@@ -229,6 +254,9 @@ export class TimeTrigger extends EventEmitter {
 
         // Manage the state.
         this._doStateChange(this._idleState);
+
+        // Clear the initializing flag.
+        this._initializing = false;
     }
 
     /**
@@ -277,7 +305,7 @@ export class TimeTrigger extends EventEmitter {
             throw new TypeError(`'timeout' is not a number`);
         }
         if (_is.not.positive(timeout)) {
-            throw new RangeError(`'timeout' is not positive`);
+            throw new RangeError(`'timeout' is not positive: ${timeout}`);
         }
 
         // Sanity. Stop, if needed.

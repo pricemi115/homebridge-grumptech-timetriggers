@@ -13,11 +13,20 @@
                 "properties": {
                     "triggers": {
                         "title": "Time Triggers",
-                        "description": "List of time triggers.",
+                        "description": "List of time-based triggers.",
                         "type": "array",
                         "items": {
                             "type": "object",
                             "properties": {
+                                "trigger_identifier": {
+                                    "title": "Identifier",
+                                    "description": "Unique identifier for the trigger.</br><small>Controls the mapping of the Homekit accessory to this trigger.</br>and serves as the default name for the accessory and services.</br><i><u>Note</u>: Subsequent triggers with this name will be ignored.</br><u>Warning</u>: Changing the identifier will affect existing Homekit automations using this trigger.</i></small>",
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "default": "Trigger",
+                                    "pattern": "(?!^$)([^\\s])",
+                                    "required": true
+                                },
                                 "trigger_type": {
                                     "title": "Trigger Type",
                                     "description": "Type of trigger",

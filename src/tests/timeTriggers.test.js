@@ -53,11 +53,15 @@ describe('TimeTrigger class tests', ()=>{
             let trigEmpty = new TimeTrigger({});
             let trigId = new TimeTrigger({identifier: id});
             let trigWaffles = new TimeTrigger({waffles: id});
+            let trigSignature = new TimeTrigger({signature: id});
             expect(_is.not.undefined(trigEmpty)).toBe(true);
             expect(_is.not.undefined(trigId)).toBe(true);
             expect(trigId.Identifier).not.toBe(id);
             expect(_is.not.undefined(trigWaffles)).toBe(true);
             expect(trigWaffles.Identifier).not.toBe(id);
+            expect(trigWaffles.Name).toBe(trigWaffles.Signature.slice(0,6));
+            expect(trigSignature.Signature).toBe(id);
+            expect(trigSignature.Name).toBe(id);
         });
     });
     describe('Instance function/property invalid tests', ()=>{

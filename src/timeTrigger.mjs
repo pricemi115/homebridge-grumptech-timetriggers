@@ -77,6 +77,7 @@ export class TimeTrigger extends EventEmitter {
     /**
      * @description Constructor
      * @param {object} config - Configuration data
+     * @param {string} config.signature - Identifier intended to be used for persistence, but cannot be guaranteed to be unique.
      * @param {object=} config.timeout - Range of times for the timeout.
      * @param {number} config.timeout.min - Minimum time, in milliseconds for the timeout.
      * @param {number} config.timeout.max - Maximum time, in milliseconds for the timeout.
@@ -120,6 +121,26 @@ export class TimeTrigger extends EventEmitter {
         // Generate a new identifier
         this._uuid = _crypto.randomUUID({disableEntropyCache: true});
 
+        // Get the identifier from the configuration.
+        if (_is.existy(config) &&
+            _is.string(config.signature) &&
+            (config.signature.length > 0)) {
+            this._signature = config.signature;
+            this._name = config.signature;
+        }
+        else {
+            // Identifier was either not provided or is invalid.
+            const hash = _crypto.createHash('sha256');
+            if (_is.existy(config)) {
+                hash.update(JSON.stringify(config));
+            }
+            else {
+                hash.update(`No config`);
+            }
+            this._signature = hash.digest('hex').toLowerCase();
+            this._name = this._signature.slice(0, 6);
+        }
+
         // Use the timeout provided or generate a new one.
         if (_is.undefined(config) ||
             _is.undefined(config.timeout)) {
@@ -141,16 +162,6 @@ export class TimeTrigger extends EventEmitter {
             // Use the identifier provided.
             this._trippedDuration = config.duration;
         }
-
-        // Compute a signature for this item.
-        const hash = _crypto.createHash('sha256');
-        if (_is.not.undefined(config)) {
-            hash.update(JSON.stringify(config));
-        }
-        else {
-            hash.update(`No config`);
-        }
-        this._signature = hash.digest('hex').toLowerCase();
 
         this._timeout_ms = -1;
         this._trippedDuration_ms = -1;
@@ -191,7 +202,7 @@ export class TimeTrigger extends EventEmitter {
      * @returns {string} - Trigger name.
      */
     get Name() {
-        return this.Signature.slice(0, 6);
+        return this._name;
     }
 
     /**

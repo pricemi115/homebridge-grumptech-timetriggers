@@ -169,7 +169,7 @@ class TimeTriggerPlatform {
                 // Determine if this trigger identifier is already in use.
                 let identifierUsed = false;
                 this._triggers.forEach((item, index) => {
-                    if (_is.existy(item.trigger) && 
+                    if (_is.existy(item.trigger) &&
                         _is.equal(item.trigger.Signature, identifier)) {
                         identifierUsed = true;
                     }
@@ -197,7 +197,8 @@ class TimeTriggerPlatform {
                     }
 
                     // Build the trigger configuration.
-                    const triggerConfig = {};
+                    const triggerConfig = {signature: identifier};
+
                     // Common trigger configuration data.
                     triggerConfig.duration = {};
                     if (_is.not.undefined(triggerSettings.duration) && _is.object(triggerSettings.duration)) {
@@ -409,7 +410,7 @@ class TimeTriggerPlatform {
             this._triggers.forEach((value, key)=>{
                 if (_is.object(value) &&
                     (_is.not.undefined(value.trigger) && (value.trigger instanceof TimeTrigger))) {
-                    this._log.debug(`Unsubscribing trigger: ${value.trigger.Identifier}`);
+                    this._log.debug(`Unsubscribing trigger: '${value.trigger.Identifier}'`);
                     value.trigger.off(TRIGGER_EVENTS.EVENT_STATE_CHANGED, this._CB_TriggerStateChanged);
                     value.trigger.off(TRIGGER_EVENTS.EVENT_STATE_NOTIFY, this._CB_TriggerStateNotify);
                 }
@@ -439,14 +440,14 @@ class TimeTriggerPlatform {
                 // Accessory is from a prior version and needs to be replaced.
                 if (!Object.prototype.hasOwnProperty.call(accessory.context, 'VERSION') ||
                     (accessory.context.VERSION !== ACCESSORY_VERSION)) {
-                    this._log(`Accessory ${accessory.displayName} has accessory version ${accessory.context.VERSION}. Version ${ACCESSORY_VERSION} is expected.`);
+                    this._log.debug(`Accessory '${accessory.displayName}' has accessory version ${accessory.context.VERSION}. Version ${ACCESSORY_VERSION} is expected.`);
                     // This accessory needs to be replaced.
                     accessoriesToRemove.push(accessory);
                     removed = true;
                 }
                 // If this accessory was not previously removed, does the accessory have a matching trigger?
                 if (!removed) {
-                    this._log(`Checking to see if accessory ${accessory.displayName} is an orphan.`);
+                    this._log.debug(`Checking to see if accessory '${accessory.displayName}' is an orphan.`);
                     let isOrphan = true;
                     for (const item of this._triggers.values()) {
                         if (Object.prototype.hasOwnProperty.call(accessory.context, 'ID') &&
@@ -459,7 +460,7 @@ class TimeTriggerPlatform {
                         }
                     }
                     if (isOrphan) {
-                        this._log(`Accessory ${accessory.displayName} is an orphan and should be purged.`);
+                        this._log.debug(`Accessory '${accessory.displayName}' is an orphan and should be purged.`);
                         // This accessory needs to be removed.
                         accessoriesToRemove.push(accessory);
                     }
@@ -473,10 +474,10 @@ class TimeTriggerPlatform {
 
         // Manage the accessories and triggers.
         for (const item of this._triggers.values()) {
+            let accessory = item.accessory;
             if (_is.existy(item.trigger) &&
                 (item.trigger instanceof TimeTrigger)) {
                 // Is this trigger new?
-                let accessory = item.accessory;
                 if (_is.not.existy(accessory)) {
                     // There is no matching accessory for this trigger.
                     // Create and register an accessory.
@@ -495,6 +496,7 @@ class TimeTriggerPlatform {
                 }
             }
             else if (_is.existy(accessory)) {
+                this._log.debug(`Unexpected orphaned trigger '${accessory.displayName}.`);
                 throw new RangeError(`Orphaned accessory is found.`);
             }
         }
@@ -531,7 +533,7 @@ class TimeTriggerPlatform {
                 this._configureAccessory(accessory);
             }
             catch (error) {
-                this._log(`Unable to configure accessory ${accessory.displayName}. Version:${accessory.context.VERSION}. Error:${error}`);
+                this._log.debug(`Unable to configure accessory '${accessory.displayName}'. Version:${accessory.context.VERSION}. Error:${error}`);
                 // Store the acessory without a trigger.
                 this._triggers.set(accessory.contect.ID, {accessory: accessory, trigger: null});
             }
@@ -552,7 +554,7 @@ class TimeTriggerPlatform {
             throw new TypeError(`accessory must be a PlatformAccessory`);
         }
 
-        this._log.debug('Configuring accessory %s', accessory.displayName);
+        this._log.debug(`Configuring accessory ${accessory.displayName}'.`);
 
         // Get the accessory identifier from the context.
         const id = accessory.context.ID;
@@ -597,7 +599,7 @@ class TimeTriggerPlatform {
 
         // Initialize the motion sensor.
         try {
-            this._log(`Updating motion sensor service. Accessory(${accessory.displayName})`);
+            this._log.debug(`Updating motion sensor service. Accessory(${accessory.displayName})`);
             this._updateMotionSensorService(accessory, SERVICE_INFO.MOTION, {active: switchState, motion: false});
 
             // Update the accessory information
@@ -612,18 +614,18 @@ class TimeTriggerPlatform {
                     // Match found.
                     found = true;
                     // Register the accessory.
-                    this._log.debug(`Adding accessory '${accessory.displayName} to the triggers list. Count:${this._triggers.size}`);
+                    this._log.debug(`Adding accessory '${accessory.displayName}' to the triggers list. Count:${this._triggers.size}`);
                     item.accessory = accessory;
                 }
             });
             if (!found) {
                 // Accessory appears to be an orphan.
-                this._log.debug(`Adding ORPHAN accessory '${accessory.displayName} to the triggers list. Count:${this._triggers.size}`);
+                this._log.debug(`Adding ORPHAN accessory '${accessory.displayName}' to the triggers list. Count:${this._triggers.size}`);
                 this._triggers.set(id, {accessory: accessory, trigger: null});
             }
         }
         catch (error) {
-            this._log.debug(`Error configuring accessory ${accessory.displayName}. Error:'${error}'`);
+            this._log.debug(`Error configuring accessory '${accessory.displayName}'. Error:'${error}'`);
         }
     }
 
@@ -706,7 +708,7 @@ class TimeTriggerPlatform {
     _removeAccessory(accessory) {
         // Validate arguments
         if ((accessory === undefined) || !(accessory instanceof _PlatformAccessory)) {
-            throw new TypeError('Accessory must be a PlatformAccessory');
+            throw new TypeError(`Accessory must be a PlatformAccessory`);
         }
         let found = false;
         this._triggers.forEach((item, index) => {
@@ -836,11 +838,11 @@ class TimeTriggerPlatform {
                 serviceMotion.updateCharacteristic(_hap.Characteristic.StatusTampered,   _hap.Characteristic.StatusTampered.NOT_TAMPERED);
             }
             catch (err) {
-                this._log.debug(`Error setting characteristics for ${accessory.displayName}. Error: ${err}`);
+                this._log.debug(`Error setting characteristics for '${accessory.displayName}'. Error: ${err}`);
             }
         }
         else {
-            this._log.debug(`No service: Accessory ${accessory.displayName}`);
+            this._log.debug(`No service: Accessory '${accessory.displayName}'`);
             throw new Error(`Accessory ${accessory.displayName} does not have a valid ${serviceInfo.uuid}:${serviceInfo.udst} service`);
         }
     }
@@ -904,7 +906,7 @@ class TimeTriggerPlatform {
             throw new TypeError(`id must be a non-zero length string.`);
         }
 
-        this._log(`Attempting to set trigger ${id} to ${value}`);
+        this._log.debug(`Attempting to set trigger ${id} to ${value}`);
         let status = null;
         this._triggers.forEach((item, index) => {
             if (_is.existy(item.accessory) &&

@@ -78,6 +78,7 @@
                                     "description": "Days to trip th trigger",
                                     "type": "number",
                                     "default": 127,
+                                    "minimum": 1,
                                     "oneOf": [
                                         { "title": "Sunday", "enum": [1] },
                                         { "title": "Monday", "enum": [2] },

@@ -35,34 +35,34 @@ describe('ScheduledTrigger class tests', ()=>{
                 const test = new ScheduledTrigger({time: {}});
             }
             function trigInvalidTime3() {
-                const test = new ScheduledTrigger({time: {min: 'waffles'}});
+                const test = new ScheduledTrigger({time: {nominal: 'waffles'}});
             }
             function trigInvalidTime4() {
-                const test = new ScheduledTrigger({time: {max: true}});
+                const test = new ScheduledTrigger({time: {tolerance: true}});
             }
             function trigInvalidTimeLowMinHour() {
-                const test = new ScheduledTrigger({time: {min: {hour: -1, minute: 0}, max: {hour: 10, minute: 0}}});
+                const test = new ScheduledTrigger({time: {nominal: {hour: -1, minute: 0}, tolerance: {hour: 10, minute: 0}}});
             }
             function trigInvalidTimeLowMinMinute() {
-                const test = new ScheduledTrigger({time: {min: {hour: 5, minute: -1}, max: {hour: 10, minute: 0}}});
+                const test = new ScheduledTrigger({time: {nominal: {hour: 5, minute: -1}, tolerance: {hour: 10, minute: 0}}});
             }
             function trigInvalidTimeHighMinHour() {
-                const test = new ScheduledTrigger({time: {min: {hour: 24, minute: 0}, max: {hour: 10, minute: 0}}});
+                const test = new ScheduledTrigger({time: {nominal: {hour: 24, minute: 0}, tolerance: {hour: 10, minute: 0}}});
             }
             function trigInvalidTimeHighMinMinute() {
-                const test = new ScheduledTrigger({time: {min: {hour: 5, minute: 61}, max: {hour: 10, minute: 0}}});
+                const test = new ScheduledTrigger({time: {nominal: {hour: 5, minute: 61}, tolerance: {hour: 10, minute: 0}}});
             }
             function trigInvalidTimeLowMaxHour() {
-                const test = new ScheduledTrigger({time: {min: {hour: 7, minute: 0}, max: {hour: -1, minute: 0}}});
+                const test = new ScheduledTrigger({time: {nominal: {hour: 7, minute: 0}, tolerance: {hour: -1, minute: 0}}});
             }
             function trigInvalidTimeLowMaxMinute() {
-                const test = new ScheduledTrigger({time: {min: {hour: 5, minute: 7}, max: {hour: 10, minute: -1}}});
+                const test = new ScheduledTrigger({time: {nominal: {hour: 5, minute: 7}, tolerance: {hour: 10, minute: -1}}});
             }
             function trigInvalidTimeHighMaxHour() {
-                const test = new ScheduledTrigger({time: {min: {hour: 15, minute: 0}, max: {hour: 24, minute: 0}}});
+                const test = new ScheduledTrigger({time: {nominal: {hour: 15, minute: 0}, tolerance: {hour: 24, minute: 0}}});
             }
             function trigInvalidTimeHighMaxMinute() {
-                const test = new ScheduledTrigger({time: {min: {hour: 5, minute: 45}, max: {hour: 10, minute: 61}}});
+                const test = new ScheduledTrigger({time: {nominal: {hour: 5, minute: 45}, tolerance: {hour: 10, minute: 61}}});
             }
 
             expect(trigInvalidDays).toThrow(TypeError);
@@ -87,7 +87,7 @@ describe('ScheduledTrigger class tests', ()=>{
             ['Pre Window',  {minOffset:  1, maxOffset:  2}, 0, TRIGGER_DAYS.AllDays],
             ['Mid Window',  {minOffset: -1, maxOffset:  2}, 0, TRIGGER_DAYS.AllDays],
             ['Post Window', {minOffset: -2, maxOffset: -1}, 0, TRIGGER_DAYS.AllDays],
-            ['Next Week',   {minOffset: -2, maxOffset: -1}, 6, 0],
+            ['Next Week',   {minOffset: -2, maxOffset: -1}, 7, 0],
         ])('Trigger Window Tests.', (desc, offsets, deltaDays, additionalDays) =>{
             test(desc, done =>{
                 function handlerStateNotify(e) {
@@ -140,7 +140,7 @@ describe('ScheduledTrigger class tests', ()=>{
                         while ((test & mask) === 0) {
                             dayOffset++;
                             test = (test << 1);
-                            if (test == 0) {
+                            if (test > TRIGGER_DAYS.Saturday) {
                                 test = TRIGGER_DAYS.Sunday;
                             }
                         }
@@ -150,7 +150,11 @@ describe('ScheduledTrigger class tests', ()=>{
                     }
                 }
 
-                let config = {days: (triggerDay  | additionalDays), time: {min: {hour: minWindow.getHours(), minute: 0}, max: {hour: maxWindow.getHours(), minute: 0}}};
+                const tolerance = ((maxWindow - minWindow)/2);
+                let nominal = (minWindow - now) + tolerance;
+                const nominalTime = new Date(now.getTime() + nominal);
+
+                const config = {days: (triggerDay  | additionalDays), time: {nominal: {hour: nominalTime.getHours(), minute: 0}, tolerance: {hour: (offsets.maxOffset - offsets.minOffset), minute: 0}}};
                 const trigger = new ScheduledTrigger(config);
                 trigger.on(TRIGGER_EVENTS.EVENT_STATE_NOTIFY, handlerStateNotify);
             });

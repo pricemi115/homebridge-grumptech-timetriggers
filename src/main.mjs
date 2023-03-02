@@ -177,15 +177,6 @@ class TimeTriggerPlatform {
 
                 // Is the identifier free?
                 if (!identifierUsed) {
-                    // Determine if the `random` flag is set.
-                    let isRandom = false;
-                    if (_is.not.undefined(triggerSettings.trigger_random) && _is.boolean(triggerSettings.trigger_random)) {
-                        isRandom = triggerSettings.trigger_random;
-                    }
-                    else {
-                        throw new TypeError(`Configuration is invalid. Trigger Random.`);
-                    }
-
                     // Get the trigger type.
                     let triggerType = -1;
                     if (_is.not.undefined(triggerSettings.trigger_type) && _is.number(triggerSettings.trigger_type) &&
@@ -202,31 +193,27 @@ class TimeTriggerPlatform {
                     // Common trigger configuration data.
                     triggerConfig.duration = {};
                     if (_is.not.undefined(triggerSettings.duration) && _is.object(triggerSettings.duration)) {
-                        // Duration - Minimum
-                        if (_is.not.undefined(triggerSettings.duration.min) && _is.number(triggerSettings.duration.min) &&
-                            _is.positive(triggerSettings.duration.min) &&_is.above(triggerSettings.duration.min, 249)) {
-                            // Set the minimum
-                            triggerConfig.duration.min = triggerSettings.duration.min;
-                            // Default the maximum to the minimum
-                            triggerConfig.duration.max = triggerSettings.duration.min;
+                        // Duration - Nominal
+                        if (_is.not.undefined(triggerSettings.duration.nominal) && _is.number(triggerSettings.duration.nominal) &&
+                            _is.positive(triggerSettings.duration.nominal) &&_is.above(triggerSettings.duration.nominal, 249)) {
+                            // Set the nominal
+                            triggerConfig.duration.nominal = triggerSettings.duration.nominal;
                         }
                         else {
-                            throw new TypeError(`Configuration is invalid. Duration - min.`);
+                            throw new TypeError(`Configuration is invalid. Duration - nominal.`);
                         }
-                        // Duration - Maximum (only valid if random is enabled.)
-                        if (isRandom) {
-                            if (_is.not.undefined(triggerSettings.duration.max) && _is.number(triggerSettings.duration.max) &&
-                                _is.positive(triggerSettings.duration.max) && _is.above(triggerSettings.duration.max, (triggerSettings.duration.min - 1))) {
-                                // Update the maximum
-                                triggerConfig.duration.max = triggerSettings.duration.max;
-                            }
-                            else  {
-                                throw new TypeError(`Configuration is invalid. Duration - max.`);
-                            }
+                        // Duration - Tolerance
+                        if (_is.not.undefined(triggerSettings.duration.tolerance) && _is.number(triggerSettings.duration.tolerance) &&
+                            _is.not.negative(triggerSettings.duration.tolerance)) {
+                            // Set the maximum
+                            triggerConfig.duration.tolerance = triggerSettings.duration.tolerance;
+                        }
+                        else {
+                            throw new TypeError(`Configuration is invalid. Duration - tolerance.`);
                         }
                     }
                     else {
-                        throw new TypeError(`Configuration is invalid. Timeout.`);
+                        throw new TypeError(`Configuration is invalid. Duration.`);
                     }
                     // Trigger type specific configuration.
                     switch (triggerType) {
@@ -234,27 +221,23 @@ class TimeTriggerPlatform {
                             // Extract the appropriate configuration.
                             triggerConfig.timeout = {};
                             if (_is.not.undefined(triggerSettings.timeout) && _is.object(triggerSettings.timeout)) {
-                                // Timeout - Minimum
-                                if (_is.not.undefined(triggerSettings.timeout.min) && _is.number(triggerSettings.timeout.min) &&
-                                    _is.positive(triggerSettings.timeout.min)) {
-                                    // Set the minimum
-                                    triggerConfig.timeout.min = triggerSettings.timeout.min;
-                                    // Default the maximum to the minimum
-                                    triggerConfig.timeout.max = triggerSettings.timeout.min;
+                                // Timeout - Nominal
+                                if (_is.not.undefined(triggerSettings.timeout.nominal) && _is.number(triggerSettings.timeout.nominal) &&
+                                    _is.positive(triggerSettings.timeout.nominal)) {
+                                    // Set the nominal
+                                    triggerConfig.timeout.nominal = triggerSettings.timeout.nominal;
                                 }
                                 else {
-                                    throw new TypeError(`Configuration is invalid. Timeout - min.`);
+                                    throw new TypeError(`Configuration is invalid. Timeout - nominal.`);
                                 }
-                                // Timeout - Maximum (only valid if random is enabled.)
-                                if (isRandom) {
-                                    if (_is.not.undefined(triggerSettings.timeout.max) && _is.number(triggerSettings.timeout.max) &&
-                                        _is.positive(triggerSettings.timeout.max) && _is.above(triggerSettings.timeout.max, (triggerSettings.timeout.min - 1))) {
-                                        // Update the maximum
-                                        triggerConfig.timeout.max = triggerSettings.timeout.max;
-                                    }
-                                    else  {
-                                        throw new TypeError(`Configuration is invalid. Timeout - max.`);
-                                    }
+                                // Timeout - Tolerance
+                                if (_is.not.undefined(triggerSettings.timeout.tolerance) && _is.number(triggerSettings.timeout.tolerance) &&
+                                    _is.not.negative(triggerSettings.timeout.tolerance)) {
+                                    // Set the tolerance
+                                    triggerConfig.timeout.tolerance = triggerSettings.timeout.tolerance;
+                                }
+                                else  {
+                                    throw new TypeError(`Configuration is invalid. Timeout - tolerance.`);
                                 }
                             }
                             else {
@@ -277,61 +260,55 @@ class TimeTriggerPlatform {
                             // Trigger time window
                             triggerConfig.time = {};
                             if (_is.not.undefined(triggerSettings.time) && _is.object(triggerSettings.time)) {
-                                // Time Window - Minimum
-                                triggerConfig.time.min = {};
-                                triggerConfig.time.max = {};
-                                if (_is.not.undefined(triggerSettings.time.min) && _is.object(triggerSettings.time.min)) {
+                                triggerConfig.time.nominal = {};
+                                triggerConfig.time.tolerance = {};
+                                // Time Window - Nominal
+                                if (_is.not.undefined(triggerSettings.time.nominal) && _is.object(triggerSettings.time.nominal)) {
                                     // Hour
-                                    if (_is.not.undefined(triggerSettings.time.min.hour) && _is.number(triggerSettings.time.min.hour) &&
-                                        _is.within(triggerSettings.timeout.min.hour, -1, 24)) {
-                                        // Set the minimum
-                                        triggerConfig.time.min.hour = triggerSettings.timeout.min.hour;
-                                        // Default the maximum to the minimum
-                                        triggerConfig.time.max.hour = triggerSettings.timeout.min.hour;
+                                    if (_is.not.undefined(triggerSettings.time.nominal.hour) && _is.number(triggerSettings.time.nominal.hour) &&
+                                        _is.within(triggerSettings.time.nominal.hour, -1, 24)) {
+                                        // Set the nominal
+                                        triggerConfig.time.nominal.hour = triggerSettings.time.nominal.hour;
                                     }
                                     else {
-                                        throw new TypeError(`Configuration is invalid. Time Window(min)-hour.`);
+                                        throw new TypeError(`Configuration is invalid. Time Window(nominal)-hour.`);
                                     }
                                     // Minute
-                                    if (_is.not.undefined(triggerSettings.time.min.minute) && _is.number(triggerSettings.time.min.minute) &&
-                                        _is.within(triggerSettings.timeout.min.minute, -1, 60)) {
-                                        // Set the minimum
-                                        triggerConfig.time.min.minute = triggerSettings.timeout.min.minute;
-                                        // Default the maximum to the minimum
-                                        triggerConfig.time.max.minute = triggerSettings.timeout.min.minute;
+                                    if (_is.not.undefined(triggerSettings.time.nominal.minute) && _is.number(triggerSettings.time.nominal.minute) &&
+                                        _is.within(triggerSettings.time.nominal.minute, -1, 60)) {
+                                        // Set the nominal
+                                        triggerConfig.time.nominal.minute = triggerSettings.time.nominal.minute;
                                     }
                                     else {
-                                        throw new TypeError(`Configuration is invalid. Time Window(min)-minute.`);
+                                        throw new TypeError(`Configuration is invalid. Time Window(nominal)-minute.`);
                                     }
                                 }
                                 else {
-                                    throw new TypeError(`Configuration is invalid. Time Window - min.`);
+                                    throw new TypeError(`Configuration is invalid. Time Window - nominal.`);
                                 }
-                                // Time Window - Maximum (only valid if random is enabled.)
-                                if (isRandom) {
-                                    if (_is.not.undefined(triggerSettings.time.max) && _is.object(triggerSettings.time.max)) {
-                                        // Hour
-                                        if (_is.not.undefined(triggerSettings.time.max.hour) && _is.number(triggerSettings.time.max.hour) &&
-                                            _is.within(triggerSettings.timeout.max.hour, -1, 24)) {
-                                            // Update the maximum
-                                            triggerConfig.time.max.hour = triggerSettings.timeout.max.hour;
-                                        }
-                                        else {
-                                            throw new TypeError(`Configuration is invalid. Time Window(max)-hour.`);
-                                        }
-                                        // Minute
-                                        if (_is.not.undefined(triggerSettings.time.max.minute) && _is.number(triggerSettings.time.max.minute) &&
-                                            _is.within(triggerSettings.timeout.max.minute, -1, 60)) {
-                                            // Update the minimum
-                                            triggerConfig.time.max.minute = triggerSettings.timeout.max.minute;
-                                        }
-                                        else {
-                                            throw new TypeError(`Configuration is invalid. Time Window(max)-minute.`);
-                                        }
+                                // Time Window - Tolerance
+                                if (_is.not.undefined(triggerSettings.time.tolerance) && _is.object(triggerSettings.time.tolerance)) {
+                                    // Hour
+                                    if (_is.not.undefined(triggerSettings.time.tolerance.hour) && _is.number(triggerSettings.time.tolerance.hour) &&
+                                        _is.within(triggerSettings.time.tolerance.hour, -1, 24)) {
+                                        // Update the tolerance
+                                        triggerConfig.time.tolerance.hour = triggerSettings.time.tolerance.hour;
                                     }
                                     else {
-                                        throw new TypeError(`Configuration is invalid. Time Window - max.`);
+                                        throw new TypeError(`Configuration is invalid. Time Window(tolerance)-hour.`);
                                     }
+                                    // Minute
+                                    if (_is.not.undefined(triggerSettings.time.tolerance.minute) && _is.number(triggerSettings.time.tolerance.minute) &&
+                                        _is.within(triggerSettings.time.tolerance.minute, -1, 60)) {
+                                        // Update the tolerance
+                                        triggerConfig.time.tolerance.minute = triggerSettings.time.tolerance.minute;
+                                    }
+                                    else {
+                                        throw new TypeError(`Configuration is invalid. Time Window(tolerance)-minute.`);
+                                    }
+                                }
+                                else {
+                                    throw new TypeError(`Configuration is invalid. Time Window - tolerance.`);
                                 }
                             }
                             else {

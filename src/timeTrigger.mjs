@@ -41,16 +41,16 @@ const _debug_proces = _debugModule('time_trigger');
 const INVALID_TIMEOUT_ID = -1;
 
 /**
- * @description Default timeout in milli-seconds
+ * @description Default timeout, in milliseconds
  * @private
  */
-const DEFAULT_TIMEOUT_MS = {min: 10000, max: 10000};
+const DEFAULT_TIMEOUT_MS = {nominal: 10000, tolerance: 0};
 
 /**
- * @description Default time in milli-seconds for the diration of the tripped state
+ * @description Default, in milli-seconds, for the duration of the tripped state
  * @private
  */
-const DEFAULT_TRIP_DURATION_MS = {min: 250, max: 250};
+const DEFAULT_TRIP_DURATION_MS = {nominal: 250, tolerance: 0};
 
 /**
  * @description Time Trigger state changed notification
@@ -78,12 +78,12 @@ export class TimeTrigger extends EventEmitter {
      * @description Constructor
      * @param {object} config - Configuration data
      * @param {string} config.signature - Identifier intended to be used for persistence, but cannot be guaranteed to be unique.
-     * @param {object=} config.timeout - Range of times for the timeout.
-     * @param {number} config.timeout.min - Minimum time, in milliseconds for the timeout.
-     * @param {number} config.timeout.max - Maximum time, in milliseconds for the timeout.
-     * @param {object=} config.duration - Range of times for the tripped duration.
-     * @param {number} config.duration.min - Minimum time, in milliseconds for the tripped duration.
-     * @param {number} config.duration.max - Maximum time, in milliseconds for the tripped duration.
+     * @param {object=} config.timeout - Configuration of the timeout interval.
+     * @param {number} config.timeout.nominal - Nominal time, in milliseconds, for the timeout.
+     * @param {number} config.timeout.tolerance - Tolerance, in milliseconds, for the timeout.
+     * @param {object=} config.duration - Configuration of the tripped duration.
+     * @param {number} config.duration.nominal - Nominal time, in milliseconds, for the tripped duration.
+     * @param {number} config.duration.tolerance - Tolerance, in milliseconds, for the tripped duration.
      * @throws {TypeError} - Thrown if 'config' is invalid.
      * @class
      * @private
@@ -394,23 +394,22 @@ export class TimeTrigger extends EventEmitter {
     /**
      * @description Helper to validate range configuration parameters,
      * @param {object} range - range object to be validated.
-     * @param {number} range.mimumum - Minimum value
-     * @param {number} range.maximum - Maximum value
+     * @param {number} range.nominal - Nominal value
+     * @param {number} range.tolerance - Tolerance value
      * @returns {void}
      * @throws {TypeError} - Thrown if the types are not as expected.
-     * @throws {RangeError} - Thrown if e ither the max or min are negative or if the max is less than the min.
+     * @throws {RangeError} - Thrown if either the nominal or tolerance are negative.
      * @private
      */
     static _checkRange(range) {
         if (_is.not.undefined(range)) {
             if (_is.not.object(range) ||
-                _is.not.number(range.min) ||
-                _is.not.number(range.max)) {
+                _is.not.number(range.nominal) ||
+                _is.not.number(range.tolerance)) {
                 throw new TypeError(`range is invalid.`);
             }
-            if (_is.negative(range.min) ||
-                _is.negative(range.max) ||
-                _is.under(range.max, range.min)) {
+            if (_is.negative(range.nominal) ||
+                _is.negative(range.tolerance)) {
                 throw new RangeError(`range is invalid.`);
             }
         }
@@ -419,19 +418,27 @@ export class TimeTrigger extends EventEmitter {
     /**
      * @description Helper to get the next value from range specified
      * @param {object} range - Configuration parameter
-     * @param {number} range.mimumum - Minimum value
-     * @param {number} range.maximum - Maximum value
+     * @param {number} range.nominal - Nominal value
+     * @param {number} range.tolerance - Tolerance value
      * @returns {number} - next value from the range
-     * @throws {TypeError} - Thrown if the types are not as expected.
-     * @throws {RangeError} - Thrown if wither the max or min are negative or if the max is less than the min.
      * @private
      */
     static _getNextValue(range) {
         // Validate
         TimeTrigger._checkRange(range);
 
+        // Compute the absolute minimum possible, capping at 0.
+        const minimum = range.nominal - range.tolerance;
+
+        // Compute the absolute maximum possible.
+        const maximum = range.nominal + range.tolerance;
+
         // Compute the next value from the range.
-        const nextVal = (Math.floor(Math.random()) * (range.max - range.min)) + range.min;
+        let nextVal = (Math.floor(Math.random()) * (maximum - minimum)) + minimum;
+        // Cap at 0
+        if (_is.negative(nextVal)) {
+            nextVal = 0;
+        }
 
         return nextVal;
     }

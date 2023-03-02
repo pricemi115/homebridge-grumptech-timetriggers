@@ -73,10 +73,10 @@ describe('TimeTrigger class tests', ()=>{
                 const test = new TimeTrigger('waffles');
             };
             function trigNegTimeout() {
-                const test = new TimeTrigger({timeout: {min: -10, max: -10}});
+                const test = new TimeTrigger({timeout: {nominal: -10, tolerance: -10}});
             }
             function trigNegTripDurationt() {
-                const test = new TimeTrigger({duration: {min: -10, max: -10}});
+                const test = new TimeTrigger({duration: {nominal: -10, tolerance: -10}});
             }
             expect(trigNumber).toThrow(TypeError);
             expect(trigString).toThrow(TypeError);
@@ -90,7 +90,7 @@ describe('TimeTrigger class tests', ()=>{
         let error;
         describe.each([
             ['Default', {}],
-            ['1 Sec',   {timeout: {min: 1000, max: 1000}}],
+            ['1 Sec',   {timeout: {nominal: 1000, tolerance: 0}}],
         ])('Start Tests.', (desc, config) =>{
             test(desc, done =>{
                 function handlerStateChanged(e) {

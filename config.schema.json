@@ -38,35 +38,25 @@
                                       ],
                                     "required": true
                                 },
-                                "trigger_random": {
-                                    "title": "Randomize",
-                                    "description": "Randomize when the trigger trips within the specified window.",
-                                    "type": "boolean",
-                                    "default": false,
-                                    "required": true
-                                },
                                 "timeout": {
                                     "title": "Timeout Window",
                                     "description": "Trigger timeout window",
                                     "type": "object",
                                     "required": true,
                                     "properties": {
-                                        "min": {
-                                            "title": "Minumum Trip Interval",
-                                            "description": "Start of the trip interval window, in milliseconds.",
+                                        "nominal": {
+                                            "title": "Trip Interval",
+                                            "description": "Nominal trip interval, in milliseconds.",
                                             "type": "number",
                                             "default": 60000,
                                             "minimum": 1
                                         },
-                                        "max": {
-                                            "title": "Maximum Trip Interval",
-                                            "description": "End of the trip interval window, in milliseconds.",
+                                        "tolerance": {
+                                            "title": "Trip Interval Tolerance",
+                                            "description": "Tolerance, in milliseconds, for the trip interval.</br><small>Used to randomize the trip event around the specified interval.</small>",
                                             "type": "number",
-                                            "default": 60000,
-                                            "minimum":  1,
-                                            "condition": {
-                                                "functionBody": "return (model.settings.triggers[arrayIndices] && (model.settings.triggers[arrayIndices].trigger_random));"
-                                            }
+                                            "default": 0,
+                                            "minimum":  0
                                         }
                                     },
                                     "condition": {
@@ -92,16 +82,17 @@
                                     ],
                                     "condition": {
                                         "functionBody": "return (model.settings.triggers[arrayIndices] && (model.settings.triggers[arrayIndices].trigger_type === 1));"
-                                    }
+                                    },
+                                    "required": true
                                 },
                                 "time" : {
                                     "title": "Time settings",
                                     "description": "Time settings for daily triggers.",
                                     "type": "object",
                                     "properties": {
-                                        "min": {
-                                            "title": "Minimum Time",
-                                            "description": "Start of the trip window",
+                                        "nominal": {
+                                            "title": "Trip Time",
+                                            "description": "Nominal time of day to trip the trigger",
                                             "type": "object",
                                             "properties": {
                                                 "hour": {
@@ -122,9 +113,9 @@
                                                 }
                                             }
                                         },
-                                        "max": {
-                                            "title": "Maximum Time",
-                                            "description": "End of the trip window",
+                                        "tolerance": {
+                                            "title": "Trip Tolerance",
+                                            "description": "Tolerance around the trip time.</br><small>Used to randomize the trip event around the specified trip time.</small>",
                                             "type": "object",
                                             "properties": {
                                                 "hour": {
@@ -143,9 +134,6 @@
                                                     "maximum": 59,
                                                     "default": 0
                                                 }
-                                            },
-                                            "condition": {
-                                                "functionBody": "return (model.settings.triggers[arrayIndices] && (model.settings.triggers[arrayIndices].trigger_random));"
                                             }
                                         }
                                     },
@@ -159,22 +147,19 @@
                                     "type": "object",
                                     "required": true,
                                     "properties": {
-                                        "min": {
-                                            "title": "Minumum Trip Duration",
-                                            "description": "Start of the trip duration window, in milliseconds.",
+                                        "nominal": {
+                                            "title": "Trip Duration",
+                                            "description": "Nominal trip duration, in milliseconds.",
                                             "type": "number",
                                             "default": 250,
                                             "minimum": 10
                                         },
-                                        "max": {
-                                            "title": "Maximum Trip Duration",
-                                            "description": "End of the trip duration window, in milliseconds.",
+                                        "tolerance": {
+                                            "title": "Trip Duration Tolerance",
+                                            "description": "Tolerance, in milliseconds, for the trip duration.</br><small>Used to randomize the trip event around the specified interval.</small>",
                                             "type": "number",
-                                            "default": 250,
-                                            "minimum": 10,
-                                            "condition": {
-                                                "functionBody": "return (model.settings.triggers[arrayIndices] && (model.settings.triggers[arrayIndices].trigger_random));"
-                                            }
+                                            "default": 0,
+                                            "minimum": 0
                                         }
                                     }
                                 }

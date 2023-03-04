@@ -72,10 +72,11 @@
                                     "oneOf": [
                                         { "title": "Sunday", "enum": [1] },
                                         { "title": "Monday", "enum": [2] },
-                                        { "title": "Tuesday", "enum": [2] },
-                                        { "title": "Wednesday", "enum": [2] },
-                                        { "title": "Thursday", "enum": [2] },
-                                        { "title": "Friday", "enum": [2] },
+                                        { "title": "Tuesday", "enum": [4] },
+                                        { "title": "Wednesday", "enum": [8] },
+                                        { "title": "Thursday", "enum": [16] },
+                                        { "title": "Friday", "enum": [32] },
+                                        { "title": "Saturday", "enum": [64] },
                                         { "title": "Weekdays", "enum": [62] },
                                         { "title": "Weekends", "enum": [65] },
                                         { "title": "Every day", "enum": [127] }

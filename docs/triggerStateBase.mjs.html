@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>triggerStateBase.mjs - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <input type="text" id="nav-search" placeholder="Search" />
+    
+    
+    <h2><a href="index.html">Home</a></h2><h2><a href="https://github.com/pricemi115/homebridge-grumptech-timetriggers" target="_blank" >GrumpTech</a></h2><h3>Modules</h3><ul><li><a href="module-HomebridgeAPIModule.html">HomebridgeAPIModule</a></li><li><a href="module-TimeTriggerModule.html">TimeTriggerModule</a></li><li></li><li><a href="module-TriggerStateArmedModule.html">TriggerStateArmedModule</a></li><li><a href="module-TriggerStateBaseModule.html">TriggerStateBaseModule</a></li><li><a href="module-TriggerStateIdleModule.html">TriggerStateIdleModule</a></li><li><a href="module-TriggerStateTrippedModule.html">TriggerStateTrippedModule</a></li><li><a href="module-TriggerTypes.html">TriggerTypes</a><ul class='members'><li data-type='member' style='display: none;'><a href="module-TriggerTypes.html#.TRIGGER_DAYS">TRIGGER_DAYS</a></li><li data-type='member' style='display: none;'><a href="module-TriggerTypes.html#.TRIGGER_TYPES">TRIGGER_TYPES</a></li></ul></li></ul><h3>Classes</h3><ul><li><a href="module-HomebridgeAPIModule-TimeTriggerPlatform.html">TimeTriggerPlatform</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-HomebridgeAPIModule-TimeTriggerPlatform.html#configureAccessory">configureAccessory</a></li></ul></li><li><a href="module-TimeTriggerModule.ScheduledTrigger.html">ScheduledTrigger</a></li><li><a href="module-TimeTriggerModule.TimeTrigger.html">TimeTrigger</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#EnterArmed">EnterArmed</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#EnterIdle">EnterIdle</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#EnterTripped">EnterTripped</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#Start">Start</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#Stop">Stop</a></li></ul></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-license.html">license</a></li><li><a href="tutorial-security.html">security</a></li></ul>
+    
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">triggerStateBase.mjs</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * @description Base class for managing trigger states.
+ * @copyright 2023-2023
+ * @author Mike Price &lt;dev.grumptech@gmail.com>
+ * @module TriggerStateBaseModule
+ * @requires debug
+ * @see {@link https://github.com/debug-js/debug#readme}
+ * @requires is-it-check
+ * @see {@link https://github.com/evdama/is-it-check}
+ */
+
+import _debugModule from 'debug';
+import _is from 'is-it-check';
+
+import {TRIGGER_STATES} from './triggerTypes.mjs';
+import {TimeTrigger} from './timeTrigger.mjs';
+
+/**
+ * @description Debugging function pointer for runtime related diagnostics.
+ * @private
+ */
+// eslint-disable-next-line camelcase
+const _debug = _debugModule('time_trigger_state');
+
+/**
+ * @description Enumeration of the trigger actoions
+ * @private
+ * @readonly
+ * @enum {string}
+ * @property {string} Next- Perform next action
+ * @property {string} Abort - Perform abort action
+ */
+export const TRIGGER_ACTIONS = {
+    /* eslint-disable key-spacing */
+    Next  : 'next',
+    Abort : 'abort',
+    /* eslint-enable key-spacing */
+};
+
+/**
+ * @description Base class for managing trigger states.
+ */
+export class TriggerStateBase {
+    /**
+     * @description Constructor
+     * @param {object} config - Configuration data
+     * @param {TimeTrigger} config.owner - Owning Trigger
+     * @throws {TypeError} - Thrown if 'config' is invalid.
+     * @throws {Error} - Thrown if instantiating the base class.
+     * @class
+     * @private
+     */
+    constructor(config) {
+        // Validate arguments
+        if (_is.undefined(config) ||
+            _is.not.object(config) ||
+            _is.undefined(config.owner) ||
+            !(config.owner instanceof TimeTrigger)) {
+            throw new TypeError(`Invalid configuration.`);
+        }
+
+        // Ensure we are not attempting to instanciate the base class.
+        if (this.constructor === TriggerStateBase) {
+            // Prevent creation of the base object.
+            throw new Error(`Instantiating base class.`);
+        }
+
+        this._owner = config.owner;
+    }
+
+    // eslint-disable-next-line jsdoc/require-returns-check
+    /**
+     * @description Read-only property for the name of the state.
+     * @returns {string} - name
+     * @throws {Error} - Thrown when calling the base class
+     * @private
+     */
+    get Name() {
+        throw new Error(`Abstract Property: Name`);
+    }
+
+    // eslint-disable-next-line jsdoc/require-returns-check
+    /**
+     * @description Read-only property for the name of the state.
+     * @returns {TRIGGER_STATES} - state identifier
+     * @throws {Error} - Thrown when calling the base class
+     * @private
+     */
+    get State() {
+        throw new Error(`Abstract Property: State`);
+    }
+
+    /**
+     * @description Evaluate the trigger action
+     * @param {TRIGGER_ACTIONS} action - Action to evaluate for the current state.
+     * @returns {boolean} - true if handled.
+     * @throws {TypeError} - Thrown if 'action' is invalid.
+     * @private
+     */
+    Evaluate(action) {
+        // Validate arguments.
+        if (_is.not.string(action) ||
+            _is.under(action.length, 1) ||
+            (Object.values(TRIGGER_ACTIONS).indexOf(action) &lt; 0)) {
+            throw new TypeError(`'action' is invalid. ${action}`);
+        }
+
+        let handled = false;
+        switch (action) {
+            case TRIGGER_ACTIONS.Next: {
+                handled = this._doNext();
+            }
+            // eslint-disable-next-line indent
+            break;
+
+            case TRIGGER_ACTIONS.Abort: {
+                handled = this._doAbort();
+            }
+            // eslint-disable-next-line indent
+            break;
+
+            default: {
+                handled = false;
+            }
+            // eslint-disable-next-line indent
+            break;
+        }
+        _debug(`State Eval: ${this.Name} evaluating action:${action} result:${handled}`);
+
+        return handled;
+    }
+
+    /**
+     * @description Perform actions when entering this state.
+     * @param {TriggerStateBase} oldState - State being transitioned from.
+     * @returns {void}
+     * @throws {TypeError} thrown if 'oldState' is not a TriggerStateBase object.
+     * @private
+     */
+    OnEntrance(oldState) {
+        if (!(oldState instanceof TriggerStateBase)) {
+            throw new TypeError(`${this.Name}::OnEntrance(). oldState is invalid.`);
+        }
+
+        _debug(`${this.Name}::OnEntrance() called. Transitioning from state ${oldState.Name}`);
+    }
+
+    /**
+     * @description Perform actions when exiting this state.
+     * @param {TriggerStateBase} newState - State being transitioned to.
+     * @returns {void}
+     * @throws {TypeError} thrown if 'oldState' is not a TriggerStateBase object.
+     * @private
+     */
+    OnExit(newState) {
+        if (!(newState instanceof TriggerStateBase)) {
+            throw new TypeError(`${this.Name}::OnEntrance(). newState is invalid.`);
+        }
+
+        _debug(`${this.Name}::OnExit() called. Transitioning to state ${newState.Name}`);
+    }
+
+    /**
+     * @description Perform actions for the transition to the next state.
+     * @returns {boolean} - true if handled
+     * @private
+     */
+    _doNext() {
+        _debug(`${this.Name}::_doNext() called.`);
+        return false;
+    }
+
+    /**
+     * @description Perform actions for the abort the current state.
+     * @returns {boolean} - true if handled
+     * @private
+     */
+    _doAbort() {
+        _debug(`${this.Name}::_doAbort() called.`);
+        return false;
+    }
+}
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.0</a> using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+<script src="scripts/search.js" defer></script>
+
+
+<script src="scripts/collapse.js" defer></script>
+
+
+</body>
+</html>

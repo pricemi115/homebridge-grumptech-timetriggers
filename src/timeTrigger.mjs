@@ -1,7 +1,7 @@
 /* eslint-disable new-cap */
 /**
  * @description Manages a time-based trigger event.
- * @copyright January 2023
+ * @copyright 2023-2023
  * @author Mike Price <dev.grumptech@gmail.com>
  * @module TimeTriggerModule
  * @requires debug
@@ -86,7 +86,6 @@ export class TimeTrigger extends EventEmitter {
      * @param {number} config.duration.tolerance - Tolerance, in milliseconds, for the tripped duration.
      * @throws {TypeError} - Thrown if 'config' is invalid.
      * @class
-     * @private
      */
     constructor(config) {
         // Validate arguments
@@ -297,6 +296,7 @@ export class TimeTrigger extends EventEmitter {
     /**
      * @description Generates new timeout values for the timer.
      * @returns {void}
+     * @private
      */
     _generateNewTimerValues() {
         this._timeout_ms = TimeTrigger._getNextValue(this._timeout);

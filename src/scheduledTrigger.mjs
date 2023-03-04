@@ -1,7 +1,7 @@
 /* eslint-disable new-cap */
 /**
  * @description Manages a scheduled trigger event.
- * @copyright January 2023
+ * @copyright 2023-2023
  * @author Mike Price <dev.grumptech@gmail.com>
  * @module TimeTriggerModule
  * @requires debug
@@ -82,21 +82,20 @@ export class ScheduledTrigger extends TimeTrigger {
      * @description Constructor
      * @param {object} config - Configuration data
      * @param {string=} config.identifier - Identifier
-     * @param {number} config.days - Bitmask of days of the week to schedule the trigger.
+     * @param {module:TriggerTypes.TRIGGER_DAYS} config.days - Bitmask of days of the week to schedule the trigger.
      * @param {object} config.time - Structure of time to trip the trigger
-     * @param {object} config.time.nominal - Earliest time to trip the trigger.
+     * @param {object} config.time.nominal - Nominal time to trip the trigger.
      * @param {number} config.time.nominal.hour - Hour (0-23)
      * @param {number} config.time.nominal.minute - Minute (0-59)
-     * @param {object} config.time.tolerance - Latest time to trip the trigger.
+     * @param {object} config.time.tolerance - Tolerance around the nominal time to trip the trigger.
      * @param {number} config.time.tolerance.hour - Hour (0-23)
-     * @param {number} config.time.max.minute - Minute (0-59)
+     * @param {number} config.time.tolerance.minute - Minute (0-59)
      * @param {object=} config.duration - Range of times for the tripped duration.
      * @param {number} config.duration.nominal - Minimum time, in milliseconds for the tripped duration.
      * @param {number} config.duration.tolerance - Maximum time, in milliseconds for the tripped duration.
      * @throws {TypeError} - Thrown if 'config' is invalid.
      * @throws {RangeError} - Thrown if 'config' is invalid.
      * @class
-     * @private
      */
     constructor(config) {
         // Validate arguments
@@ -148,6 +147,7 @@ export class ScheduledTrigger extends TimeTrigger {
     /**
      * @description Generates new timeout values for the timer.
      * @returns {void}
+     * @private
      */
     _generateNewTimerValues() {
         // Determine the current day so we can see when the next alarm is due.
@@ -243,6 +243,7 @@ export class ScheduledTrigger extends TimeTrigger {
      * @returns {number} - Number of days
      * @throws {TypeError} - Thrown if the types are not as expected.
      * @throws {RangeError} - Thrown if either the argument is not in the range [0..6]
+     * @private
      */
     _computeDeltaDays(dayReference, dayTarget) {
         if (_is.not.number(dayReference) ||
@@ -275,6 +276,7 @@ export class ScheduledTrigger extends TimeTrigger {
      * @param {number} time.tolerance.hour - Hour (0-23)
      * @param {number} time.tolerance.minute - Minute (0-59)
      * @returns {number} - total milliseconds, accounting for the tolerance, for the trigger.
+     * @private
      */
     _computeTriggerTimeDelta(time) {
         // Make Dates for the nominal trigger.
@@ -316,6 +318,7 @@ export class ScheduledTrigger extends TimeTrigger {
      * @returns {void}
      * @throws {TypeError} - Thrown if the types are not as expected.
      * @throws {RangeError} - Thrown if either the hour or minute are out of range.
+     * @private
      */
     static _checkTime(time) {
         if (_is.not.undefined(time)) {

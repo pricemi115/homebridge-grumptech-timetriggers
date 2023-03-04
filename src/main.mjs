@@ -1,8 +1,8 @@
 /**
  * @description Manages a time-based trigger event.
- * @copyright January 2023
+ * @copyright 2023-2023
  * @author Mike Price <dev.grumptech@gmail.com>
- * @module TimeTriggerModule
+ * @module HomebridgeAPIModule
  * @requires debug
  * @see {@link https://github.com/debug-js/debug#readme}
  * @requires events
@@ -120,7 +120,6 @@ const SERVICE_INFO = {
 
 /**
  * @description Homebridge platform for managing the Triggers
- * @private
  */
 class TimeTriggerPlatform {
     /**
@@ -484,7 +483,6 @@ class TimeTriggerPlatform {
      * @param {_PlatformAccessory} accessory - Accessory to be configured.
      * @returns {void}
      * @throws {TypeError} - thrown if 'accessory' is not a PlatformAccessory
-     * @private
      */
     configureAccessory(accessory) {
         // Validate the argument(s)
@@ -985,6 +983,7 @@ class TimeTriggerPlatform {
      * @returns {void}
      * @throws {TypeError} - thrown when the arguments are invalid
      * @throws {RangeError} - thrown when the uuid is not associated with a known trigger.
+     * @private
      */
     _handleTriggerStateChanged(e) {
         if (_is.not.object(e) ||
@@ -1023,6 +1022,7 @@ class TimeTriggerPlatform {
      * @returns {void}
      * @throws {TypeError} - thrown when the arguments are invalid
      * @throws {RangeError} - thrown when the uuid is not associated with a known trigger.
+     * @private
      */
     _handleTriggerStateNotify(e) {
         if (_is.not.object(e) ||

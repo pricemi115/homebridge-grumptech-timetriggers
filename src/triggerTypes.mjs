@@ -1,17 +1,16 @@
 /**
  * @description Common type definitions and enumerations for triggers.
- * @copyright January 2023
+ * @copyright 2023-2023
  * @author Mike Price <dev.grumptech@gmail.com>
  * @module TriggerTypes
  */
 
 /**
  * @description Enumeration of the trigger states
- * @private
  * @readonly
  * @enum {number}
- * @property {number} MultiTrip - Triggering multiple times per day
- * @property {number} Daily - Trips once per day
+ * @property {number} MultiTrip - Repeating trigger that trips multiple times per day
+ * @property {number} Daily - Trips once per day on the configured day(s) at the configured hour and minute
  */
 export const TRIGGER_TYPES = {
     /* eslint-disable key-spacing */
@@ -39,7 +38,6 @@ export const TRIGGER_STATES = {
 
 /**
  * @description Enumeration of the days of the week
- * @private
  * @readonly
  * @enum {number}
  * @property {number} Sunday - Sunday

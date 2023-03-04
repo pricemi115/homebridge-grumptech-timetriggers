@@ -1,6 +1,6 @@
 /**
  * @description Base class for managing trigger states.
- * @copyright January 2023
+ * @copyright 2023-2023
  * @author Mike Price <dev.grumptech@gmail.com>
  * @module TriggerStateBaseModule
  * @requires debug

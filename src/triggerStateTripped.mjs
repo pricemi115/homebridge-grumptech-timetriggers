@@ -1,9 +1,9 @@
 /* eslint-disable new-cap */
 /**
  * @description Class for managing tripped trigger states.
- * @copyright January 2023
+ * @copyright 2023-2023
  * @author Mike Price <dev.grumptech@gmail.com>
- * @module TriggerStateArmedodule
+ * @module TriggerStateTrippedModule
  * @requires debug
  * @see {@link https://github.com/debug-js/debug#readme}
  * @requires is-it-check

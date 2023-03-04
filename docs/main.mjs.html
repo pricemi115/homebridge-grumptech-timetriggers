@@ -1,7 +1,56 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>main.mjs - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <input type="text" id="nav-search" placeholder="Search" />
+    
+    
+    <h2><a href="index.html">Home</a></h2><h2><a href="https://github.com/pricemi115/homebridge-grumptech-timetriggers" target="_blank" >GrumpTech</a></h2><h3>Modules</h3><ul><li><a href="module-HomebridgeAPIModule.html">HomebridgeAPIModule</a></li><li><a href="module-TimeTriggerModule.html">TimeTriggerModule</a></li><li></li><li><a href="module-TriggerStateArmedModule.html">TriggerStateArmedModule</a></li><li><a href="module-TriggerStateBaseModule.html">TriggerStateBaseModule</a></li><li><a href="module-TriggerStateIdleModule.html">TriggerStateIdleModule</a></li><li><a href="module-TriggerStateTrippedModule.html">TriggerStateTrippedModule</a></li><li><a href="module-TriggerTypes.html">TriggerTypes</a><ul class='members'><li data-type='member' style='display: none;'><a href="module-TriggerTypes.html#.TRIGGER_DAYS">TRIGGER_DAYS</a></li><li data-type='member' style='display: none;'><a href="module-TriggerTypes.html#.TRIGGER_TYPES">TRIGGER_TYPES</a></li></ul></li></ul><h3>Classes</h3><ul><li><a href="module-HomebridgeAPIModule-TimeTriggerPlatform.html">TimeTriggerPlatform</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-HomebridgeAPIModule-TimeTriggerPlatform.html#configureAccessory">configureAccessory</a></li></ul></li><li><a href="module-TimeTriggerModule.ScheduledTrigger.html">ScheduledTrigger</a></li><li><a href="module-TimeTriggerModule.TimeTrigger.html">TimeTrigger</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#EnterArmed">EnterArmed</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#EnterIdle">EnterIdle</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#EnterTripped">EnterTripped</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#Start">Start</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#Stop">Stop</a></li></ul></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-license.html">license</a></li><li><a href="tutorial-security.html">security</a></li></ul>
+    
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">main.mjs</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
  * @description Manages a time-based trigger event.
  * @copyright 2023-2023
- * @author Mike Price <dev.grumptech@gmail.com>
+ * @author Mike Price &lt;dev.grumptech@gmail.com>
  * @module HomebridgeAPIModule
  * @requires debug
  * @see {@link https://github.com/debug-js/debug#readme}
@@ -152,13 +201,13 @@ class TimeTriggerPlatform {
         this._triggers = new Map();
 
         // Create triggers based upon the configuration.
-        if (_is.not.undefined(config) &&
-            _is.not.undefined(config.settings) && _is.not.undefined(config.settings.triggers) &&
+        if (_is.not.undefined(config) &amp;&amp;
+            _is.not.undefined(config.settings) &amp;&amp; _is.not.undefined(config.settings.triggers) &amp;&amp;
             _is.array(config.settings.triggers)) {
             config.settings.triggers.forEach((triggerSettings, index) => {
                 // Get the identifier.
                 let identifier = null;
-                if (_is.not.undefined(triggerSettings.trigger_identifier) && _is.string(triggerSettings.trigger_identifier)) {
+                if (_is.not.undefined(triggerSettings.trigger_identifier) &amp;&amp; _is.string(triggerSettings.trigger_identifier)) {
                     identifier = triggerSettings.trigger_identifier;
                 }
                 else {
@@ -168,7 +217,7 @@ class TimeTriggerPlatform {
                 // Determine if this trigger identifier is already in use.
                 let identifierUsed = false;
                 this._triggers.forEach((item, index) => {
-                    if (_is.existy(item.trigger) &&
+                    if (_is.existy(item.trigger) &amp;&amp;
                         _is.equal(item.trigger.Signature, identifier)) {
                         identifierUsed = true;
                     }
@@ -178,7 +227,7 @@ class TimeTriggerPlatform {
                 if (!identifierUsed) {
                     // Get the trigger type.
                     let triggerType = -1;
-                    if (_is.not.undefined(triggerSettings.trigger_type) && _is.number(triggerSettings.trigger_type) &&
+                    if (_is.not.undefined(triggerSettings.trigger_type) &amp;&amp; _is.number(triggerSettings.trigger_type) &amp;&amp;
                         (Object.values(TRIGGER_TYPES).indexOf(triggerSettings.trigger_type) >= 0)) {
                         triggerType = triggerSettings.trigger_type;
                     }
@@ -191,10 +240,10 @@ class TimeTriggerPlatform {
 
                     // Common trigger configuration data.
                     triggerConfig.duration = {};
-                    if (_is.not.undefined(triggerSettings.duration) && _is.object(triggerSettings.duration)) {
+                    if (_is.not.undefined(triggerSettings.duration) &amp;&amp; _is.object(triggerSettings.duration)) {
                         // Duration - Nominal
-                        if (_is.not.undefined(triggerSettings.duration.nominal) && _is.number(triggerSettings.duration.nominal) &&
-                            _is.positive(triggerSettings.duration.nominal) &&_is.above(triggerSettings.duration.nominal, 249)) {
+                        if (_is.not.undefined(triggerSettings.duration.nominal) &amp;&amp; _is.number(triggerSettings.duration.nominal) &amp;&amp;
+                            _is.positive(triggerSettings.duration.nominal) &amp;&amp;_is.above(triggerSettings.duration.nominal, 249)) {
                             // Set the nominal
                             triggerConfig.duration.nominal = triggerSettings.duration.nominal;
                         }
@@ -202,7 +251,7 @@ class TimeTriggerPlatform {
                             throw new TypeError(`Configuration is invalid. Duration - nominal.`);
                         }
                         // Duration - Tolerance
-                        if (_is.not.undefined(triggerSettings.duration.tolerance) && _is.number(triggerSettings.duration.tolerance) &&
+                        if (_is.not.undefined(triggerSettings.duration.tolerance) &amp;&amp; _is.number(triggerSettings.duration.tolerance) &amp;&amp;
                             _is.not.negative(triggerSettings.duration.tolerance)) {
                             // Set the maximum
                             triggerConfig.duration.tolerance = triggerSettings.duration.tolerance;
@@ -219,9 +268,9 @@ class TimeTriggerPlatform {
                         case TRIGGER_TYPES.MultiTrip: {
                             // Extract the appropriate configuration.
                             triggerConfig.timeout = {};
-                            if (_is.not.undefined(triggerSettings.timeout) && _is.object(triggerSettings.timeout)) {
+                            if (_is.not.undefined(triggerSettings.timeout) &amp;&amp; _is.object(triggerSettings.timeout)) {
                                 // Timeout - Nominal
-                                if (_is.not.undefined(triggerSettings.timeout.nominal) && _is.number(triggerSettings.timeout.nominal) &&
+                                if (_is.not.undefined(triggerSettings.timeout.nominal) &amp;&amp; _is.number(triggerSettings.timeout.nominal) &amp;&amp;
                                     _is.positive(triggerSettings.timeout.nominal)) {
                                     // Set the nominal
                                     triggerConfig.timeout.nominal = triggerSettings.timeout.nominal;
@@ -230,7 +279,7 @@ class TimeTriggerPlatform {
                                     throw new TypeError(`Configuration is invalid. Timeout - nominal.`);
                                 }
                                 // Timeout - Tolerance
-                                if (_is.not.undefined(triggerSettings.timeout.tolerance) && _is.number(triggerSettings.timeout.tolerance) &&
+                                if (_is.not.undefined(triggerSettings.timeout.tolerance) &amp;&amp; _is.number(triggerSettings.timeout.tolerance) &amp;&amp;
                                     _is.not.negative(triggerSettings.timeout.tolerance)) {
                                     // Set the tolerance
                                     triggerConfig.timeout.tolerance = triggerSettings.timeout.tolerance;
@@ -249,7 +298,7 @@ class TimeTriggerPlatform {
                         case TRIGGER_TYPES.Daily: {
                             // Extract the appropriate configuration.
                             // Days that the trigger should trip.
-                            if (_is.not.undefined(triggerSettings.days) && _is.number(triggerSettings.days) &&
+                            if (_is.not.undefined(triggerSettings.days) &amp;&amp; _is.number(triggerSettings.days) &amp;&amp;
                                 (Object.values(TRIGGER_DAYS).indexOf(triggerSettings.days) >= 0)) {
                                 triggerConfig.days = triggerSettings.days;
                             }
@@ -258,13 +307,13 @@ class TimeTriggerPlatform {
                             }
                             // Trigger time window
                             triggerConfig.time = {};
-                            if (_is.not.undefined(triggerSettings.time) && _is.object(triggerSettings.time)) {
+                            if (_is.not.undefined(triggerSettings.time) &amp;&amp; _is.object(triggerSettings.time)) {
                                 triggerConfig.time.nominal = {};
                                 triggerConfig.time.tolerance = {};
                                 // Time Window - Nominal
-                                if (_is.not.undefined(triggerSettings.time.nominal) && _is.object(triggerSettings.time.nominal)) {
+                                if (_is.not.undefined(triggerSettings.time.nominal) &amp;&amp; _is.object(triggerSettings.time.nominal)) {
                                     // Hour
-                                    if (_is.not.undefined(triggerSettings.time.nominal.hour) && _is.number(triggerSettings.time.nominal.hour) &&
+                                    if (_is.not.undefined(triggerSettings.time.nominal.hour) &amp;&amp; _is.number(triggerSettings.time.nominal.hour) &amp;&amp;
                                         _is.within(triggerSettings.time.nominal.hour, -1, 24)) {
                                         // Set the nominal
                                         triggerConfig.time.nominal.hour = triggerSettings.time.nominal.hour;
@@ -273,7 +322,7 @@ class TimeTriggerPlatform {
                                         throw new TypeError(`Configuration is invalid. Time Window(nominal)-hour.`);
                                     }
                                     // Minute
-                                    if (_is.not.undefined(triggerSettings.time.nominal.minute) && _is.number(triggerSettings.time.nominal.minute) &&
+                                    if (_is.not.undefined(triggerSettings.time.nominal.minute) &amp;&amp; _is.number(triggerSettings.time.nominal.minute) &amp;&amp;
                                         _is.within(triggerSettings.time.nominal.minute, -1, 60)) {
                                         // Set the nominal
                                         triggerConfig.time.nominal.minute = triggerSettings.time.nominal.minute;
@@ -286,9 +335,9 @@ class TimeTriggerPlatform {
                                     throw new TypeError(`Configuration is invalid. Time Window - nominal.`);
                                 }
                                 // Time Window - Tolerance
-                                if (_is.not.undefined(triggerSettings.time.tolerance) && _is.object(triggerSettings.time.tolerance)) {
+                                if (_is.not.undefined(triggerSettings.time.tolerance) &amp;&amp; _is.object(triggerSettings.time.tolerance)) {
                                     // Hour
-                                    if (_is.not.undefined(triggerSettings.time.tolerance.hour) && _is.number(triggerSettings.time.tolerance.hour) &&
+                                    if (_is.not.undefined(triggerSettings.time.tolerance.hour) &amp;&amp; _is.number(triggerSettings.time.tolerance.hour) &amp;&amp;
                                         _is.within(triggerSettings.time.tolerance.hour, -1, 24)) {
                                         // Update the tolerance
                                         triggerConfig.time.tolerance.hour = triggerSettings.time.tolerance.hour;
@@ -297,7 +346,7 @@ class TimeTriggerPlatform {
                                         throw new TypeError(`Configuration is invalid. Time Window(tolerance)-hour.`);
                                     }
                                     // Minute
-                                    if (_is.not.undefined(triggerSettings.time.tolerance.minute) && _is.number(triggerSettings.time.tolerance.minute) &&
+                                    if (_is.not.undefined(triggerSettings.time.tolerance.minute) &amp;&amp; _is.number(triggerSettings.time.tolerance.minute) &amp;&amp;
                                         _is.within(triggerSettings.time.tolerance.minute, -1, 60)) {
                                         // Update the tolerance
                                         triggerConfig.time.tolerance.minute = triggerSettings.time.tolerance.minute;
@@ -384,8 +433,8 @@ class TimeTriggerPlatform {
             this._log.debug(err);
             // Iterate over all of the triggers and unsubscribe from the events.
             this._triggers.forEach((value, key)=>{
-                if (_is.object(value) &&
-                    (_is.not.undefined(value.trigger) && (value.trigger instanceof TimeTrigger))) {
+                if (_is.object(value) &amp;&amp;
+                    (_is.not.undefined(value.trigger) &amp;&amp; (value.trigger instanceof TimeTrigger))) {
                     this._log.debug(`Unsubscribing trigger: '${value.trigger.Identifier}'`);
                     value.trigger.off(TRIGGER_EVENTS.EVENT_STATE_CHANGED, this._CB_TriggerStateChanged);
                     value.trigger.off(TRIGGER_EVENTS.EVENT_STATE_NOTIFY, this._CB_TriggerStateNotify);
@@ -410,7 +459,7 @@ class TimeTriggerPlatform {
         const accessoriesToRemove = [];
         for (const item of this._triggers.values()) {
             let removed = false;
-            if (_is.not.undefined(item.accessory) &&
+            if (_is.not.undefined(item.accessory) &amp;&amp;
                 (item.accessory instanceof _PlatformAccessory)) {
                 const accessory = item.accessory;
                 // Accessory is from a prior version and needs to be replaced.
@@ -426,9 +475,9 @@ class TimeTriggerPlatform {
                     this._log.debug(`Checking to see if accessory '${accessory.displayName}' is an orphan.`);
                     let isOrphan = true;
                     for (const item of this._triggers.values()) {
-                        if (Object.prototype.hasOwnProperty.call(accessory.context, 'ID') &&
-                            _is.existy(item.trigger) &&
-                            (item.trigger instanceof TimeTrigger) &&
+                        if (Object.prototype.hasOwnProperty.call(accessory.context, 'ID') &amp;&amp;
+                            _is.existy(item.trigger) &amp;&amp;
+                            (item.trigger instanceof TimeTrigger) &amp;&amp;
                             (_is.equal(item.trigger.Signature, accessory.context.ID))) {
                             // Accessory is not an orphan.
                             isOrphan = false;
@@ -451,7 +500,7 @@ class TimeTriggerPlatform {
         // Manage the accessories and triggers.
         for (const item of this._triggers.values()) {
             let accessory = item.accessory;
-            if (_is.existy(item.trigger) &&
+            if (_is.existy(item.trigger) &amp;&amp;
                 (item.trigger instanceof TimeTrigger)) {
                 // Is this trigger new?
                 if (_is.not.existy(accessory)) {
@@ -494,7 +543,7 @@ class TimeTriggerPlatform {
         // Is this accessory already registered?
         let found = false;
         for (const item of this._triggers.values()) {
-            if (_is.not.undefined(item.accessory) &&
+            if (_is.not.undefined(item.accessory) &amp;&amp;
                 (item.accessory instanceof _PlatformAccessory)) {
                 if (item.accessory === accessory) {
                     found = true;
@@ -542,13 +591,13 @@ class TimeTriggerPlatform {
         // Does this accessory have a Switch service?
         let switchState = true;
         const serviceSwitch = accessory.getService(_hap.Service.Switch);
-        if (_is.existy(serviceSwitch) &&
+        if (_is.existy(serviceSwitch) &amp;&amp;
             (serviceSwitch instanceof _hap.Service.Switch)) {
             // Set the switch to the stored setting (the default is on).
             const theSettings = accessory.context.SETTINGS;
-            if ((theSettings !== undefined) &&
-                _is.object(theSettings) &&
-                (Object.prototype.hasOwnProperty.call(theSettings, 'SwitchState') &&
+            if ((theSettings !== undefined) &amp;&amp;
+                _is.object(theSettings) &amp;&amp;
+                (Object.prototype.hasOwnProperty.call(theSettings, 'SwitchState') &amp;&amp;
                 _is.boolean(theSettings.SwitchState))) {
                 // Modify the settings
                 switchState = theSettings.SwitchState;
@@ -583,8 +632,8 @@ class TimeTriggerPlatform {
             // Find the unused trigger with the matching id.
             let found = false;
             this._triggers.forEach((item, index) => {
-                if (_is.existy(item.trigger) && (item.trigger instanceof TimeTrigger) &&
-                    _is.equal(item.trigger.Signature, id) &&
+                if (_is.existy(item.trigger) &amp;&amp; (item.trigger instanceof TimeTrigger) &amp;&amp;
+                    _is.equal(item.trigger.Signature, id) &amp;&amp;
                     _is.not.existy(item.accessory)) {
                     // Match found.
                     found = true;
@@ -619,7 +668,7 @@ class TimeTriggerPlatform {
         if (_is.not.string(id)) {
             throw new TypeError(`id must be a string`);
         }
-        if (id.length <= 0) {
+        if (id.length &lt;= 0) {
             throw new RangeError(`id must be a non-zero length string.`);
         }
 
@@ -687,7 +736,7 @@ class TimeTriggerPlatform {
         }
         let found = false;
         this._triggers.forEach((item, index) => {
-            if (!found && (item.accessory === accessory)) {
+            if (!found &amp;&amp; (item.accessory === accessory)) {
                 found = true;
             }
         });
@@ -721,7 +770,7 @@ class TimeTriggerPlatform {
         /* remove the accessory from our mapping */
         found = false;
         this._triggers.forEach((item, index) => {
-            if (!found && (item.accessory === accessory)) {
+            if (!found &amp;&amp; (item.accessory === accessory)) {
                 item.accessory = null;
                 found = true;
             }
@@ -789,20 +838,20 @@ class TimeTriggerPlatform {
         }
         if (_is.not.existy(serviceInfo) ||
             _is.not.object(serviceInfo) ||
-            (!Object.prototype.hasOwnProperty.call(serviceInfo, 'uuid') || _is.not.string(serviceInfo.uuid) || (serviceInfo.uuid.length <= 0)) ||
-            (!Object.prototype.hasOwnProperty.call(serviceInfo, 'name') || _is.not.string(serviceInfo.name) || (serviceInfo.name.length <= 0)) ||
-            (!Object.prototype.hasOwnProperty.call(serviceInfo, 'udst') || _is.not.string(serviceInfo.udst) || (serviceInfo.udst.length <= 0))   ) {
+            (!Object.prototype.hasOwnProperty.call(serviceInfo, 'uuid') || _is.not.string(serviceInfo.uuid) || (serviceInfo.uuid.length &lt;= 0)) ||
+            (!Object.prototype.hasOwnProperty.call(serviceInfo, 'name') || _is.not.string(serviceInfo.name) || (serviceInfo.name.length &lt;= 0)) ||
+            (!Object.prototype.hasOwnProperty.call(serviceInfo, 'udst') || _is.not.string(serviceInfo.udst) || (serviceInfo.udst.length &lt;= 0))   ) {
             throw new TypeError(`serviceName does not conform to a SERVICE_INFO item.`);
         }
         if (_is.not.existy(values) || _is.not.object(values) ||
-            (!Object.prototype.hasOwnProperty.call(values, 'active')) || (_is.not.boolean(values.active) && !(values.active instanceof Error)) ||
-            (!Object.prototype.hasOwnProperty.call(values, 'motion')) || (_is.not.boolean(values.motion) && !(values.motion instanceof Error))   ) {
+            (!Object.prototype.hasOwnProperty.call(values, 'active')) || (_is.not.boolean(values.active) &amp;&amp; !(values.active instanceof Error)) ||
+            (!Object.prototype.hasOwnProperty.call(values, 'motion')) || (_is.not.boolean(values.motion) &amp;&amp; !(values.motion instanceof Error))   ) {
             throw new TypeError(`values must be an object with properties named 'active' (boolean or Error) and 'motion' (boolean or Error)`);
         }
 
         // Attempt to get the named service and validate that it is a Carbon Dioxie Sensor
         const serviceMotion = accessory.getServiceById(serviceInfo.uuid, serviceInfo.udst);
-        if (_is.existy(serviceMotion) &&
+        if (_is.existy(serviceMotion) &amp;&amp;
             (serviceMotion instanceof _hap.Service.MotionSensor)) {
             try {
                 // Set the characteristics.
@@ -834,14 +883,14 @@ class TimeTriggerPlatform {
     _handleOnGet(id, callback) {
         // Validate arguments
         if ((id === undefined) ||
-            (typeof(id) !== 'string') || (id.length <= 0)) {
+            (typeof(id) !== 'string') || (id.length &lt;= 0)) {
             throw new TypeError(`id must be a non-zero length string.`);
         }
 
         let status = null;
         let result = new Error(`id:${id} has no matching accessory`);
         this._triggers.forEach((item, index) => {
-            if (_is.existy(item.accessory) &&
+            if (_is.existy(item.accessory) &amp;&amp;
                 _is.equal(item.accessory.context.ID, id)) {
                 // Get the accessory for this id.
                 const accessory = item.accessory;
@@ -877,14 +926,14 @@ class TimeTriggerPlatform {
     _handleOnSet(id, value, callback) {
         // Validate arguments
         if ((id === undefined) ||
-            (typeof(id) !== 'string') || (id.length <= 0)) {
+            (typeof(id) !== 'string') || (id.length &lt;= 0)) {
             throw new TypeError(`id must be a non-zero length string.`);
         }
 
         this._log.debug(`Attempting to set trigger ${id} to ${value}`);
         let status = null;
         this._triggers.forEach((item, index) => {
-            if (_is.existy(item.accessory) &&
+            if (_is.existy(item.accessory) &amp;&amp;
                 _is.equal(item.accessory.context.ID, id)) {
                 const accessory = item.accessory;
 
@@ -895,9 +944,9 @@ class TimeTriggerPlatform {
                 // switch state as it was last set. But only do this for Triggers.
                 if (isValidTrigger) {
                     const theSettings = accessory.context.SETTINGS;
-                    if (_is.existy(theSettings) &&
-                        _is.object(theSettings) &&
-                        (Object.prototype.hasOwnProperty.call(theSettings, 'SwitchState')) &&
+                    if (_is.existy(theSettings) &amp;&amp;
+                        _is.object(theSettings) &amp;&amp;
+                        (Object.prototype.hasOwnProperty.call(theSettings, 'SwitchState')) &amp;&amp;
                         _is.boolean(theSettings.SwitchState)) {
                         // Modify the settings
                         theSettings.SwitchState = value;
@@ -1002,7 +1051,7 @@ class TimeTriggerPlatform {
 
         // Get the accessory.
         const match = this._triggers.get(e.uuid);
-        if (_is.existy(match) &&
+        if (_is.existy(match) &amp;&amp;
             _is.existy(match.accessory)) {
             // Update the characteristics
             try {
@@ -1040,7 +1089,7 @@ class TimeTriggerPlatform {
 
         // Get the accessory.
         const match = this._triggers.get(e.uuid);
-        if (_is.existy(match) &&
+        if (_is.existy(match) &amp;&amp;
             _is.existy(match.accessory)) {
             // Update the characteristics
             try {
@@ -1080,3 +1129,32 @@ export default (homebridgeAPI) => {
     _debug(`Registering platform: ${_PackageInfo.CONFIG_INFO.platform}`);
     homebridgeAPI.registerPlatform(_PackageInfo.CONFIG_INFO.platform, TimeTriggerPlatform);
 };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.0</a> using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+<script src="scripts/search.js" defer></script>
+
+
+<script src="scripts/collapse.js" defer></script>
+
+
+</body>
+</html>

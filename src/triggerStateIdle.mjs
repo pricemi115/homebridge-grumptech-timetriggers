@@ -1,7 +1,7 @@
 /* eslint-disable new-cap */
 /**
  * @description Class for managing idle trigger states.
- * @copyright January 2023
+ * @copyright 2023-2023
  * @author Mike Price <dev.grumptech@gmail.com>
  * @module TriggerStateIdleModule
  * @requires debug

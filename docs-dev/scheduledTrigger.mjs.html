@@ -1,8 +1,57 @@
-/* eslint-disable new-cap */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>scheduledTrigger.mjs - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <input type="text" id="nav-search" placeholder="Search" />
+    
+    
+    <h2><a href="index.html">Home</a></h2><h2><a href="https://github.com/pricemi115/homebridge-grumptech-timetriggers" target="_blank" >GrumpTech</a></h2><h3>Modules</h3><ul><li><a href="module-HomebridgeAPIModule.html">HomebridgeAPIModule</a></li><li><a href="module-TimeTriggerModule.html">TimeTriggerModule</a></li><li></li><li><a href="module-TriggerStateArmedModule.html">TriggerStateArmedModule</a></li><li><a href="module-TriggerStateBaseModule.html">TriggerStateBaseModule</a><ul class='members'><li data-type='member' style='display: none;'><a href="module-TriggerStateBaseModule.html#.TRIGGER_ACTIONS">TRIGGER_ACTIONS</a></li><li data-type='member' style='display: none;'><a href="module-TriggerStateBaseModule.html#~_debug">_debug</a></li></ul></li><li><a href="module-TriggerStateIdleModule.html">TriggerStateIdleModule</a></li><li><a href="module-TriggerStateTrippedModule.html">TriggerStateTrippedModule</a></li><li><a href="module-TriggerTypes.html">TriggerTypes</a><ul class='members'><li data-type='member' style='display: none;'><a href="module-TriggerTypes.html#.TRIGGER_DAYS">TRIGGER_DAYS</a></li><li data-type='member' style='display: none;'><a href="module-TriggerTypes.html#.TRIGGER_EVENTS">TRIGGER_EVENTS</a></li><li data-type='member' style='display: none;'><a href="module-TriggerTypes.html#.TRIGGER_STATES">TRIGGER_STATES</a></li><li data-type='member' style='display: none;'><a href="module-TriggerTypes.html#.TRIGGER_TYPES">TRIGGER_TYPES</a></li></ul></li></ul><h3>Events</h3><ul><li><a href="module-TimeTriggerModule.html#event:event:state_changed">state_changed</a></li><li></li><li><a href="module-TimeTriggerModule.html#event:event:state_notify">state_notify</a></li><li></li></ul><h3>Classes</h3><ul><li><a href="module-HomebridgeAPIModule-TimeTriggerPlatform.html">TimeTriggerPlatform</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-HomebridgeAPIModule-TimeTriggerPlatform.html#_addTriggerAccessory">_addTriggerAccessory</a></li><li data-type='method' style='display: none;'><a href="module-HomebridgeAPIModule-TimeTriggerPlatform.html#_configureAccessory">_configureAccessory</a></li><li data-type='method' style='display: none;'><a href="module-HomebridgeAPIModule-TimeTriggerPlatform.html#_destructor">_destructor</a></li><li data-type='method' style='display: none;'><a href="module-HomebridgeAPIModule-TimeTriggerPlatform.html#_doInitialization">_doInitialization</a></li><li data-type='method' style='display: none;'><a href="module-HomebridgeAPIModule-TimeTriggerPlatform.html#_getAccessorySwitchState">_getAccessorySwitchState</a></li><li data-type='method' style='display: none;'><a href="module-HomebridgeAPIModule-TimeTriggerPlatform.html#_handleOnGet">_handleOnGet</a></li><li data-type='method' style='display: none;'><a href="module-HomebridgeAPIModule-TimeTriggerPlatform.html#_handleOnSet">_handleOnSet</a></li><li data-type='method' style='display: none;'><a href="module-HomebridgeAPIModule-TimeTriggerPlatform.html#_handleTriggerStateChanged">_handleTriggerStateChanged</a></li><li data-type='method' style='display: none;'><a href="module-HomebridgeAPIModule-TimeTriggerPlatform.html#_handleTriggerStateNotify">_handleTriggerStateNotify</a></li><li data-type='method' style='display: none;'><a href="module-HomebridgeAPIModule-TimeTriggerPlatform.html#_removeAccessory">_removeAccessory</a></li><li data-type='method' style='display: none;'><a href="module-HomebridgeAPIModule-TimeTriggerPlatform.html#_updateAccessoryInfo">_updateAccessoryInfo</a></li><li data-type='method' style='display: none;'><a href="module-HomebridgeAPIModule-TimeTriggerPlatform.html#_updateMotionSensorService">_updateMotionSensorService</a></li><li data-type='method' style='display: none;'><a href="module-HomebridgeAPIModule-TimeTriggerPlatform.html#configureAccessory">configureAccessory</a></li></ul></li><li><a href="module-TimeTriggerModule.ScheduledTrigger.html">ScheduledTrigger</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.ScheduledTrigger.html#_computeDeltaDays">_computeDeltaDays</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.ScheduledTrigger.html#_computeTriggerTimeDelta">_computeTriggerTimeDelta</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.ScheduledTrigger.html#_generateNewTimerValues">_generateNewTimerValues</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.ScheduledTrigger.html#._checkTime">_checkTime</a></li></ul></li><li><a href="module-TimeTriggerModule.TimeTrigger.html">TimeTrigger</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#EnterArmed">EnterArmed</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#EnterIdle">EnterIdle</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#EnterTripped">EnterTripped</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#Start">Start</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#Stop">Stop</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#_doStart">_doStart</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#_doStateChange">_doStateChange</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#_doStop">_doStop</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#_generateNewTimerValues">_generateNewTimerValues</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#_on_timerTripped">_on_timerTripped</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#._checkRange">_checkRange</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#._getNextValue">_getNextValue</a></li></ul></li><li><a href="module-TriggerStateArmedModule.TriggerStateArmed.html">TriggerStateArmed</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-TriggerStateArmedModule.TriggerStateArmed.html#_doAbort">_doAbort</a></li><li data-type='method' style='display: none;'><a href="module-TriggerStateArmedModule.TriggerStateArmed.html#_doNext">_doNext</a></li></ul></li><li><a href="module-TriggerStateBaseModule.TriggerStateBase.html">TriggerStateBase</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-TriggerStateBaseModule.TriggerStateBase.html#Evaluate">Evaluate</a></li><li data-type='method' style='display: none;'><a href="module-TriggerStateBaseModule.TriggerStateBase.html#OnEntrance">OnEntrance</a></li><li data-type='method' style='display: none;'><a href="module-TriggerStateBaseModule.TriggerStateBase.html#OnExit">OnExit</a></li><li data-type='method' style='display: none;'><a href="module-TriggerStateBaseModule.TriggerStateBase.html#_doAbort">_doAbort</a></li><li data-type='method' style='display: none;'><a href="module-TriggerStateBaseModule.TriggerStateBase.html#_doNext">_doNext</a></li></ul></li><li><a href="module-TriggerStateIdleModule.TriggerStateIdle.html">TriggerStateIdle</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-TriggerStateIdleModule.TriggerStateIdle.html#_doAbort">_doAbort</a></li><li data-type='method' style='display: none;'><a href="module-TriggerStateIdleModule.TriggerStateIdle.html#_doNext">_doNext</a></li></ul></li><li><a href="module-TriggerStateTrippedModule.TriggerStateTripped.html">TriggerStateTripped</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-TriggerStateTrippedModule.TriggerStateTripped.html#_doAbort">_doAbort</a></li><li data-type='method' style='display: none;'><a href="module-TriggerStateTrippedModule.TriggerStateTripped.html#_doNext">_doNext</a></li></ul></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-license.html">license</a></li><li><a href="tutorial-security.html">security</a></li></ul>
+    
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">scheduledTrigger.mjs</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/* eslint-disable new-cap */
 /**
  * @description Manages a scheduled trigger event.
  * @copyright 2023-2023
- * @author Mike Price <dev.grumptech@gmail.com>
+ * @author Mike Price &lt;dev.grumptech@gmail.com>
  * @module TimeTriggerModule
  * @requires debug
  * @see {@link https://github.com/debug-js/debug#readme}
@@ -101,10 +150,10 @@ export class ScheduledTrigger extends TimeTrigger {
         // Validate arguments
         if (_is.not.undefined(config)) {
             if ((_is.not.object(config) ||
-                (_is.not.undefined(config.days) && _is.not.number(config.days)))) {
+                (_is.not.undefined(config.days) &amp;&amp; _is.not.number(config.days)))) {
                 throw new TypeError(`Invalid configuration.`);
             }
-            if (_is.not.undefined(config.days) && _is.not.within(config.days, (TRIGGER_DAYS.Sunday-1), (TRIGGER_DAYS.AllDays+1))) {
+            if (_is.not.undefined(config.days) &amp;&amp; _is.not.within(config.days, (TRIGGER_DAYS.Sunday-1), (TRIGGER_DAYS.AllDays+1))) {
                 throw new RangeError(`Invalid configuration. Days=${config.days}`);
             }
             // Validate the time.
@@ -115,7 +164,7 @@ export class ScheduledTrigger extends TimeTrigger {
         super(config);
 
         // Set the days.
-        if (_is.not.undefined(config) &&
+        if (_is.not.undefined(config) &amp;&amp;
             _is.not.undefined(config.days)) {
             this._days = config.days;
         }
@@ -125,7 +174,7 @@ export class ScheduledTrigger extends TimeTrigger {
         }
 
         // Set the scheduled time.
-        if (_is.not.undefined(config) &&
+        if (_is.not.undefined(config) &amp;&amp;
             _is.not.undefined(config.time)) {
             this._time = config.time;
         }
@@ -163,9 +212,9 @@ export class ScheduledTrigger extends TimeTrigger {
         let count = 0;
         const triggerDays = [];
         let nextTriggerDay = dayOfWeek;
-        while (count <= MAX_DAY) {
-            const candidate = (1 << nextTriggerDay);
-            if ((candidate & this._days)  !== 0) {
+        while (count &lt;= MAX_DAY) {
+            const candidate = (1 &lt;&lt; nextTriggerDay);
+            if ((candidate &amp; this._days)  !== 0) {
                 // Add the candidate
                 triggerDays.push(nextTriggerDay);
             }
@@ -195,7 +244,7 @@ export class ScheduledTrigger extends TimeTrigger {
         dateMax.setMilliseconds(dateMax.getMilliseconds() + this._triggerDelta);
 
         // Manage the trigger window
-        if (dateMin < now) {
+        if (dateMin &lt; now) {
             if (dateMax >= now) {
                 // The scheduled minimum trigger has already occured, set the minumum to now.
                 dateMin = now;
@@ -227,7 +276,7 @@ export class ScheduledTrigger extends TimeTrigger {
         // Compute the nominal time, in milliseconds, for the trigger.
         let nominalTime = minTime + toleranceTime;
         // Cap the nominal at 0.
-        if ((nominalTime < 0) && ((nominalTime+toleranceTime) >= 0)) {
+        if ((nominalTime &lt; 0) &amp;&amp; ((nominalTime+toleranceTime) >= 0)) {
             nominalTime = 0;
         }
         this._timeout = {nominal: nominalTime, tolerance: toleranceTime};
@@ -295,7 +344,7 @@ export class ScheduledTrigger extends TimeTrigger {
         maxTrigger.setMinutes(minTrigger.getMinutes() + time.tolerance.minute);
 
         // Compute the time between the triggers.
-        if (maxTrigger < minTrigger) {
+        if (maxTrigger &lt; minTrigger) {
             // Roll the max trigger forward by one day.
             maxTrigger.setDate(maxTrigger.getDate() + 1);
         }
@@ -340,3 +389,32 @@ export class ScheduledTrigger extends TimeTrigger {
         }
     }
 }
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 4.0.0</a> using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+<script src="scripts/search.js" defer></script>
+
+
+<script src="scripts/collapse.js" defer></script>
+
+
+</body>
+</html>

@@ -23,7 +23,7 @@ import {TimeTrigger} from './timeTrigger.mjs';
  * @private
  */
 // eslint-disable-next-line camelcase, no-unused-vars
-const _debug_proces = _debugModule('scheduled_trigger');
+const _debug = _debugModule('scheduled_trigger');
 
 /**
  * @description Minimum day (Sunday)
@@ -149,7 +149,7 @@ export class ScheduledTrigger extends TimeTrigger {
      * @returns {void}
      * @private
      */
-    _generateNewTimerValues() {
+    GenerateNewTimerValues() {
         // Determine the current day so we can see when the next alarm is due.
         const now = new Date();
         const dayOfWeek = now.getDay();
@@ -159,13 +159,13 @@ export class ScheduledTrigger extends TimeTrigger {
             throw new RangeError(`Unexpected day. day=${dayOfWeek}`);
         }
 
-        // Build an array of candicates.
+        // Build an array of candidates.
         let count = 0;
         const triggerDays = [];
         let nextTriggerDay = dayOfWeek;
         while (count <= MAX_DAY) {
             const candidate = (1 << nextTriggerDay);
-            if ((candidate & this._days)  !== 0) {
+            if ((candidate & this._days) !== 0) {
                 // Add the candidate
                 triggerDays.push(nextTriggerDay);
             }
@@ -185,6 +185,8 @@ export class ScheduledTrigger extends TimeTrigger {
         dateMin.setMinutes(this._time.nominal.minute);
         dateMin.setSeconds(0);
         dateMin.setMilliseconds(0);
+        // Adjust for the tolerance
+        dateMin.setTime(dateMin.getTime() - (this._triggerDelta/2));
 
         // Get the number of days from now until the minimum trigger time
         const deltaDaysMin = this._computeDeltaDays(dayOfWeek, triggerDays[0]);
@@ -192,7 +194,8 @@ export class ScheduledTrigger extends TimeTrigger {
 
         // Made a Date for the maximum trigger.
         const dateMax = new Date(dateMin);
-        dateMax.setMilliseconds(dateMax.getMilliseconds() + this._triggerDelta);
+        // Adjust for the tolerance
+        dateMax.setTime(dateMax.getTime() + this._triggerDelta);
 
         // Manage the trigger window
         if (dateMin < now) {
@@ -233,7 +236,7 @@ export class ScheduledTrigger extends TimeTrigger {
         this._timeout = {nominal: nominalTime, tolerance: toleranceTime};
 
         // Defer to the base class.
-        super._generateNewTimerValues();
+        super.GenerateNewTimerValues();
     }
 
     /**
@@ -291,8 +294,8 @@ export class ScheduledTrigger extends TimeTrigger {
         minTrigger.setMinutes(minTrigger.getMinutes() - time.tolerance.minute);
         // Compute the maximum trigger (latest possible trip)
         const maxTrigger = new Date(nominalTrigger);
-        maxTrigger.setHours(minTrigger.getHours() + time.tolerance.hour);
-        maxTrigger.setMinutes(minTrigger.getMinutes() + time.tolerance.minute);
+        maxTrigger.setHours(maxTrigger.getHours() + time.tolerance.hour);
+        maxTrigger.setMinutes(maxTrigger.getMinutes() + time.tolerance.minute);
 
         // Compute the time between the triggers.
         if (maxTrigger < minTrigger) {
@@ -300,8 +303,9 @@ export class ScheduledTrigger extends TimeTrigger {
             maxTrigger.setDate(maxTrigger.getDate() + 1);
         }
 
-        // Compute the number of milliseconds between the timers.
+        // Compute the number of milliseconds between the minimum and maximum.
         const triggerDelta = maxTrigger - minTrigger;
+        _debug(`Trigger delta in milliseconds: ${triggerDelta}`);
 
         return triggerDelta;
     }

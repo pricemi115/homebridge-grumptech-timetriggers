@@ -84,15 +84,15 @@ export class ScheduledTrigger extends TimeTrigger {
      * @param {string=} config.identifier - Identifier
      * @param {number} config.days - Bitmask of days of the week to schedule the trigger.
      * @param {object} config.time - Structure of time to trip the trigger
-     * @param {object} config.time.min - Earliest time to trip the trigger.
-     * @param {number} config.time.min.hour - Hour (0-23)
-     * @param {number} config.time.min.minute - Minute (0-59)
-     * @param {object} config.time.max - Latest time to trip the trigger.
-     * @param {number} config.time.max.hour - Hour (0-23)
+     * @param {object} config.time.nominal - Earliest time to trip the trigger.
+     * @param {number} config.time.nominal.hour - Hour (0-23)
+     * @param {number} config.time.nominal.minute - Minute (0-59)
+     * @param {object} config.time.tolerance - Latest time to trip the trigger.
+     * @param {number} config.time.tolerance.hour - Hour (0-23)
      * @param {number} config.time.max.minute - Minute (0-59)
      * @param {object=} config.duration - Range of times for the tripped duration.
-     * @param {number} config.duration.min - Minimum time, in milliseconds for the tripped duration.
-     * @param {number} config.duration.max - Maximum time, in milliseconds for the tripped duration.
+     * @param {number} config.duration.nominal - Minimum time, in milliseconds for the tripped duration.
+     * @param {number} config.duration.tolerance - Maximum time, in milliseconds for the tripped duration.
      * @throws {TypeError} - Thrown if 'config' is invalid.
      * @throws {RangeError} - Thrown if 'config' is invalid.
      * @class
@@ -135,9 +135,11 @@ export class ScheduledTrigger extends TimeTrigger {
             const trigger = new Date();
             trigger.setMinutes(trigger.getMinutes() + 1);
             /* eslint-disable indent */
-            this._time = {min: {hour: trigger.getHours(), minute: trigger.getMinutes()},
-                          max: {hour: trigger.getHours(), minute: trigger.getMinutes()}};
+            /* eslint-disable key-spacing */
+            this._time = {nominal:   {hour: trigger.getHours(), minute: trigger.getMinutes()},
+                          tolerance: {hour: 0, minute: 0}};
             /* eslint-enable indent */
+            /* eslint-enable key-spacing */
         }
 
         this._triggerDelta = this._computeTriggerTimeDelta(this._time);
@@ -179,8 +181,8 @@ export class ScheduledTrigger extends TimeTrigger {
         // Make a Date for the minimum trigger.
         let dateMin = new Date(now);
         // Update the times appropriately.
-        dateMin.setHours(this._time.min.hour);
-        dateMin.setMinutes(this._time.min.minute);
+        dateMin.setHours(this._time.nominal.hour);
+        dateMin.setMinutes(this._time.nominal.minute);
         dateMin.setSeconds(0);
         dateMin.setMilliseconds(0);
 
@@ -216,12 +218,19 @@ export class ScheduledTrigger extends TimeTrigger {
         }
 
         // Update the trigger timeout window.
-        const range =  {min: (dateMin - now), max: (dateMax - now)};
-        // Check if the current time is within the window.
-        if ((range.min < 0) && (range.max >= 0)) {
-            range.min = 0;
+        // Compute the minumum time, in milliseconds, for the trigger.
+        const minTime = dateMin - now;
+        // Compute the maximum time, in milliseconds, for the trigger.
+        const maxTime = dateMax - now;
+        // Compute the tolerancce, in milliseconds for the trigger
+        const toleranceTime = ((maxTime - minTime)/2);
+        // Compute the nominal time, in milliseconds, for the trigger.
+        let nominalTime = minTime + toleranceTime;
+        // Cap the nominal at 0.
+        if ((nominalTime < 0) && ((nominalTime+toleranceTime) >= 0)) {
+            nominalTime = 0;
         }
-        this._timeout = {min: (dateMin - now), max: (dateMax - now)};
+        this._timeout = {nominal: nominalTime, tolerance: toleranceTime};
 
         // Defer to the base class.
         super._generateNewTimerValues();
@@ -259,26 +268,29 @@ export class ScheduledTrigger extends TimeTrigger {
     /**
      * @description Helper to validate time configuration parameters,
      * @param {object} time - Structure of time to trip the trigger
-     * @param {object} time.min - Earliest time to trip the trigger.
-     * @param {number} time.min.hour - Hour (0-23)
-     * @param {number} time.min.minute - Minute (0-59)
-     * @param {object} time.max - Earliest time to trip the trigger.
-     * @param {number} time.max.hour - Hour (0-23)
-     * @param {number} time.max.minute - Minute (0-59)
-     * @returns {number} - total milliseconds between the min and max trigger.
+     * @param {object} time.nominal - Nominal time to trip the trigger.
+     * @param {number} time.nominal.hour - Hour (0-23)
+     * @param {number} time.nominal.minute - Minute (0-59)
+     * @param {object} time.tolerance - Tolerance time around nominal to trip the trigger.
+     * @param {number} time.tolerance.hour - Hour (0-23)
+     * @param {number} time.tolerance.minute - Minute (0-59)
+     * @returns {number} - total milliseconds, accounting for the tolerance, for the trigger.
      */
     _computeTriggerTimeDelta(time) {
-        // Make Dates for each trigger.
-        const minTrigger = new Date();
-        minTrigger.setHours(time.min.hour);
-        minTrigger.setMinutes(time.min.minute);
-        minTrigger.setSeconds(0);
-        minTrigger.setMilliseconds(0);
-        const maxTrigger = new Date();
-        maxTrigger.setHours(time.max.hour);
-        maxTrigger.setMinutes(time.max.minute);
-        maxTrigger.setSeconds(0);
-        maxTrigger.setMilliseconds(0);
+        // Make Dates for the nominal trigger.
+        const nominalTrigger = new Date();
+        nominalTrigger.setHours(time.nominal.hour);
+        nominalTrigger.setMinutes(time.nominal.minute);
+        nominalTrigger.setSeconds(0);
+        nominalTrigger.setMilliseconds(0);
+        // Compute the minimum trigger (earliest possible trip)
+        const minTrigger = new Date(nominalTrigger);
+        minTrigger.setHours(minTrigger.getHours() - time.tolerance.hour);
+        minTrigger.setMinutes(minTrigger.getMinutes() - time.tolerance.minute);
+        // Compute the maximum trigger (latest possible trip)
+        const maxTrigger = new Date(nominalTrigger);
+        maxTrigger.setHours(minTrigger.getHours() + time.tolerance.hour);
+        maxTrigger.setMinutes(minTrigger.getMinutes() + time.tolerance.minute);
 
         // Compute the time between the triggers.
         if (maxTrigger < minTrigger) {
@@ -295,12 +307,12 @@ export class ScheduledTrigger extends TimeTrigger {
     /**
      * @description Helper to validate time configuration parameters,
      * @param {object} time - Structure of time to trip the trigger
-     * @param {object} time.min - Earliest time to trip the trigger.
-     * @param {number} time.min.hour - Hour (0-23)
-     * @param {number} time.min.minute - Minute (0-59)
-     * @param {object} time.max - Earliest time to trip the trigger.
-     * @param {number} time.max.hour - Hour (0-23)
-     * @param {number} time.max.minute - Minute (0-59)
+     * @param {object} time.nominal - Nominal time to trip the trigger.
+     * @param {number} time.nominal.hour - Hour (0-23)
+     * @param {number} time.nominal.minute - Minute (0-59)
+     * @param {object} time.tolerance - Tolerance time around nominal to trip the trigger.
+     * @param {number} time.tolerance.hour - Hour (0-23)
+     * @param {number} time.tolerance.minute - Minute (0-59)
      * @returns {void}
      * @throws {TypeError} - Thrown if the types are not as expected.
      * @throws {RangeError} - Thrown if either the hour or minute are out of range.
@@ -308,18 +320,18 @@ export class ScheduledTrigger extends TimeTrigger {
     static _checkTime(time) {
         if (_is.not.undefined(time)) {
             if (_is.not.object(time) ||
-                _is.not.object(time.min) ||
-                _is.not.number(time.min.hour) ||
-                _is.not.number(time.min.minute) ||
-                _is.not.object(time.max) ||
-                _is.not.number(time.max.hour) ||
-                _is.not.number(time.max.minute)) {
+                _is.not.object(time.nominal) ||
+                _is.not.number(time.nominal.hour) ||
+                _is.not.number(time.nominal.minute) ||
+                _is.not.object(time.tolerance) ||
+                _is.not.number(time.tolerance.hour) ||
+                _is.not.number(time.tolerance.minute)) {
                 throw new TypeError(`time is invalid.`);
             }
-            if (_is.not.within(time.min.hour, (MIN_HOUR-1), (MAX_HOUR+1)) ||
-                _is.not.within(time.min.minute, (MIN_MINUTE-1), (MAX_MINUTE+1)) ||
-                _is.not.within(time.max.hour, (MIN_HOUR-1), (MAX_HOUR+1)) ||
-                _is.not.within(time.max.minute, (MIN_MINUTE-1), (MAX_MINUTE+1))) {
+            if (_is.not.within(time.nominal.hour, (MIN_HOUR-1), (MAX_HOUR+1)) ||
+                _is.not.within(time.nominal.minute, (MIN_MINUTE-1), (MAX_MINUTE+1)) ||
+                _is.not.within(time.tolerance.hour, (MIN_HOUR-1), (MAX_HOUR+1)) ||
+                _is.not.within(time.tolerance.minute, (MIN_MINUTE-1), (MAX_MINUTE+1))) {
                 throw new RangeError(`range is invalid.`);
             }
         }

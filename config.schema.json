@@ -13,11 +13,20 @@
                 "properties": {
                     "triggers": {
                         "title": "Time Triggers",
-                        "description": "List of time triggers.",
+                        "description": "List of time-based triggers.",
                         "type": "array",
                         "items": {
                             "type": "object",
                             "properties": {
+                                "trigger_identifier": {
+                                    "title": "Identifier",
+                                    "description": "Unique identifier for the trigger.</br><small>Controls the mapping of the Homekit accessory to this trigger.</br>and serves as the default name for the accessory and services.</br><i><u>Note</u>: Subsequent triggers with this name will be ignored.</br><u>Warning</u>: Changing the identifier will affect existing Homekit automations using this trigger.</i></small>",
+                                    "type": "string",
+                                    "minLength": 1,
+                                    "default": "Trigger",
+                                    "pattern": "(?!^$)([^\\s])",
+                                    "required": true
+                                },
                                 "trigger_type": {
                                     "title": "Trigger Type",
                                     "description": "Type of trigger",
@@ -29,35 +38,25 @@
                                       ],
                                     "required": true
                                 },
-                                "trigger_random": {
-                                    "title": "Randomize",
-                                    "description": "Randomize when the trigger trips within the specified window.",
-                                    "type": "boolean",
-                                    "default": false,
-                                    "required": true
-                                },
                                 "timeout": {
                                     "title": "Timeout Window",
                                     "description": "Trigger timeout window",
                                     "type": "object",
                                     "required": true,
                                     "properties": {
-                                        "min": {
-                                            "title": "Minumum Trip Interval",
-                                            "description": "Start of the trip interval window, in milliseconds.",
+                                        "nominal": {
+                                            "title": "Trip Interval",
+                                            "description": "Nominal trip interval, in milliseconds.",
                                             "type": "number",
                                             "default": 60000,
                                             "minimum": 1
                                         },
-                                        "max": {
-                                            "title": "Maximum Trip Interval",
-                                            "description": "End of the trip interval window, in milliseconds.",
+                                        "tolerance": {
+                                            "title": "Trip Interval Tolerance",
+                                            "description": "Tolerance, in milliseconds, for the trip interval.</br><small>Used to randomize the trip event around the specified interval.</small>",
                                             "type": "number",
-                                            "default": 60000,
-                                            "minimum":  1,
-                                            "condition": {
-                                                "functionBody": "return (model.settings.triggers[arrayIndices] && (model.settings.triggers[arrayIndices].trigger_random));"
-                                            }
+                                            "default": 0,
+                                            "minimum":  0
                                         }
                                     },
                                     "condition": {
@@ -69,29 +68,32 @@
                                     "description": "Days to trip th trigger",
                                     "type": "number",
                                     "default": 127,
+                                    "minimum": 1,
                                     "oneOf": [
                                         { "title": "Sunday", "enum": [1] },
                                         { "title": "Monday", "enum": [2] },
-                                        { "title": "Tuesday", "enum": [2] },
-                                        { "title": "Wednesday", "enum": [2] },
-                                        { "title": "Thursday", "enum": [2] },
-                                        { "title": "Friday", "enum": [2] },
+                                        { "title": "Tuesday", "enum": [4] },
+                                        { "title": "Wednesday", "enum": [8] },
+                                        { "title": "Thursday", "enum": [16] },
+                                        { "title": "Friday", "enum": [32] },
+                                        { "title": "Saturday", "enum": [64] },
                                         { "title": "Weekdays", "enum": [62] },
                                         { "title": "Weekends", "enum": [65] },
                                         { "title": "Every day", "enum": [127] }
                                     ],
                                     "condition": {
                                         "functionBody": "return (model.settings.triggers[arrayIndices] && (model.settings.triggers[arrayIndices].trigger_type === 1));"
-                                    }
+                                    },
+                                    "required": true
                                 },
                                 "time" : {
                                     "title": "Time settings",
                                     "description": "Time settings for daily triggers.",
                                     "type": "object",
                                     "properties": {
-                                        "min": {
-                                            "title": "Minimum Time",
-                                            "description": "Start of the trip window",
+                                        "nominal": {
+                                            "title": "Trip Time",
+                                            "description": "Nominal time of day to trip the trigger",
                                             "type": "object",
                                             "properties": {
                                                 "hour": {
@@ -112,9 +114,9 @@
                                                 }
                                             }
                                         },
-                                        "max": {
-                                            "title": "Maximum Time",
-                                            "description": "End of the trip window",
+                                        "tolerance": {
+                                            "title": "Trip Tolerance",
+                                            "description": "Tolerance around the trip time.</br><small>Used to randomize the trip event around the specified trip time.</small>",
                                             "type": "object",
                                             "properties": {
                                                 "hour": {
@@ -133,9 +135,6 @@
                                                     "maximum": 59,
                                                     "default": 0
                                                 }
-                                            },
-                                            "condition": {
-                                                "functionBody": "return (model.settings.triggers[arrayIndices] && (model.settings.triggers[arrayIndices].trigger_random));"
                                             }
                                         }
                                     },
@@ -149,22 +148,19 @@
                                     "type": "object",
                                     "required": true,
                                     "properties": {
-                                        "min": {
-                                            "title": "Minumum Trip Duration",
-                                            "description": "Start of the trip duration window, in milliseconds.",
+                                        "nominal": {
+                                            "title": "Trip Duration",
+                                            "description": "Nominal trip duration, in milliseconds.",
                                             "type": "number",
                                             "default": 250,
                                             "minimum": 10
                                         },
-                                        "max": {
-                                            "title": "Maximum Trip Duration",
-                                            "description": "End of the trip duration window, in milliseconds.",
+                                        "tolerance": {
+                                            "title": "Trip Duration Tolerance",
+                                            "description": "Tolerance, in milliseconds, for the trip duration.</br><small>Used to randomize the trip event around the specified interval.</small>",
                                             "type": "number",
-                                            "default": 250,
-                                            "minimum": 10,
-                                            "condition": {
-                                                "functionBody": "return (model.settings.triggers[arrayIndices] && (model.settings.triggers[arrayIndices].trigger_random));"
-                                            }
+                                            "default": 0,
+                                            "minimum": 0
                                         }
                                     }
                                 }

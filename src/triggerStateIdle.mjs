@@ -1,3 +1,4 @@
+/* eslint-disable new-cap */
 /**
  * @description Class for managing idle trigger states.
  * @copyright January 2023
@@ -12,14 +13,14 @@
 import _debugModule from 'debug';
 import _is from 'is-it-check';
 
-import { TRIGGER_STATES } from './triggerTypes.mjs';
-import { TriggerStateBase } from './triggerStateBase.mjs';
+import {TRIGGER_STATES} from './triggerTypes.mjs';
+import {TriggerStateBase} from './triggerStateBase.mjs';
 
 /**
  * @description Debugging function pointer for runtime related diagnostics.
  * @private
  */
-// eslint-disable-next-line camelcase
+// eslint-disable-next-line camelcase, no-unused-vars
 const _debug = _debugModule('time_trigger_state');
 
 /**
@@ -38,7 +39,7 @@ export class TriggerStateIdle extends TriggerStateBase {
         super(config);
     }
 
-   /**
+    /**
      * @description Read-only property for the name of the state.
      * @returns {string} - name
      * @throws {Error} - Thrown when calling the base class
@@ -48,7 +49,7 @@ export class TriggerStateIdle extends TriggerStateBase {
         return `StateIdle`;
     }
 
-   /**
+    /**
      * @description Read-only property for the name of the state.
      * @returns {TRIGGER_STATES} - state identifier
      * @throws {Error} - Thrown when calling the base class
@@ -89,5 +90,4 @@ export class TriggerStateIdle extends TriggerStateBase {
 
         return handled;
     }
-
 }

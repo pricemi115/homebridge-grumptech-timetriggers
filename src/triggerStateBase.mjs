@@ -12,8 +12,8 @@
 import _debugModule from 'debug';
 import _is from 'is-it-check';
 
-import { TRIGGER_STATES } from './triggerTypes.mjs';
-import { TimeTrigger } from './timeTrigger.mjs';
+import {TRIGGER_STATES} from './triggerTypes.mjs';
+import {TimeTrigger} from './timeTrigger.mjs';
 
 /**
  * @description Debugging function pointer for runtime related diagnostics.
@@ -59,8 +59,8 @@ export class TriggerStateBase {
             throw new TypeError(`Invalid configuration.`);
         }
 
-       // Ensure we are not attempting to instanciate the base class.
-       if (this.constructor === TriggerStateBase) {
+        // Ensure we are not attempting to instanciate the base class.
+        if (this.constructor === TriggerStateBase) {
             // Prevent creation of the base object.
             throw new Error(`Instantiating base class.`);
         }
@@ -68,7 +68,8 @@ export class TriggerStateBase {
         this._owner = config.owner;
     }
 
-   /**
+    // eslint-disable-next-line jsdoc/require-returns-check
+    /**
      * @description Read-only property for the name of the state.
      * @returns {string} - name
      * @throws {Error} - Thrown when calling the base class
@@ -78,7 +79,8 @@ export class TriggerStateBase {
         throw new Error(`Abstract Property: Name`);
     }
 
-   /**
+    // eslint-disable-next-line jsdoc/require-returns-check
+    /**
      * @description Read-only property for the name of the state.
      * @returns {TRIGGER_STATES} - state identifier
      * @throws {Error} - Thrown when calling the base class
@@ -108,16 +110,19 @@ export class TriggerStateBase {
             case TRIGGER_ACTIONS.Next: {
                 handled = this._doNext();
             }
+            // eslint-disable-next-line indent
             break;
 
             case TRIGGER_ACTIONS.Abort: {
                 handled = this._doAbort();
             }
+            // eslint-disable-next-line indent
             break;
 
             default: {
                 handled = false;
             }
+            // eslint-disable-next-line indent
             break;
         }
         _debug(`State Eval: ${this.Name} evaluating action:${action} result:${handled}`);
@@ -134,7 +139,7 @@ export class TriggerStateBase {
      */
     OnEntrance(oldState) {
         if (!(oldState instanceof TriggerStateBase)) {
-            throw new TypeError(`${this.Name}::OnEntrance(). oldState is invalid.`)
+            throw new TypeError(`${this.Name}::OnEntrance(). oldState is invalid.`);
         }
 
         _debug(`${this.Name}::OnEntrance() called. Transitioning from state ${oldState.Name}`);
@@ -149,7 +154,7 @@ export class TriggerStateBase {
      */
     OnExit(newState) {
         if (!(newState instanceof TriggerStateBase)) {
-            throw new TypeError(`${this.Name}::OnEntrance(). newState is invalid.`)
+            throw new TypeError(`${this.Name}::OnEntrance(). newState is invalid.`);
         }
 
         _debug(`${this.Name}::OnExit() called. Transitioning to state ${newState.Name}`);
@@ -174,5 +179,4 @@ export class TriggerStateBase {
         _debug(`${this.Name}::_doAbort() called.`);
         return false;
     }
-
 }

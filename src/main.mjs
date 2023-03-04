@@ -107,9 +107,9 @@ let _hap;
  * @property {string} CONTROL.name - Name of the control switch.
  * @property {string} CONTROL.udst - User defined subtype for the control switch.
  * @property {object} MOTION - Service information for the motion status for each trigger.
- * @property {string} CONTROL.uuid - Unique identifier for the motion status.
- * @property {string} CONTROL.name - Name of the motion status.
- * @property {string} CONTROL.udst - User defined subtype for the motion status.
+ * @property {string} MOTION.uuid - Unique identifier for the motion status.
+ * @property {string} MOTION.name - Name of the motion status.
+ * @property {string} MOTION.udst - User defined subtype for the motion status.
  */
 const SERVICE_INFO = {
     /* eslint-disable key-spacing, max-len */
@@ -157,199 +157,201 @@ class TimeTriggerPlatform {
             _is.not.undefined(config.settings) && _is.not.undefined(config.settings.triggers) &&
             _is.array(config.settings.triggers)) {
             config.settings.triggers.forEach((triggerSettings, index) => {
-                // Determine if the `random` flag is set.
-                let isRandom = false;
-                if (_is.not.undefined(triggerSettings.trigger_random) && _is.boolean(triggerSettings.trigger_random)) {
-                    isRandom = triggerSettings.trigger_random;
+                // Get the identifier.
+                let identifier = null;
+                if (_is.not.undefined(triggerSettings.trigger_identifier) && _is.string(triggerSettings.trigger_identifier)) {
+                    identifier = triggerSettings.trigger_identifier;
                 }
                 else {
-                    throw new TypeError(`Configuration is invalid. Trigger Random.`);
+                    throw new TypeError(`Configuration is invalid. Trigger Identifier.`);
                 }
 
-                // Get the trigger type.
-                let triggerType = -1;
-                if (_is.not.undefined(triggerSettings.trigger_type) && _is.number(triggerSettings.trigger_type) &&
-                    (Object.values(TRIGGER_TYPES).indexOf(triggerSettings.trigger_type) >= 0)) {
-                    triggerType = triggerSettings.trigger_type;
-                }
-                else {
-                    throw new TypeError(`Configuration is invalid. Trigger Type.`);
-                }
+                // Determine if this trigger identifier is already in use.
+                let identifierUsed = false;
+                this._triggers.forEach((item, index) => {
+                    if (_is.existy(item.trigger) &&
+                        _is.equal(item.trigger.Signature, identifier)) {
+                        identifierUsed = true;
+                    }
+                });
 
-                // Build the trigger configuration.
-                const triggerConfig = {};
-                // Common trigger configuration data.
-                triggerConfig.duration = {};
-                if (_is.not.undefined(triggerSettings.duration) && _is.object(triggerSettings.duration)) {
-                    // Duration - Minimum
-                    if (_is.not.undefined(triggerSettings.duration.min) && _is.number(triggerSettings.duration.min) &&
-                        _is.positive(triggerSettings.duration.min) &&_is.above(triggerSettings.duration.min, 249)) {
-                        // Set the minimum
-                        triggerConfig.duration.min = triggerSettings.duration.min;
-                        // Default the maximum to the minimum
-                        triggerConfig.duration.max = triggerSettings.duration.min;
+                // Is the identifier free?
+                if (!identifierUsed) {
+                    // Get the trigger type.
+                    let triggerType = -1;
+                    if (_is.not.undefined(triggerSettings.trigger_type) && _is.number(triggerSettings.trigger_type) &&
+                        (Object.values(TRIGGER_TYPES).indexOf(triggerSettings.trigger_type) >= 0)) {
+                        triggerType = triggerSettings.trigger_type;
                     }
                     else {
-                        throw new TypeError(`Configuration is invalid. Duration - min.`);
+                        throw new TypeError(`Configuration is invalid. Trigger Type.`);
                     }
-                    // Duration - Maximum (only valid if random is enabled.)
-                    if (isRandom) {
-                        if (_is.not.undefined(triggerSettings.duration.max) && _is.number(triggerSettings.duration.max) &&
-                            _is.positive(triggerSettings.duration.max) && _is.above(triggerSettings.duration.max, (triggerSettings.duration.min - 1))) {
-                            // Update the maximum
-                            triggerConfig.duration.max = triggerSettings.duration.max;
+
+                    // Build the trigger configuration.
+                    const triggerConfig = {signature: identifier};
+
+                    // Common trigger configuration data.
+                    triggerConfig.duration = {};
+                    if (_is.not.undefined(triggerSettings.duration) && _is.object(triggerSettings.duration)) {
+                        // Duration - Nominal
+                        if (_is.not.undefined(triggerSettings.duration.nominal) && _is.number(triggerSettings.duration.nominal) &&
+                            _is.positive(triggerSettings.duration.nominal) &&_is.above(triggerSettings.duration.nominal, 249)) {
+                            // Set the nominal
+                            triggerConfig.duration.nominal = triggerSettings.duration.nominal;
                         }
-                        else  {
-                            throw new TypeError(`Configuration is invalid. Duration - max.`);
+                        else {
+                            throw new TypeError(`Configuration is invalid. Duration - nominal.`);
+                        }
+                        // Duration - Tolerance
+                        if (_is.not.undefined(triggerSettings.duration.tolerance) && _is.number(triggerSettings.duration.tolerance) &&
+                            _is.not.negative(triggerSettings.duration.tolerance)) {
+                            // Set the maximum
+                            triggerConfig.duration.tolerance = triggerSettings.duration.tolerance;
+                        }
+                        else {
+                            throw new TypeError(`Configuration is invalid. Duration - tolerance.`);
                         }
                     }
-                }
-                else {
-                    throw new TypeError(`Configuration is invalid. Timeout.`);
-                }
-                // Trigger type specific configuration.
-                switch (triggerType) {
-                    case TRIGGER_TYPES.MultiTrip: {
-                        // Extract the appropriate configuration.
-                        triggerConfig.timeout = {};
-                        if (_is.not.undefined(triggerSettings.timeout) && _is.object(triggerSettings.timeout)) {
-                            // Timeout - Minimum
-                            if (_is.not.undefined(triggerSettings.timeout.min) && _is.number(triggerSettings.timeout.min) &&
-                                _is.positive(triggerSettings.timeout.min)) {
-                                // Set the minimum
-                                triggerConfig.timeout.min = triggerSettings.timeout.min;
-                                // Default the maximum to the minimum
-                                triggerConfig.timeout.max = triggerSettings.timeout.min;
-                            }
-                            else {
-                                throw new TypeError(`Configuration is invalid. Timeout - min.`);
-                            }
-                            // Timeout - Maximum (only valid if random is enabled.)
-                            if (isRandom) {
-                                if (_is.not.undefined(triggerSettings.timeout.max) && _is.number(triggerSettings.timeout.max) &&
-                                    _is.positive(triggerSettings.timeout.max) && _is.above(triggerSettings.timeout.max, (triggerSettings.timeout.min - 1))) {
-                                    // Update the maximum
-                                    triggerConfig.timeout.max = triggerSettings.timeout.max;
+                    else {
+                        throw new TypeError(`Configuration is invalid. Duration.`);
+                    }
+                    // Trigger type specific configuration.
+                    switch (triggerType) {
+                        case TRIGGER_TYPES.MultiTrip: {
+                            // Extract the appropriate configuration.
+                            triggerConfig.timeout = {};
+                            if (_is.not.undefined(triggerSettings.timeout) && _is.object(triggerSettings.timeout)) {
+                                // Timeout - Nominal
+                                if (_is.not.undefined(triggerSettings.timeout.nominal) && _is.number(triggerSettings.timeout.nominal) &&
+                                    _is.positive(triggerSettings.timeout.nominal)) {
+                                    // Set the nominal
+                                    triggerConfig.timeout.nominal = triggerSettings.timeout.nominal;
+                                }
+                                else {
+                                    throw new TypeError(`Configuration is invalid. Timeout - nominal.`);
+                                }
+                                // Timeout - Tolerance
+                                if (_is.not.undefined(triggerSettings.timeout.tolerance) && _is.number(triggerSettings.timeout.tolerance) &&
+                                    _is.not.negative(triggerSettings.timeout.tolerance)) {
+                                    // Set the tolerance
+                                    triggerConfig.timeout.tolerance = triggerSettings.timeout.tolerance;
                                 }
                                 else  {
-                                    throw new TypeError(`Configuration is invalid. Timeout - max.`);
-                                }
-                            }
-                        }
-                        else {
-                            throw new TypeError(`Configuration is invalid. Timeout.`);
-                        }
-                    }
-                    // eslint-disable-next-line indent
-                    break;
-
-                    case TRIGGER_TYPES.Daily: {
-                        // Extract the appropriate configuration.
-                        // Days that the trigger should trip.
-                        if (_is.not.undefined(triggerSettings.days) && _is.number(triggerSettings.days) &&
-                            (Object.values(TRIGGER_DAYS).indexOf(triggerSettings.days) >= 0)) {
-                            triggerConfig.days = triggerSettings.days;
-                        }
-                        else {
-                            throw new TypeError(`Configuration is invalid. Days.`);
-                        }
-                        // Trigger time window
-                        triggerConfig.time = {};
-                        if (_is.not.undefined(triggerSettings.time) && _is.object(triggerSettings.time)) {
-                            // Time Window - Minimum
-                            triggerConfig.time.min = {};
-                            triggerConfig.time.max = {};
-                            if (_is.not.undefined(triggerSettings.time.min) && _is.object(triggerSettings.time.min)) {
-                                // Hour
-                                if (_is.not.undefined(triggerSettings.time.min.hour) && _is.number(triggerSettings.time.min.hour) &&
-                                    _is.within(triggerSettings.timeout.min.hour, -1, 24)) {
-                                    // Set the minimum
-                                    triggerConfig.time.min.hour = triggerSettings.timeout.min.hour;
-                                    // Default the maximum to the minimum
-                                    triggerConfig.time.max.hour = triggerSettings.timeout.min.hour;
-                                }
-                                else {
-                                    throw new TypeError(`Configuration is invalid. Time Window(min)-hour.`);
-                                }
-                                // Minute
-                                if (_is.not.undefined(triggerSettings.time.min.minute) && _is.number(triggerSettings.time.min.minute) &&
-                                    _is.within(triggerSettings.timeout.min.minute, -1, 60)) {
-                                    // Set the minimum
-                                    triggerConfig.time.min.minute = triggerSettings.timeout.min.minute;
-                                    // Default the maximum to the minimum
-                                    triggerConfig.time.max.minute = triggerSettings.timeout.min.minute;
-                                }
-                                else {
-                                    throw new TypeError(`Configuration is invalid. Time Window(min)-minute.`);
+                                    throw new TypeError(`Configuration is invalid. Timeout - tolerance.`);
                                 }
                             }
                             else {
-                                throw new TypeError(`Configuration is invalid. Time Window - min.`);
+                                throw new TypeError(`Configuration is invalid. Timeout.`);
                             }
-                            // Time Window - Maximum (only valid if random is enabled.)
-                            if (isRandom) {
-                                if (_is.not.undefined(triggerSettings.time.max) && _is.object(triggerSettings.time.max)) {
+                        }
+                        // eslint-disable-next-line indent
+                        break;
+
+                        case TRIGGER_TYPES.Daily: {
+                            // Extract the appropriate configuration.
+                            // Days that the trigger should trip.
+                            if (_is.not.undefined(triggerSettings.days) && _is.number(triggerSettings.days) &&
+                                (Object.values(TRIGGER_DAYS).indexOf(triggerSettings.days) >= 0)) {
+                                triggerConfig.days = triggerSettings.days;
+                            }
+                            else {
+                                throw new TypeError(`Configuration is invalid. Days.`);
+                            }
+                            // Trigger time window
+                            triggerConfig.time = {};
+                            if (_is.not.undefined(triggerSettings.time) && _is.object(triggerSettings.time)) {
+                                triggerConfig.time.nominal = {};
+                                triggerConfig.time.tolerance = {};
+                                // Time Window - Nominal
+                                if (_is.not.undefined(triggerSettings.time.nominal) && _is.object(triggerSettings.time.nominal)) {
                                     // Hour
-                                    if (_is.not.undefined(triggerSettings.time.max.hour) && _is.number(triggerSettings.time.max.hour) &&
-                                        _is.within(triggerSettings.timeout.max.hour, -1, 24)) {
-                                        // Update the maximum
-                                        triggerConfig.time.max.hour = triggerSettings.timeout.max.hour;
+                                    if (_is.not.undefined(triggerSettings.time.nominal.hour) && _is.number(triggerSettings.time.nominal.hour) &&
+                                        _is.within(triggerSettings.time.nominal.hour, -1, 24)) {
+                                        // Set the nominal
+                                        triggerConfig.time.nominal.hour = triggerSettings.time.nominal.hour;
                                     }
                                     else {
-                                        throw new TypeError(`Configuration is invalid. Time Window(max)-hour.`);
+                                        throw new TypeError(`Configuration is invalid. Time Window(nominal)-hour.`);
                                     }
                                     // Minute
-                                    if (_is.not.undefined(triggerSettings.time.max.minute) && _is.number(triggerSettings.time.max.minute) &&
-                                        _is.within(triggerSettings.timeout.max.minute, -1, 60)) {
-                                        // Update the minimum
-                                        triggerConfig.time.max.minute = triggerSettings.timeout.max.minute;
+                                    if (_is.not.undefined(triggerSettings.time.nominal.minute) && _is.number(triggerSettings.time.nominal.minute) &&
+                                        _is.within(triggerSettings.time.nominal.minute, -1, 60)) {
+                                        // Set the nominal
+                                        triggerConfig.time.nominal.minute = triggerSettings.time.nominal.minute;
                                     }
                                     else {
-                                        throw new TypeError(`Configuration is invalid. Time Window(max)-minute.`);
+                                        throw new TypeError(`Configuration is invalid. Time Window(nominal)-minute.`);
                                     }
                                 }
                                 else {
-                                    throw new TypeError(`Configuration is invalid. Time Window - max.`);
+                                    throw new TypeError(`Configuration is invalid. Time Window - nominal.`);
+                                }
+                                // Time Window - Tolerance
+                                if (_is.not.undefined(triggerSettings.time.tolerance) && _is.object(triggerSettings.time.tolerance)) {
+                                    // Hour
+                                    if (_is.not.undefined(triggerSettings.time.tolerance.hour) && _is.number(triggerSettings.time.tolerance.hour) &&
+                                        _is.within(triggerSettings.time.tolerance.hour, -1, 24)) {
+                                        // Update the tolerance
+                                        triggerConfig.time.tolerance.hour = triggerSettings.time.tolerance.hour;
+                                    }
+                                    else {
+                                        throw new TypeError(`Configuration is invalid. Time Window(tolerance)-hour.`);
+                                    }
+                                    // Minute
+                                    if (_is.not.undefined(triggerSettings.time.tolerance.minute) && _is.number(triggerSettings.time.tolerance.minute) &&
+                                        _is.within(triggerSettings.time.tolerance.minute, -1, 60)) {
+                                        // Update the tolerance
+                                        triggerConfig.time.tolerance.minute = triggerSettings.time.tolerance.minute;
+                                    }
+                                    else {
+                                        throw new TypeError(`Configuration is invalid. Time Window(tolerance)-minute.`);
+                                    }
+                                }
+                                else {
+                                    throw new TypeError(`Configuration is invalid. Time Window - tolerance.`);
                                 }
                             }
+                            else {
+                                throw new TypeError(`Configuration is invalid. Time window.`);
+                            }
                         }
-                        else {
-                            throw new TypeError(`Configuration is invalid. Time window.`);
+                        // eslint-disable-next-line indent
+                        break;
+
+                        default: {
+                            throw new TypeError(`Configuration is invalid. Unknown TriggerType. ${triggerSettings.trigger_type}`);
                         }
+                        // eslint-disable-next-line indent
+                        break;
                     }
-                    // eslint-disable-next-line indent
-                    break;
 
-                    default: {
-                        throw new TypeError(`Configuration is invalid. Unknown TriggerType. ${triggerSettings.trigger_type}`);
+                    // Construct the appropriate trigger with the configuration.
+                    let trigger = null;
+                    switch (triggerType) {
+                        case TRIGGER_TYPES.MultiTrip: {
+                            trigger = new TimeTrigger(triggerConfig);
+                        }
+                        // eslint-disable-next-line indent
+                        break;
+
+                        case TRIGGER_TYPES.Daily: {
+                            trigger = new ScheduledTrigger(triggerConfig);
+                        }
+                        // eslint-disable-next-line indent
+                        break;
+
+                        default: {
+                            throw new TypeError(`Configuration is invalid. Unknown TriggerType. ${triggerSettings.trigger_type}`);
+                        }
+                        // eslint-disable-next-line indent
+                        break;
                     }
-                    // eslint-disable-next-line indent
-                    break;
+                    // Append the trigget to our map, keyed off the unique identification.
+                    this._triggers.set(trigger.Identifier, {accessory: null, trigger: trigger});
                 }
-
-                // Construct the appropriate trigger with the configuration.
-                let trigger = null;
-                switch (triggerType) {
-                    case TRIGGER_TYPES.MultiTrip: {
-                        trigger = new TimeTrigger(triggerConfig);
-                    }
-                    // eslint-disable-next-line indent
-                    break;
-
-                    case TRIGGER_TYPES.Daily: {
-                        trigger = new ScheduledTrigger(triggerConfig);
-                    }
-                    // eslint-disable-next-line indent
-                    break;
-
-                    default: {
-                        throw new TypeError(`Configuration is invalid. Unknown TriggerType. ${triggerSettings.trigger_type}`);
-                    }
-                    // eslint-disable-next-line indent
-                    break;
+                else {
+                    this.log(`Trigger Identifier '${identifier}' already used.`);
                 }
-                // Append the trigget to our map, keyed off the unique identification.
-                this._triggers.set(trigger.Identifier, {accessory: null, trigger: trigger});
             });
         }
         else {
@@ -385,7 +387,7 @@ class TimeTriggerPlatform {
             this._triggers.forEach((value, key)=>{
                 if (_is.object(value) &&
                     (_is.not.undefined(value.trigger) && (value.trigger instanceof TimeTrigger))) {
-                    this._log.debug(`Unsubscribing trigger: ${value.trigger.Identifier}`);
+                    this._log.debug(`Unsubscribing trigger: '${value.trigger.Identifier}'`);
                     value.trigger.off(TRIGGER_EVENTS.EVENT_STATE_CHANGED, this._CB_TriggerStateChanged);
                     value.trigger.off(TRIGGER_EVENTS.EVENT_STATE_NOTIFY, this._CB_TriggerStateNotify);
                 }
@@ -415,14 +417,14 @@ class TimeTriggerPlatform {
                 // Accessory is from a prior version and needs to be replaced.
                 if (!Object.prototype.hasOwnProperty.call(accessory.context, 'VERSION') ||
                     (accessory.context.VERSION !== ACCESSORY_VERSION)) {
-                    this._log(`Accessory ${accessory.displayName} has accessory version ${accessory.context.VERSION}. Version ${ACCESSORY_VERSION} is expected.`);
+                    this._log.debug(`Accessory '${accessory.displayName}' has accessory version ${accessory.context.VERSION}. Version ${ACCESSORY_VERSION} is expected.`);
                     // This accessory needs to be replaced.
                     accessoriesToRemove.push(accessory);
                     removed = true;
                 }
                 // If this accessory was not previously removed, does the accessory have a matching trigger?
                 if (!removed) {
-                    this._log(`Checking to see if accessory ${accessory.displayName} is an orphan.`);
+                    this._log.debug(`Checking to see if accessory '${accessory.displayName}' is an orphan.`);
                     let isOrphan = true;
                     for (const item of this._triggers.values()) {
                         if (Object.prototype.hasOwnProperty.call(accessory.context, 'ID') &&
@@ -435,7 +437,7 @@ class TimeTriggerPlatform {
                         }
                     }
                     if (isOrphan) {
-                        this._log(`Accessory ${accessory.displayName} is an orphan and should be purged.`);
+                        this._log.debug(`Accessory '${accessory.displayName}' is an orphan and should be purged.`);
                         // This accessory needs to be removed.
                         accessoriesToRemove.push(accessory);
                     }
@@ -449,10 +451,10 @@ class TimeTriggerPlatform {
 
         // Manage the accessories and triggers.
         for (const item of this._triggers.values()) {
+            let accessory = item.accessory;
             if (_is.existy(item.trigger) &&
                 (item.trigger instanceof TimeTrigger)) {
                 // Is this trigger new?
-                let accessory = item.accessory;
                 if (_is.not.existy(accessory)) {
                     // There is no matching accessory for this trigger.
                     // Create and register an accessory.
@@ -471,6 +473,7 @@ class TimeTriggerPlatform {
                 }
             }
             else if (_is.existy(accessory)) {
+                this._log.debug(`Unexpected orphaned trigger '${accessory.displayName}.`);
                 throw new RangeError(`Orphaned accessory is found.`);
             }
         }
@@ -507,7 +510,7 @@ class TimeTriggerPlatform {
                 this._configureAccessory(accessory);
             }
             catch (error) {
-                this._log(`Unable to configure accessory ${accessory.displayName}. Version:${accessory.context.VERSION}. Error:${error}`);
+                this._log.debug(`Unable to configure accessory '${accessory.displayName}'. Version:${accessory.context.VERSION}. Error:${error}`);
                 // Store the acessory without a trigger.
                 this._triggers.set(accessory.contect.ID, {accessory: accessory, trigger: null});
             }
@@ -528,7 +531,7 @@ class TimeTriggerPlatform {
             throw new TypeError(`accessory must be a PlatformAccessory`);
         }
 
-        this._log.debug('Configuring accessory %s', accessory.displayName);
+        this._log.debug(`Configuring accessory ${accessory.displayName}'.`);
 
         // Get the accessory identifier from the context.
         const id = accessory.context.ID;
@@ -573,32 +576,33 @@ class TimeTriggerPlatform {
 
         // Initialize the motion sensor.
         try {
-            this._log(`Updating motion sensor service. Accessory(${accessory.displayName})`);
+            this._log.debug(`Updating motion sensor service. Accessory(${accessory.displayName})`);
             this._updateMotionSensorService(accessory, SERVICE_INFO.MOTION, {active: switchState, motion: false});
 
             // Update the accessory information
             this._updateAccessoryInfo(accessory, {model: 'GrumpTech Time-Based Triggers', serialnum: id});
 
-            // Find the trigger with the matching id.
+            // Find the unused trigger with the matching id.
             let found = false;
             this._triggers.forEach((item, index) => {
                 if (_is.existy(item.trigger) && (item.trigger instanceof TimeTrigger) &&
-                    _is.equal(item.trigger.Signature, id)) {
+                    _is.equal(item.trigger.Signature, id) &&
+                    _is.not.existy(item.accessory)) {
                     // Match found.
                     found = true;
                     // Register the accessory.
-                    this._log.debug(`Adding accessory '${accessory.displayName} to the triggers list. Count:${this._triggers.size}`);
+                    this._log.debug(`Adding accessory '${accessory.displayName}' to the triggers list. Count:${this._triggers.size}`);
                     item.accessory = accessory;
                 }
             });
             if (!found) {
                 // Accessory appears to be an orphan.
-                this._log.debug(`Adding ORPHAN accessory '${accessory.displayName} to the triggers list. Count:${this._triggers.size}`);
+                this._log.debug(`Adding ORPHAN accessory '${accessory.displayName}' to the triggers list. Count:${this._triggers.size}`);
                 this._triggers.set(id, {accessory: accessory, trigger: null});
             }
         }
         catch (error) {
-            this._log.debug(`Error configuring accessory ${accessory.displayName}. Error:'${error}'`);
+            this._log.debug(`Error configuring accessory '${accessory.displayName}'. Error:'${error}'`);
         }
     }
 
@@ -681,7 +685,7 @@ class TimeTriggerPlatform {
     _removeAccessory(accessory) {
         // Validate arguments
         if ((accessory === undefined) || !(accessory instanceof _PlatformAccessory)) {
-            throw new TypeError('Accessory must be a PlatformAccessory');
+            throw new TypeError(`Accessory must be a PlatformAccessory`);
         }
         let found = false;
         this._triggers.forEach((item, index) => {
@@ -811,11 +815,11 @@ class TimeTriggerPlatform {
                 serviceMotion.updateCharacteristic(_hap.Characteristic.StatusTampered,   _hap.Characteristic.StatusTampered.NOT_TAMPERED);
             }
             catch (err) {
-                this._log.debug(`Error setting characteristics for ${accessory.displayName}. Error: ${err}`);
+                this._log.debug(`Error setting characteristics for '${accessory.displayName}'. Error: ${err}`);
             }
         }
         else {
-            this._log.debug(`No service: Accessory ${accessory.displayName}`);
+            this._log.debug(`No service: Accessory '${accessory.displayName}'`);
             throw new Error(`Accessory ${accessory.displayName} does not have a valid ${serviceInfo.uuid}:${serviceInfo.udst} service`);
         }
     }
@@ -879,7 +883,7 @@ class TimeTriggerPlatform {
             throw new TypeError(`id must be a non-zero length string.`);
         }
 
-        this._log(`Attempting to set trigger ${id} to ${value}`);
+        this._log.debug(`Attempting to set trigger ${id} to ${value}`);
         let status = null;
         this._triggers.forEach((item, index) => {
             if (_is.existy(item.accessory) &&

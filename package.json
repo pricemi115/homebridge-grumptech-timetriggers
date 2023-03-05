@@ -44,7 +44,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "todo"
+    "url": "https://github.com/pricemi115/homebridge-grumptech-timetriggers"
+  },
+  "bugs": {
+    "url": "https://github.com/pricemi115/homebridge-grumptech-timetriggers/issues"
   },
   "keywords": [
     "homebridge",

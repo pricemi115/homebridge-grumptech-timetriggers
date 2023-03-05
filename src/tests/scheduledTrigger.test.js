@@ -85,6 +85,7 @@ describe('ScheduledTrigger class tests', ()=>{
     describe('Instance functionality tests', ()=>{
         describe.each([
             ['Pre Window',  {minOffset:  1, maxOffset:  2}, 0, TRIGGER_DAYS.AllDays],
+            ['Pre Window - No Tolerance',  {minOffset:  1, maxOffset:  1}, 0, TRIGGER_DAYS.AllDays],
             ['Mid Window',  {minOffset: -1, maxOffset:  2}, 0, TRIGGER_DAYS.AllDays],
             ['Post Window', {minOffset: -2, maxOffset: -1}, 0, TRIGGER_DAYS.AllDays],
             ['Next Week',   {minOffset: -2, maxOffset: -1}, 7, 0],
@@ -109,6 +110,7 @@ describe('ScheduledTrigger class tests', ()=>{
                         done(error);
                     }
                 };
+
                 const now = new Date();
                 const minWindow = new Date(now);
                 minWindow.setMinutes(0);
@@ -150,11 +152,16 @@ describe('ScheduledTrigger class tests', ()=>{
                     }
                 }
 
-                const tolerance = ((maxWindow - minWindow)/2);
-                let nominal = (minWindow - now) + tolerance;
-                const nominalTime = new Date(now.getTime() + nominal);
+                // Compute the trigger nominal
+                const winTolerance = ((maxWindow - minWindow)/2);
+                let nominal = minWindow.getTime() + winTolerance;
+                const nominalTime = new Date(nominal);
+                // Compute the trigger tolerance
+                const toleranceActual = (offsets.maxOffset - offsets.minOffset)/2;
+                const tolHr = Math.floor(toleranceActual);
+                const tolMin = Math.trunc(Math.floor((toleranceActual - tolHr)*60));
 
-                const config = {days: (triggerDay  | additionalDays), time: {nominal: {hour: nominalTime.getHours(), minute: 0}, tolerance: {hour: (offsets.maxOffset - offsets.minOffset), minute: 0}}};
+                const config = {days: (triggerDay  | additionalDays), time: {nominal: {hour: nominalTime.getHours(), minute: nominalTime.getMinutes()}, tolerance: {hour: tolHr, minute: tolMin}}};
                 const trigger = new ScheduledTrigger(config);
                 trigger.on(TRIGGER_EVENTS.EVENT_STATE_NOTIFY, handlerStateNotify);
             });

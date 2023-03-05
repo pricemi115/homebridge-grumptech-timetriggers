@@ -109,6 +109,20 @@ export class TriggerStateArmed extends TriggerStateBase {
     }
 
     /**
+     * @description Perform actions when entering this state.
+     * @param {TriggerStateBase} oldState - State being transitioned from.
+     * @returns {void}
+     * @throws {TypeError} thrown if 'oldState' is not a TriggerStateBase object.
+     * @private
+     */
+    OnEntrance(oldState) {
+        super.OnEntrance(oldState);
+
+        _debug(`TriggerStateArmed::OnEntrance: oldState=${oldState} delay=${this._owner.Timeout}`);
+        this._owner.DoStart(this._owner.Timeout);
+    }
+
+    /**
      * @description Perform actions for the transition to the next state.
      * @returns {boolean} - true if handled.
      * @private

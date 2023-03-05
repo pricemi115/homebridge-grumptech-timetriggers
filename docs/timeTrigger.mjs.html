@@ -81,7 +81,7 @@ import {TriggerStateTripped} from './triggerStateTripped.mjs';
  * @private
  */
 // eslint-disable-next-line camelcase, no-unused-vars
-const _debug_proces = _debugModule('time_trigger');
+const _debug = _debugModule('time_trigger');
 
 /**
  * @description Flag value for an invalid timeout
@@ -302,44 +302,45 @@ export class TimeTrigger extends EventEmitter {
 
     /**
      * @description Enter Idle State
-     * @returns {void}
+     * @returns {boolean} Always return true.
      */
     EnterIdle() {
         // Stop the timer.
         this._doStop();
 
         // Generate new timer values, in case there is a random element.
-        this._generateNewTimerValues();
+        // or we are actually a Scheduled Trigger.
+        this.GenerateNewTimerValues();
 
         // Manage the state.
         this._doStateChange(this._idleState);
 
         // Clear the initializing flag.
         this._initializing = false;
+
+        return true;
     }
 
     /**
      * @description Enter Armed State
-     * @returns {void}
+     * @returns {boolean} Always return true.
      */
     EnterArmed() {
         // Manage the state.
         this._doStateChange(this._armedState);
 
-        // Start the timer with the timeout period
-        this._doStart(this._timeout_ms);
+        return true;
     }
 
     /**
      * @description Enter Tripped State
-     * @returns {void}
+     * @returns {boolean} Always return true.
      */
     EnterTripped() {
         // Manage the state.
         this._doStateChange(this._trippedState);
 
-        // Start the timer for the tripped duration.
-        this._doStart(this._trippedDuration_ms);
+        return true;
     }
 
     /**
@@ -347,9 +348,11 @@ export class TimeTrigger extends EventEmitter {
      * @returns {void}
      * @private
      */
-    _generateNewTimerValues() {
+    GenerateNewTimerValues() {
         this._timeout_ms = TimeTrigger._getNextValue(this._timeout);
         this._trippedDuration_ms = TimeTrigger._getNextValue(this._trippedDuration);
+
+        _debug(`New Timer Values for Trigger(${this.Name}): Timeout=${this._timeout_ms} Duration=${this._trippedDuration_ms}`);
     }
 
     /**
@@ -360,7 +363,7 @@ export class TimeTrigger extends EventEmitter {
      * @throws {RangeError} - thrown if the timeout is not positive
      * @private
      */
-    _doStart(timeout) {
+    DoStart(timeout) {
         if (_is.not.number(timeout)) {
             throw new TypeError(`'timeout' is not a number`);
         }
@@ -373,6 +376,7 @@ export class TimeTrigger extends EventEmitter {
 
         // Set the timer.
         this._timeoutID = setTimeout(this._CB__timerTripped, timeout);
+        _debug(`timeTrigger::_doStart: timeoutID=${this._timeoutID} delay=${timeout}`);
     }
 
     /**
@@ -382,6 +386,7 @@ export class TimeTrigger extends EventEmitter {
      */
     _doStop() {
         // Clear the timer.
+        _debug(`timeTrigger::_doStop: timeoutID=${this._timeoutID}`);
         if (this._timeoutID !== INVALID_TIMEOUT_ID) {
             clearTimeout(this._timeoutID);
             this._timeoutID = INVALID_TIMEOUT_ID;
@@ -394,6 +399,7 @@ export class TimeTrigger extends EventEmitter {
      * @private
      */
     _on_timerTripped() {
+        _debug(`timeTrigger::_on_timerTripped: timeoutID=${this._timeoutID}`);
         // Reset the timer id
         this._timeoutID = INVALID_TIMEOUT_ID;
 
@@ -483,7 +489,7 @@ export class TimeTrigger extends EventEmitter {
         const maximum = range.nominal + range.tolerance;
 
         // Compute the next value from the range.
-        let nextVal = (Math.floor(Math.random()) * (maximum - minimum)) + minimum;
+        let nextVal = (Math.floor(Math.random() * (maximum - minimum))) + minimum;
         // Cap at 0
         if (_is.negative(nextVal)) {
             nextVal = 0;

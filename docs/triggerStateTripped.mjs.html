@@ -109,6 +109,38 @@ export class TriggerStateTripped extends TriggerStateBase {
     }
 
     /**
+     * @description Perform actions when entering this state.
+     * @param {TriggerStateBase} oldState - State being transitioned from.
+     * @returns {void}
+     * @throws {TypeError} thrown if 'oldState' is not a TriggerStateBase object.
+     * @private
+     */
+    OnEntrance(oldState) {
+        super.OnEntrance(oldState);
+
+        _debug(`TriggerStateTripped::OnEntrance: oldState=${oldState} delay=${this._owner.Duration}`);
+        this._owner.DoStart(this._owner.Duration);
+    }
+
+    /**
+     * @description Perform actions when exiting this state.
+     * @param {TriggerStateBase} newState - State being transitioned to.
+     * @returns {void}
+     * @throws {TypeError} thrown if 'oldState' is not a TriggerStateBase object.
+     * @private
+     */
+    OnExit(newState) {
+        super.OnExit(newState);
+
+        // Are the trigger being re-armed?
+        if (newState.State == TRIGGER_STATES.Armed) {
+            // Re-Arming. Generate new timer values, in case the owner has
+            // a random element or is a scheduled trigger.
+            this._owner.GenerateNewTimerValues();
+        }
+    }
+
+    /**
      * @description Perform actions for the transition to the next state.
      * @returns {boolean} - true if handled.
      * @private

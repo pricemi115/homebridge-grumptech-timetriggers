@@ -65,7 +65,7 @@
                                 },
                                 "days": {
                                     "title": "Days",
-                                    "description": "Days to trip th trigger",
+                                    "description": "Days to trip the trigger",
                                     "type": "number",
                                     "default": 127,
                                     "minimum": 1,
@@ -88,7 +88,7 @@
                                 },
                                 "time" : {
                                     "title": "Time settings",
-                                    "description": "Time settings for daily triggers.",
+                                    "description": "Time settings for scheduled triggers.",
                                     "type": "object",
                                     "properties": {
                                         "nominal": {
@@ -125,7 +125,7 @@
                                                     "type": "number",
                                                     "minimum": 0,
                                                     "maximum": 23,
-                                                    "default": 12
+                                                    "default": 0
                                                 },
                                                 "minute": {
                                                     "title": "Minute",

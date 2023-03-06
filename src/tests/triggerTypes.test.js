@@ -19,8 +19,8 @@ describe('Module-level tests', ()=>{
             expect(Object.values(TRIGGER_TYPES).length).toBe(2);
         });
         describe.each([
-            ['Multi',  'MultiTrip', 0],
-            ['Daily',  'Daily',     1],
+            ['Timed',  'TimedTrigger', 0],
+            ['Scheduled',  'ScheduledTrigger',     1],
         ])('Enumeration exists.', (desc, input, result) =>{
             test(desc, ()=>{
                 expect(TRIGGER_TYPES).toHaveProperty(input, result);

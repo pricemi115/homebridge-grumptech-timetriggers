@@ -216,7 +216,7 @@ class TimeTriggerPlatform {
                     }
                     // Trigger type specific configuration.
                     switch (triggerType) {
-                        case TRIGGER_TYPES.MultiTrip: {
+                        case TRIGGER_TYPES.TimedTrigger: {
                             // Extract the appropriate configuration.
                             triggerConfig.timeout = {};
                             if (_is.not.undefined(triggerSettings.timeout) && _is.object(triggerSettings.timeout)) {
@@ -246,7 +246,7 @@ class TimeTriggerPlatform {
                         // eslint-disable-next-line indent
                         break;
 
-                        case TRIGGER_TYPES.Daily: {
+                        case TRIGGER_TYPES.ScheduledTrigger: {
                             // Extract the appropriate configuration.
                             // Days that the trigger should trip.
                             if (_is.not.undefined(triggerSettings.days) && _is.number(triggerSettings.days) &&
@@ -327,13 +327,13 @@ class TimeTriggerPlatform {
                     // Construct the appropriate trigger with the configuration.
                     let trigger = null;
                     switch (triggerType) {
-                        case TRIGGER_TYPES.MultiTrip: {
+                        case TRIGGER_TYPES.TimedTrigger: {
                             trigger = new TimeTrigger(triggerConfig);
                         }
                         // eslint-disable-next-line indent
                         break;
 
-                        case TRIGGER_TYPES.Daily: {
+                        case TRIGGER_TYPES.ScheduledTrigger: {
                             trigger = new ScheduledTrigger(triggerConfig);
                         }
                         // eslint-disable-next-line indent

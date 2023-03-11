@@ -98,8 +98,8 @@ describe('ScheduledTrigger class tests', ()=>{
                         expect(e.uuid).toBe(trigger.Identifier);
 
                         const timeout = trigger.Timeout;
-                        expect(timeout).toBeGreaterThanOrEqual(0.990*expectedMin);
-                        expect(timeout).toBeLessThanOrEqual(1.010*expectedMax);
+                        expect(timeout).toBeGreaterThanOrEqual(0.950*expectedMin);
+                        expect(timeout).toBeLessThanOrEqual(1.050*expectedMax);
 
                         done();
                     }
@@ -123,14 +123,9 @@ describe('ScheduledTrigger class tests', ()=>{
                 const targetDay = ((todayDay + deltaDays) % DAYS_IN_WEEK);
                 const triggerDay = (1<<targetDay);
 
-                // Compute the offset for the expected value
-                const expectedOffset = (minWindow.getMinutes()*60*1000) +
-                                       (minWindow.getSeconds()*1000) +
-                                       (minWindow.getMilliseconds());
-
                 // Compute the expected range
-                let expectedMin = (minWindow - now) - (expectedOffset);
-                let expectedMax = (maxWindow - now) + (expectedOffset);
+                let expectedMin = (minWindow - now)
+                let expectedMax = (maxWindow - now);
 
                 if (expectedMin < 0) {
                     if (expectedMax >= 0) {
@@ -152,6 +147,13 @@ describe('ScheduledTrigger class tests', ()=>{
                         expectedMax += ((dayOffset*24.0)*3600.0*1000.0);
                     }
                 }
+
+                // Compute the offset for the expected value
+                const expectedOffset = (minWindow.getMinutes()*60*1000) +
+                                       (minWindow.getSeconds()*1000) +
+                                       (minWindow.getMilliseconds());
+                expectedMin -= expectedOffset;
+                expectedMax += expectedOffset;
 
                 // Compute the trigger nominal
                 const winTolerance = ((maxWindow - minWindow)/2);

@@ -113,11 +113,9 @@ describe('ScheduledTrigger class tests', ()=>{
 
                 const now = new Date();
                 const minWindow = new Date(now);
-                minWindow.setMinutes(0);
                 minWindow.setSeconds(0);
                 minWindow.setMilliseconds(0);
                 const maxWindow = new Date(now);
-                maxWindow.setMinutes(0);
                 maxWindow.setSeconds(0);
                 maxWindow.setMilliseconds(0);
 
@@ -129,8 +127,12 @@ describe('ScheduledTrigger class tests', ()=>{
                 const targetDay = ((todayDay + deltaDays) % DAYS_IN_WEEK);
                 const triggerDay = (1<<targetDay);
 
-                let expectedMin = minWindow - now;
-                let expectedMax = maxWindow - now;
+                // Compute the minute offset for the expected va;ue
+                const minOffset = Math.floor(minWindow.getMinutes()*60*1000);
+
+                // Compute the expected range
+                let expectedMin = (minWindow - now) - minOffset;
+                let expectedMax = (maxWindow - now) + minOffset;
                 if (expectedMin < 0) {
                     if (expectedMax >= 0) {
                         expectedMin = 0;

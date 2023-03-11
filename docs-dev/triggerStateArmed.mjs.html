@@ -118,7 +118,7 @@ export class TriggerStateArmed extends TriggerStateBase {
     OnEntrance(oldState) {
         super.OnEntrance(oldState);
 
-        _debug(`TriggerStateArmed::OnEntrance: oldState=${oldState} delay=${this._owner.Timeout}`);
+        _debug(`TriggerStateArmed::OnEntrance: oldState=${oldState.Name} delay=${this._owner.Timeout}`);
         this._owner.DoStart(this._owner.Timeout);
     }
 

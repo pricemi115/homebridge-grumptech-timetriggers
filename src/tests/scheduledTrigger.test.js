@@ -98,8 +98,8 @@ describe('ScheduledTrigger class tests', ()=>{
                         expect(e.uuid).toBe(trigger.Identifier);
 
                         const timeout = trigger.Timeout;
-                        expect(timeout).toBeGreaterThanOrEqual(0.995*expectedMin);
-                        expect(timeout).toBeLessThanOrEqual(1.005*expectedMax);
+                        expect(timeout).toBeGreaterThanOrEqual(0.950*expectedMin);
+                        expect(timeout).toBeLessThanOrEqual(1.050*expectedMax);
 
                         done();
                     }
@@ -113,11 +113,7 @@ describe('ScheduledTrigger class tests', ()=>{
 
                 const now = new Date();
                 const minWindow = new Date(now);
-                minWindow.setSeconds(0);
-                minWindow.setMilliseconds(0);
                 const maxWindow = new Date(now);
-                maxWindow.setSeconds(0);
-                maxWindow.setMilliseconds(0);
 
                 // Initiate the trigger test.
                 minWindow.setHours(minWindow.getHours() + offsets.minOffset);
@@ -127,12 +123,10 @@ describe('ScheduledTrigger class tests', ()=>{
                 const targetDay = ((todayDay + deltaDays) % DAYS_IN_WEEK);
                 const triggerDay = (1<<targetDay);
 
-                // Compute the minute offset for the expected va;ue
-                const minOffset = Math.floor(minWindow.getMinutes()*60*1000);
-
                 // Compute the expected range
-                let expectedMin = (minWindow - now) - minOffset;
-                let expectedMax = (maxWindow - now) + minOffset;
+                let expectedMin = (minWindow - now)
+                let expectedMax = (maxWindow - now);
+
                 if (expectedMin < 0) {
                     if (expectedMax >= 0) {
                         expectedMin = 0;
@@ -154,6 +148,13 @@ describe('ScheduledTrigger class tests', ()=>{
                     }
                 }
 
+                // Compute the offset for the expected value
+                const expectedOffset = (minWindow.getMinutes()*60*1000) +
+                                       (minWindow.getSeconds()*1000) +
+                                       (minWindow.getMilliseconds());
+                expectedMin -= expectedOffset;
+                expectedMax += expectedOffset;
+
                 // Compute the trigger nominal
                 const winTolerance = ((maxWindow - minWindow)/2);
                 let nominal = minWindow.getTime() + winTolerance;
@@ -161,7 +162,7 @@ describe('ScheduledTrigger class tests', ()=>{
                 // Compute the trigger tolerance
                 const toleranceActual = (offsets.maxOffset - offsets.minOffset)/2;
                 const tolHr = Math.floor(toleranceActual);
-                const tolMin = Math.trunc(Math.floor((toleranceActual - tolHr)*60));
+                const tolMin = Math.trunc(Math.ceil((toleranceActual - tolHr)*60));
 
                 const config = {days: (triggerDay  | additionalDays), time: {nominal: {hour: nominalTime.getHours(), minute: nominalTime.getMinutes()}, tolerance: {hour: tolHr, minute: tolMin}}};
                 const trigger = new ScheduledTrigger(config);

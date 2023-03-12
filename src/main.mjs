@@ -190,6 +190,12 @@ class TimeTriggerPlatform {
                     const triggerConfig = {signature: identifier};
 
                     // Common trigger configuration data.
+                    triggerConfig.trip_limit = 0;
+                    if (_is.not.undefined(triggerSettings.trip_limit) &&
+                        _is.number(triggerSettings.trip_limit) && _is.positive(triggerSettings.trip_limit)) {
+                        triggerConfig.trip_limit = triggerSettings.trip_limit;
+                    }
+
                     triggerConfig.duration = {};
                     if (_is.not.undefined(triggerSettings.duration) && _is.object(triggerSettings.duration)) {
                         // Duration - Nominal
@@ -968,7 +974,7 @@ class TimeTriggerPlatform {
         }
 
         // Determine if there is motion or not.
-        const isMotion = (e.new_state === TRIGGER_STATES.Triggered);
+        const isMotion = (e.new_state === TRIGGER_STATES.Tripped);
         const isActive = (e.new_state !== TRIGGER_STATES.Inactive);
 
         // Get the accessory.
@@ -979,6 +985,21 @@ class TimeTriggerPlatform {
             try {
                 this._log(`TriggerStateChanged: Updating motion status for trigger ${match.accessory.displayName}. active=${isActive} motion=${isMotion}`);
                 this._updateMotionSensorService(match.accessory, SERVICE_INFO.MOTION, {active: isActive, motion: isMotion});
+
+                // Get the switch state for this accessory
+                const switchState = this._getAccessorySwitchState(match.accessory);
+                // Is the switch state inconsistent with the trigger active state?
+                if (switchState !== isActive) {
+                    // Sync the switch state to the active state.
+                    const serviceSwitch = match.accessory.getService(_hap.Service.Switch);
+                    if (_is.existy(serviceSwitch) &&
+                        (serviceSwitch instanceof _hap.Service.Switch)) {
+                        // Make sure that the `set` event handler gets called so that the switch persistence
+                        // state is updated.
+                        this._log(`TriggerStateChanged: Updating switch status for trigger ${match.accessory.displayName} from ${switchState} to ${isActive}`);
+                        serviceSwitch.setCharacteristic(_hap.Characteristic.On, isActive);
+                    }
+                }
             }
             catch {
             }
@@ -1006,7 +1027,7 @@ class TimeTriggerPlatform {
         }
 
         // Determine if there is motion or not.
-        const isMotion = (e.current_state === TRIGGER_STATES.Triggered);
+        const isMotion = (e.current_state === TRIGGER_STATES.Tripped);
         const isActive = (e.current_state !== TRIGGER_STATES.Inactive);
 
         // Get the accessory.

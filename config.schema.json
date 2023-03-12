@@ -171,6 +171,14 @@
                                             "required": true
                                         }
                                     }
+                                },
+                                "trip_limit": {
+                                    "title": "Trip Limit",
+                                    "description": "Limit the number of times the trigger will trip. (0=Do not limit)",
+                                    "type": "number",
+                                    "minimum": 0,
+                                    "default": 0,
+                                    "required": true
                                 }
                             }
                         },

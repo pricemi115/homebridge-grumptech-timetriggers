@@ -84,6 +84,7 @@ export class TimeTrigger extends EventEmitter {
      * @param {object=} config.duration - Configuration of the tripped duration.
      * @param {number} config.duration.nominal - Nominal time, in milliseconds, for the tripped duration.
      * @param {number} config.duration.tolerance - Tolerance, in milliseconds, for the tripped duration.
+     * @param {number} config.trip_limit - Limit on the number of sequential trip events permitted.
      * @throws {TypeError} - Thrown if 'config' is invalid.
      * @class
      */
@@ -98,6 +99,14 @@ export class TimeTrigger extends EventEmitter {
             }
             if (_is.not.undefined(config.duration)) {
                 TimeTrigger._checkRange(config.duration);
+            }
+            if (_is.not.undefined(config.trip_limit)) {
+                if (_is.not.number(config.trip_limit)) {
+                    throw new TypeError(`Invalid configuration - trip limit`);
+                }
+                else if (_is.negative(config.trip_limit)) {
+                    throw new RangeError(`Invalid configuration - trip limit`);
+                }
             }
         }
 
@@ -162,8 +171,19 @@ export class TimeTrigger extends EventEmitter {
             this._trippedDuration = config.duration;
         }
 
+        if (_is.undefined(config) ||
+            _is.undefined(config.trip_limit)) {
+            // Use the default (no limit)
+            this._tripLimit = 0;
+        }
+        else {
+            // Use the limit provided.
+            this._tripLimit = config.trip_limit;
+        }
+
         this._timeout_ms = -1;
         this._trippedDuration_ms = -1;
+        this._tripCount = 0;
 
         // Force a decoupled transition into the Idle State.
         this._initializing = true;
@@ -256,6 +276,9 @@ export class TimeTrigger extends EventEmitter {
      * @returns {boolean} Always return true.
      */
     EnterIdle() {
+        // Reset the trip count
+        this._tripCount = 0;
+
         // Stop the timer.
         this._doStop();
 
@@ -288,10 +311,29 @@ export class TimeTrigger extends EventEmitter {
      * @returns {boolean} Always return true.
      */
     EnterTripped() {
+        // Increment the trip count
+        this._tripCount++;
+
         // Manage the state.
         this._doStateChange(this._trippedState);
 
         return true;
+    }
+
+    /**
+     * @description Read property accessor indicating if the trip limit has been exceeded
+     * @returns {boolean} - true if the trip limit has been exceeded
+     * @private
+     */
+    get IsTripLimitExpired() {
+        // Default to the trip limit being 1 or more.
+        let limitExceeded = (this._tripLimit > 0);
+        if (limitExceeded) {
+            // If the trip limit is set, has the trip count exceeded the limit?
+            limitExceeded = (this._tripCount >= this._tripLimit);
+        }
+
+        return limitExceeded;
     }
 
     /**

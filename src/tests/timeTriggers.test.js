@@ -78,10 +78,18 @@ describe('TimeTrigger class tests', ()=>{
             function trigNegTripDurationt() {
                 const test = new TimeTrigger({duration: {nominal: -10, tolerance: -10}});
             }
+            function trigInvalidTripLimit() {
+                const test = new TimeTrigger({trip_limit: 'waffles'});
+            }
+            function trigNegTripLimit() {
+                const test = new TimeTrigger({trip_limit: -1});
+            }
             expect(trigNumber).toThrow(TypeError);
             expect(trigString).toThrow(TypeError);
             expect(trigNegTimeout).toThrow(RangeError);
             expect(trigNegTripDurationt).toThrow(RangeError);
+            expect(trigInvalidTripLimit).toThrow(TypeError);
+            expect(trigNegTripLimit).toThrow(RangeError);
         });
     });
     describe('Instance functionality tests', ()=>{
@@ -111,7 +119,7 @@ describe('TimeTrigger class tests', ()=>{
                         expect((e.new_state !== e.old_state)).toBeTruthy();
 
                         /* Manage Trigger Life Cycle */
-                        if ((e.old_state === TRIGGER_STATES.Triggered) &&
+                        if ((e.old_state === TRIGGER_STATES.Tripped) &&
                             (e.new_state === TRIGGER_STATES.Armed)) {
                             // compute the measured timeout period.
                             const timeNow = Date.now();
@@ -225,6 +233,63 @@ describe('TimeTrigger class tests', ()=>{
             // Decouple the start.
             setImmediate(() => {
                 timeTrigger.Start();
+            });
+        });
+        describe.each([
+            ['1 Trip',  {timeout: {nominal: 25, tolerance: 0}, trip_limit: 1}],
+            ['5 Trips', {timeout: {nominal: 25, tolerance: 0}, trip_limit: 5}],
+        ])('Trip Limit Tests.', (desc, config) =>{
+            test(desc, done =>{
+                function handlerStateChanged(e) {
+                    try {
+                        /* UUID */
+                        expect(e).toHaveProperty('uuid');
+                        expect(e.uuid).toBe(timeTrigger.Identifier);
+
+                        /* old_state */
+                        expect(e).toHaveProperty('old_state');
+                        expect(_is.sameType(e.old_state, TRIGGER_STATES.Inactive)).toBeTruthy();
+
+                        /* new_state */
+                        expect(e).toHaveProperty('new_state');
+                        expect(_is.sameType(e.new_state, TRIGGER_STATES.Inactive)).toBeTruthy();
+
+                        /* state changed */
+                        expect((e.new_state !== e.old_state)).toBeTruthy();
+
+                        /* Manage Trigger Life Cycle */
+                        if ((e.old_state === TRIGGER_STATES.Armed) &&
+                            (e.new_state === TRIGGER_STATES.Tripped)) {
+                            // Increment the trip count
+                            tripCount++;
+                        }
+                        if ((e.old_state === TRIGGER_STATES.Tripped) &&
+                            (e.new_state === TRIGGER_STATES.Inactive)) {
+                            // Determine if we passed
+                            const error = (config.trip_limit !== tripCount);
+
+                            // Cleanup and end the test.
+                            timeTrigger.off(TRIGGER_EVENTS.EVENT_STATE_CHANGED, handlerStateChanged);
+
+                            done(error);
+                        }
+                    }
+                    catch (error) {
+                        // Abort the test.
+                        console.log(`Aborting test.`);
+                        console.log(error);
+                        done(error);
+                    }
+                };
+
+                // Initiate the trigger test.
+                let tripCount = 0;
+                timeTrigger = new TimeTrigger(config);
+                timeTrigger.on(TRIGGER_EVENTS.EVENT_STATE_CHANGED, handlerStateChanged);
+                // Decouple the start.
+                setImmediate(() => {
+                    timeTrigger.Start();
+                });
             });
         });
     });

@@ -22,6 +22,7 @@ classDiagram
         +Name() string
         +Timeout() number
         +Duration() number
+        +TimeRemaining() number
 
         +Start()
         +Stop()
@@ -30,11 +31,13 @@ classDiagram
         +EnterArmed()
         +EnterTripped()
 
-        -_doStart()
+        -DoStart()
+        -GenerateNewTimerValues()
+        -IsTripLimitExpired() boolean
+
         -_doStop()
         -_on_timerTripped()
         -_doStateChange()
-        -_generateNewTimerValues()
         -_checkRange()$
         __getNextValue()$
     }

@@ -4,8 +4,16 @@ stateDiagram-v2
 Idle --> Armed : Next
 Idle --> Idle : Abort
 
+state TripLimitCheck <<choice>>
+state TripCountCheck <<choice>>
 Armed --> Tripped : Next
 Armed --> Idle : Abort
 
-Tripped --> Armed : Next
+Tripped --> TripLimitCheck : Next
 Tripped --> Idle : Abort
+
+TripLimitCheck --> Armed: limit == 0
+TripLimitCheck --> TripCountCheck: limit > 0
+
+TripCountCheck --> Armed: count < limit
+TripCountCheck --> Idle: count >= limit

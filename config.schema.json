@@ -49,14 +49,16 @@
                                             "description": "Nominal trip interval, in milliseconds.",
                                             "type": "number",
                                             "default": 60000,
-                                            "minimum": 1
+                                            "minimum": 1,
+                                            "required": true
                                         },
                                         "tolerance": {
                                             "title": "Trip Interval Tolerance",
                                             "description": "Tolerance, in milliseconds, for the trip interval.</br><small>Used to randomize the trip event around the specified interval.</small>",
                                             "type": "number",
                                             "default": 0,
-                                            "minimum":  0
+                                            "minimum":  0,
+                                            "required": true
                                         }
                                     },
                                     "condition": {
@@ -102,7 +104,8 @@
                                                     "type": "number",
                                                     "minimum": 0,
                                                     "maximum": 23,
-                                                    "default": 12
+                                                    "default": 12,
+                                                    "required": true
                                                 },
                                                 "minute": {
                                                     "title": "Minute",
@@ -110,7 +113,8 @@
                                                     "type": "number",
                                                     "minimum": 0,
                                                     "maximum": 59,
-                                                    "default": 0
+                                                    "default": 0,
+                                                    "required": true
                                                 }
                                             }
                                         },
@@ -121,19 +125,21 @@
                                             "properties": {
                                                 "hour": {
                                                     "title": "Hour",
-                                                    "description": "Hour to trip the trigger. (00-23)",
+                                                    "description": "Hour tolerance around the nominal trip time. (00-23)",
                                                     "type": "number",
                                                     "minimum": 0,
                                                     "maximum": 23,
-                                                    "default": 0
+                                                    "default": 0,
+                                                    "required": true
                                                 },
                                                 "minute": {
                                                     "title": "Minute",
-                                                    "description": "Minute to trip the trigger. (00-59)",
+                                                    "description": "Minute tolerance around the trip time. (00-59)",
                                                     "type": "number",
                                                     "minimum": 0,
                                                     "maximum": 59,
-                                                    "default": 0
+                                                    "default": 0,
+                                                    "required": true
                                                 }
                                             }
                                         }
@@ -153,16 +159,26 @@
                                             "description": "Nominal trip duration, in milliseconds.",
                                             "type": "number",
                                             "default": 250,
-                                            "minimum": 10
+                                            "minimum": 10,
+                                            "required": true
                                         },
                                         "tolerance": {
                                             "title": "Trip Duration Tolerance",
                                             "description": "Tolerance, in milliseconds, for the trip duration.</br><small>Used to randomize the trip event around the specified interval.</small>",
                                             "type": "number",
                                             "default": 0,
-                                            "minimum": 0
+                                            "minimum": 0,
+                                            "required": true
                                         }
                                     }
+                                },
+                                "trip_limit": {
+                                    "title": "Trip Limit",
+                                    "description": "Limit the number of times the trigger will trip. (0=Do not limit)",
+                                    "type": "number",
+                                    "minimum": 0,
+                                    "default": 0,
+                                    "required": true
                                 }
                             }
                         },

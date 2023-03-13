@@ -105,7 +105,7 @@ export class TriggerStateTripped extends TriggerStateBase {
      * @private
      */
     get State() {
-        return TRIGGER_STATES.Triggered;
+        return TRIGGER_STATES.Tripped;
     }
 
     /**
@@ -148,8 +148,15 @@ export class TriggerStateTripped extends TriggerStateBase {
     _doNext() {
         let handled = false;
         if (_is.not.undefined(this._owner)) {
-            // Transitioon to armed.
-            handled = this._owner.EnterArmed();
+            // Determine if the Trip Limit has expired.
+            if (this._owner.IsTripLimitExpired) {
+                // Transition to idle
+                handled = this._owner.EnterIdle();
+            }
+            else {
+                // Transitioon to armed.
+                handled = this._owner.EnterArmed();
+            }
         }
 
         return handled;

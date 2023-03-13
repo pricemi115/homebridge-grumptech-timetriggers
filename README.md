@@ -26,7 +26,7 @@ The plugin configuration consists of an array of objects containing the configur
 | :------: | :------: | :------: | :------: | :------: |:------: | :------: | :------: | :------: | :------: |
 | Identifier | Uniqie identifier for the trigger | trigger_identifier | Per Trigger | String | N/A | Trigger | | | Must be unique. Controls trigger and Homekit accessory mapping. |
 | Type | Type of trigger | trigger_type | Per Trigger | Number | N/A | Timed (0) | Timed (0), Scheduled(1) | | |
-| Trip Duration | The nominal time that a trigger reains in the tripped state. | duration:nominal | Per Trigger | Number | milliseconds | 250 | 10 | | |
+| Trip Duration | The nminal time that a trigger reains in the tripped state. | duration:nominal | Per Trigger | Number | milliseconds | 250 | 10 | | |
 | Trip Duration Tolerance | The random time to apply to the trip duration | duration:tolerance | Per Trigger | Number | milliseconds | 0 | 0 | | Allows for a random trip duration. |
 | Trip Time | The nominal time for a trigger | timeout:nominal | Per Trigger | Number | milliseconds | 60000 | 1 | | Applies to _Timed_ triggers only. |
 | Trip Time Tolerance | The random to apply to the trigger | timeout:tolerance | Per Trigger | Number | milliseconds | 0 | 0 | | Applies to _Timed_ triggers only. |
@@ -34,13 +34,18 @@ The plugin configuration consists of an array of objects containing the configur
 | Scheduled Trip Minute | The nominal minute to schedule a trigger to trip | time:nominal:minute | Per Trigger | Number | Minute of the Hour | 0 | 0 | 59 | Applies to _Scheduled_ triggers only. |
 | Scheduled Trip Hour Tolerance | The tolarance to appply to the hour of a scheduled trigger | time:tolerance:hour | Per Trigger | Number | Hours | 0 | 0 | 23 | Applies to _Scheduled_ triggers only. |
 | Scheduled Trip Minute Tolerance | The tolarance to appply to the minute of a scheduled trigger | time:tolerance:minute | Per Trigger | Number | Minutes | 0 | 0 | 59 | Applies to _Scheduled_ triggers only. |
-| Days to trip | Bitmask of the days to trip the trigger | days | Per Trigger | Number | | 127 | 1 | 127 |  Applies to _Scheduled_ triggers only.</br>1:Sunday, 2:Monday, 4:Tuesday, 8:Wednesday,</br>16:Thursday, 32:Friday, 64:Saturday |
+| Days to Trip | Bitmask of the days to trip the trigger | days | Per Trigger | Number | | 127 | 1 | 127 |  Applies to _Scheduled_ triggers only.</br>1:Sunday, 2:Monday, 4:Tuesday, 8:Wednesday,</br>16:Thursday, 32:Friday, 64:Saturday |
+| Trip Limit | Place a cap on the number of sequential trip events | trip_limit | Per Trigger | Number | | 0 | 0 | | A value of 0 diables the limit and the trigger will re-arm indefinitely |
 
 ## Usage
 The plugin will create, or restore, a dynamic accessory for each trigger specified in the configuration. Each accessory will advertise two services: (1) switch, and (1) motion sensors.
 
 The control switch will enable/disable the trigger. The state of this setting is saved and will be restored to the last known state upon restart.</br>
 The motion sensor will report that motion is detected when the trigger is in the tripped state. Otherwise, there will be no motion detected.</br>
+
+Some example use cases are:</br>
+1. Use the Scheduled Trigger to control lights that turn on/off randomly within a user specified window to give the appearance of being home when you are away on holiday.
+2. Use the Timed Trigger with a limit of 1 to provide the capability of delayed control of various accessories. For example to turn the lighs off in 30 minutes.
 
 ## Known Issues and Planned Enhancements
 Refer to the bugs and enhancements listed [here](https://github.com/pricemi115/homebridge-grumptech-timetriggers/issues)

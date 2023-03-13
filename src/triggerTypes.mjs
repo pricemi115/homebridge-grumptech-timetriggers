@@ -26,13 +26,13 @@ export const TRIGGER_TYPES = {
  * @enum {number}
  * @property {number} Inactive- Trigger Inactive
  * @property {number} Armed - Trigger Armed
- * @property {number} Triggered - Trigger Tripped
+ * @property {number} Tripped - Trigger Tripped
  */
 export const TRIGGER_STATES = {
     /* eslint-disable key-spacing */
     Inactive  : 0,
     Armed     : 1,
-    Triggered : 2,
+    Tripped   : 2,
     /* eslint-enable key-spacing */
 };
 

@@ -33,9 +33,9 @@ describe('Module-level tests', ()=>{
             expect(Object.values(TRIGGER_STATES).length).toBe(3);
         });
         describe.each([
-            ['Inactive',  'Inactive',  0],
-            ['Armed',     'Armed',     1],
-            ['Triggered', 'Triggered', 2],
+            ['Inactive', 'Inactive', 0],
+            ['Armed',    'Armed',    1],
+            ['Tripped',  'Tripped',  2],
         ])('Enumeration exists.', (desc, input, result) =>{
             test(desc, ()=>{
                 expect(TRIGGER_STATES).toHaveProperty(input, result);

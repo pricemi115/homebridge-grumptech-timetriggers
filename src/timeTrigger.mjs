@@ -410,8 +410,8 @@ export class TimeTrigger extends EventEmitter {
     static _checkRange(range) {
         if (_is.not.undefined(range)) {
             if (_is.not.object(range) ||
-                _is.not.number(range.nominal) ||
-                _is.not.number(range.tolerance)) {
+                (_is.not.undefined(range.nominal) && _is.not.number(range.nominal)) ||
+                (_is.not.undefined(range.tolerance) && _is.not.number(range.tolerance))) {
                 throw new TypeError(`range is invalid.`);
             }
             if (_is.negative(range.nominal) ||

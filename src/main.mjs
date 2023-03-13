@@ -198,21 +198,12 @@ class TimeTriggerPlatform {
                             // Set the nominal
                             triggerConfig.duration.nominal = triggerSettings.duration.nominal;
                         }
-                        else {
-                            throw new TypeError(`Configuration is invalid. Duration - nominal.`);
-                        }
                         // Duration - Tolerance
                         if (_is.not.undefined(triggerSettings.duration.tolerance) && _is.number(triggerSettings.duration.tolerance) &&
                             _is.not.negative(triggerSettings.duration.tolerance)) {
                             // Set the maximum
                             triggerConfig.duration.tolerance = triggerSettings.duration.tolerance;
                         }
-                        else {
-                            throw new TypeError(`Configuration is invalid. Duration - tolerance.`);
-                        }
-                    }
-                    else {
-                        throw new TypeError(`Configuration is invalid. Duration.`);
                     }
                     // Trigger type specific configuration.
                     switch (triggerType) {
@@ -226,17 +217,11 @@ class TimeTriggerPlatform {
                                     // Set the nominal
                                     triggerConfig.timeout.nominal = triggerSettings.timeout.nominal;
                                 }
-                                else {
-                                    throw new TypeError(`Configuration is invalid. Timeout - nominal.`);
-                                }
                                 // Timeout - Tolerance
                                 if (_is.not.undefined(triggerSettings.timeout.tolerance) && _is.number(triggerSettings.timeout.tolerance) &&
                                     _is.not.negative(triggerSettings.timeout.tolerance)) {
                                     // Set the tolerance
                                     triggerConfig.timeout.tolerance = triggerSettings.timeout.tolerance;
-                                }
-                                else  {
-                                    throw new TypeError(`Configuration is invalid. Timeout - tolerance.`);
                                 }
                             }
                             else {
@@ -249,12 +234,10 @@ class TimeTriggerPlatform {
                         case TRIGGER_TYPES.ScheduledTrigger: {
                             // Extract the appropriate configuration.
                             // Days that the trigger should trip.
+                            triggerConfig.days = TRIGGER_DAYS.AllDays;
                             if (_is.not.undefined(triggerSettings.days) && _is.number(triggerSettings.days) &&
                                 (Object.values(TRIGGER_DAYS).indexOf(triggerSettings.days) >= 0)) {
                                 triggerConfig.days = triggerSettings.days;
-                            }
-                            else {
-                                throw new TypeError(`Configuration is invalid. Days.`);
                             }
                             // Trigger time window
                             triggerConfig.time = {};
@@ -269,17 +252,11 @@ class TimeTriggerPlatform {
                                         // Set the nominal
                                         triggerConfig.time.nominal.hour = triggerSettings.time.nominal.hour;
                                     }
-                                    else {
-                                        throw new TypeError(`Configuration is invalid. Time Window(nominal)-hour.`);
-                                    }
                                     // Minute
                                     if (_is.not.undefined(triggerSettings.time.nominal.minute) && _is.number(triggerSettings.time.nominal.minute) &&
                                         _is.within(triggerSettings.time.nominal.minute, -1, 60)) {
                                         // Set the nominal
                                         triggerConfig.time.nominal.minute = triggerSettings.time.nominal.minute;
-                                    }
-                                    else {
-                                        throw new TypeError(`Configuration is invalid. Time Window(nominal)-minute.`);
                                     }
                                 }
                                 else {
@@ -293,17 +270,11 @@ class TimeTriggerPlatform {
                                         // Update the tolerance
                                         triggerConfig.time.tolerance.hour = triggerSettings.time.tolerance.hour;
                                     }
-                                    else {
-                                        throw new TypeError(`Configuration is invalid. Time Window(tolerance)-hour.`);
-                                    }
                                     // Minute
                                     if (_is.not.undefined(triggerSettings.time.tolerance.minute) && _is.number(triggerSettings.time.tolerance.minute) &&
                                         _is.within(triggerSettings.time.tolerance.minute, -1, 60)) {
                                         // Update the tolerance
                                         triggerConfig.time.tolerance.minute = triggerSettings.time.tolerance.minute;
-                                    }
-                                    else {
-                                        throw new TypeError(`Configuration is invalid. Time Window(tolerance)-minute.`);
                                     }
                                 }
                                 else {

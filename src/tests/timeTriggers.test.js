@@ -46,6 +46,10 @@ describe('TimeTrigger class tests', ()=>{
             // Setting of the duration to a positive value is decoupled.
             expect(_is.positive(timeTrigger.Duration)).toBe(false);
         });
+        test('TimeRemaining', ()=>{
+            expect(timeTrigger).toHaveProperty('TimeRemaining');
+            expect(_is.equal(timeTrigger.TimeRemaining, 0)).toBe(true);
+        });
     });
     describe('Instance function/property valid tests - part 2', ()=>{
         test('Valid config', ()=>{

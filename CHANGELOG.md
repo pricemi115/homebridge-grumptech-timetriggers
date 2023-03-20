@@ -4,7 +4,11 @@ Change history for _homebridge-grumptech-timetriggers_
 ---
 ---
 
-## [1.1.0] - 2023-MAR-07
+## [1.2.0] - 2023-MAR-20
+### What's new
+- [Issue #23](https://github.com/pricemi115/homebridge-grumptech-timetriggers/issues/23): Add a service to see the amount of time remaining before the next trigger event.
+
+## [1.1.0] - 2023-MAR-12
 ### What's new
 - [Issue #16](https://github.com/pricemi115/homebridge-grumptech-timetriggers/issues/16): Implemented a cap to the number of times a trigger will trip when enabled.
 

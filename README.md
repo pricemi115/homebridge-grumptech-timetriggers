@@ -38,10 +38,12 @@ The plugin configuration consists of an array of objects containing the configur
 | Trip Limit | Place a cap on the number of sequential trip events | trip_limit | Per Trigger | Number | | 0 | 0 | | A value of 0 diables the limit and the trigger will re-arm indefinitely |
 
 ## Usage
-The plugin will create, or restore, a dynamic accessory for each trigger specified in the configuration. Each accessory will advertise two services: (1) switch, and (1) motion sensors.
+The plugin will create, or restore, a dynamic accessory for each trigger specified in the configuration. Each accessory will advertise four services: (1) switch, (1) motion sensor, (1) light sensor, and (1) time information.
 
 The control switch will enable/disable the trigger. The state of this setting is saved and will be restored to the last known state upon restart.</br>
 The motion sensor will report that motion is detected when the trigger is in the tripped state. Otherwise, there will be no motion detected.</br>
+The light sensor will be used to indicate the time, in minutes, until the next trigger event.</br>
+The time informaiton service is used to indicate the time, in the local timezone, of the next trigger event. However, to date, no Homekit app has been found that resolves this service. This service is only accessible via the [_homebridge-config-ui-x_](https://www.npmjs.com/package/homebridge-config-ui-x) web view on the `Accessories` page.</br> 
 
 Some example use cases are:</br>
 1. Use the Scheduled Trigger to control lights that turn on/off randomly within a user specified window to give the appearance of being home when you are away on holiday.

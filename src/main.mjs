@@ -66,14 +66,22 @@ import {TimeTrigger} from './timeTrigger.mjs';
 import {ScheduledTrigger} from './scheduledTrigger.mjs';
 import {TRIGGER_STATES, TRIGGER_EVENTS, TRIGGER_DAYS, TRIGGER_TYPES} from './triggerTypes.mjs';
 
+// Internal complex types
+/**
+ * @typedef {object} DueTime - Due Time
+ * @property {string} due_time - Local time string
+ * @property {number} due_dow  - Day of the week.
+ */
+
 // Internal Constants
 // History:
-//          v1: Initial release
+//          v1:     Initial release
+//          v1.1:   Added Time Remaining and Dur Time Services
 /**
  * @description Version history of the plugin.
  * @private
  */
-const ACCESSORY_VERSION = 1;
+const ACCESSORY_VERSION = 1.1;
 
 /**
  * @private
@@ -113,8 +121,10 @@ let _hap;
  */
 const SERVICE_INFO = {
     /* eslint-disable key-spacing, max-len */
-    CONTROL : {uuid:`4A11F55C-B51E-4E17-9170-7295B0731F67`, name:`Trigger Control`, udst:`TriggerControl`},
-    MOTION  : {uuid:`26BCECB8-5477-4198-83F0-768F79CC2951`, name:`Motion Status`,   udst:`MotionStatus`},
+    CONTROL         : {uuid:`4A11F55C-B51E-4E17-9170-7295B0731F67`, name:`Trigger Control`,      udst:`TriggerControl`},
+    MOTION          : {uuid:`26BCECB8-5477-4198-83F0-768F79CC2951`, name:`Motion Status`,        udst:`MotionStatus`},
+    DUE_TIME        : {uuid:`f9ff7190-4bba-4079-86ce-acca24870921`, name:`Due Time`,             udst:`DueTime`},
+    TIME_REMAINING  : {uuid:`168456ad-4f4b-45ac-8299-aaa080cb13cc`, name:`Time Remainng Status`, udst:`TimeRemainingStatus`},
     /* eslint-enable key-spacing, max-len */
 };
 
@@ -374,10 +384,8 @@ class TimeTriggerPlatform {
             if (_is.not.undefined(item.accessory) &&
                 (item.accessory instanceof _PlatformAccessory)) {
                 const accessory = item.accessory;
-                // Accessory is from a prior version and needs to be replaced.
-                if (!Object.prototype.hasOwnProperty.call(accessory.context, 'VERSION') ||
-                    (accessory.context.VERSION !== ACCESSORY_VERSION)) {
-                    this._log.debug(`Accessory '${accessory.displayName}' has accessory version ${accessory.context.VERSION}. Version ${ACCESSORY_VERSION} is expected.`);
+                // Check if the accessory version cannot be managed
+                if (!this._managePluginVersion(accessory)) {
                     // This accessory needs to be replaced.
                     accessoriesToRemove.push(accessory);
                     removed = true;
@@ -447,7 +455,7 @@ class TimeTriggerPlatform {
      */
     configureAccessory(accessory) {
         // Validate the argument(s)
-        if ((accessory === undefined) ||
+        if ((_is.undefined(accessory)) ||
             (!(accessory instanceof _PlatformAccessory))) {
             throw new TypeError('accessory must be a PlatformAccessory');
         }
@@ -466,7 +474,7 @@ class TimeTriggerPlatform {
         if (!found) {
             // Configure the accessory (also registers it.)
             try {
-                this._configureAccessory(accessory);
+                this._configureAccessory(accessory, false);
             }
             catch (error) {
                 this._log.debug(`Unable to configure accessory '${accessory.displayName}'. Version:${accessory.context.VERSION}. Error:${error}`);
@@ -480,12 +488,13 @@ class TimeTriggerPlatform {
      * @description Performs accessory configuration and internal 'registration' (appending to our list).
      *              Opportunity to setup event handlers for characteristics and update values (as needed).
      * @param {_PlatformAccessory} accessory - Accessory to be configured/registered
+     * @param {boolean} reconfig - flag indicating if this is a re-configuration
      * @returns {void}
      * @throws {TypeError} - thrown if 'accessory' is not a PlatformAccessory
      * @private
      */
-    _configureAccessory(accessory) {
-        if ((accessory === undefined) ||
+    _configureAccessory(accessory, reconfig) {
+        if ((_is.undefined(accessory)) ||
             (!(accessory instanceof _PlatformAccessory))) {
             throw new TypeError(`accessory must be a PlatformAccessory`);
         }
@@ -495,10 +504,12 @@ class TimeTriggerPlatform {
         // Get the accessory identifier from the context.
         const id = accessory.context.ID;
 
-        // Register to handle the Identify request for the accessory.
-        accessory.on(_PlatformAccessory.PlatformAccessoryEvent.IDENTIFY, () => {
-            this._log('%s identified!', accessory.displayName);
-        });
+        if (!reconfig) {
+            // Register to handle the Identify request for the accessory.
+            accessory.on(_PlatformAccessory.PlatformAccessoryEvent.IDENTIFY, () => {
+                this._log('%s identified!', accessory.displayName);
+            });
+        }
 
         // Does this accessory have a Switch service?
         let switchState = true;
@@ -515,17 +526,38 @@ class TimeTriggerPlatform {
                 switchState = theSettings.SwitchState;
             }
             serviceSwitch.updateCharacteristic(_hap.Characteristic.On, switchState);
+            if (!reconfig) {
+                // Get the 'On' characteristic for the switch.
+                const charOn = serviceSwitch.getCharacteristic(_hap.Characteristic.On);
+                // Register for the "get" event notification.
+                charOn.on('get', this._handleOnGet.bind(this, id));
+                // Register for the "set" event notification.
+                charOn.on('set', this._handleOnSet.bind(this, id));
+            }
+        }
 
-            // Get the 'On' characteristic for the switch.
-            const charOn = serviceSwitch.getCharacteristic(_hap.Characteristic.On);
+        // Does the accessory have a LightSensor service.
+        const serviceLightSensor = accessory.getService(_hap.Service.LightSensor);
+        if (_is.existy(serviceLightSensor) &&
+            (serviceLightSensor instanceof _hap.Service.LightSensor)) {
+            // Get the 'Current Ambient Light Level' characteristic for the light sensor.
+            const charLightLevel = serviceLightSensor.getCharacteristic(_hap.Characteristic.CurrentAmbientLightLevel);
             // Register for the "get" event notification.
-            charOn.on('get', this._handleOnGet.bind(this, id));
-            // Register for the "set" event notification.
-            charOn.on('set', this._handleOnSet.bind(this, id));
+            charLightLevel.on('get', this._handleCurrentAmbientLightLevelGet.bind(this, id));
+        }
+
+        // Does the accessory have a LightSensor service.
+        const serviceTimeInfo = accessory.getService(_hap.Service.TimeInformation);
+        if (_is.existy(serviceTimeInfo) &&
+            (serviceTimeInfo instanceof _hap.Service.TimeInformation)) {
+            // Get the 'CurrentTime' characteristic for the time information.
+            const charCurrTime = serviceTimeInfo.getCharacteristic(_hap.Characteristic.CurrentTime);
+            // Register for the "get" event notification.
+            charCurrTime.on('get', this._handleCurrentTimeGet.bind(this, id));
         }
 
         // Update the names of each service.
-        const infoItems = [SERVICE_INFO.CONTROL, SERVICE_INFO.MOTION];
+        const infoItems = [SERVICE_INFO.CONTROL, SERVICE_INFO.MOTION, SERVICE_INFO.TIME_REMAINING, SERVICE_INFO.DUE_TIME];
         for (const item of infoItems) {
             const service = accessory.getServiceById(item.uuid, item.udst);
             if (_is.existy(service)) {
@@ -535,8 +567,11 @@ class TimeTriggerPlatform {
 
         // Initialize the motion sensor.
         try {
-            this._log.debug(`Updating motion sensor service. Accessory(${accessory.displayName})`);
+            const today = new Date();
+            this._log.debug(`Updating services. Accessory(${accessory.displayName})`);
             this._updateMotionSensorService(accessory, SERVICE_INFO.MOTION, {active: switchState, motion: false});
+            this._updateLightSensorService(accessory, SERVICE_INFO.TIME_REMAINING, {active: switchState, lightlevel: 0.0001});
+            this._updateTimeInformationService(accessory, SERVICE_INFO.DUE_TIME, {due_time: 'Unknown', due_dow: (today.getDay() + 1)});
 
             // Update the accessory information
             this._updateAccessoryInfo(accessory, {model: 'GrumpTech Time-Based Triggers', serialnum: id});
@@ -546,7 +581,7 @@ class TimeTriggerPlatform {
             this._triggers.forEach((item, index) => {
                 if (_is.existy(item.trigger) && (item.trigger instanceof TimeTrigger) &&
                     _is.equal(item.trigger.Signature, id) &&
-                    _is.not.existy(item.accessory)) {
+                    (_is.not.existy(item.accessory) || (reconfig))) {
                     // Match found.
                     found = true;
                     // Register the accessory.
@@ -563,6 +598,75 @@ class TimeTriggerPlatform {
         catch (error) {
             this._log.debug(`Error configuring accessory '${accessory.displayName}'. Error:'${error}'`);
         }
+    }
+
+    /**
+     * @description - Manage plugin version upgrading if possible
+     * @param {_PlatformAccessory} accessory - Accessory to be configured.
+     * @returns {boolean} - false if the accessory version cannot me managed. true, otherwise.
+     * @throws {TypeError} - thrown if 'accessory' is not a PlatformAccessory
+     */
+    _managePluginVersion(accessory) {
+        // Validate the argument(s)
+        if ((_is.undefined(accessory)) ||
+            (!(accessory instanceof _PlatformAccessory))) {
+            throw new TypeError('accessory must be a PlatformAccessory');
+        }
+        let versionManaged = false;
+
+        // Accessory is from a prior version and needs to be replaced.
+        if (Object.prototype.hasOwnProperty.call(accessory.context, 'VERSION') &&
+            _is.number(accessory.context.VERSION)) {
+            // Compute the version delta.
+            const versionDelta = ACCESSORY_VERSION - accessory.context.VERSION;
+
+            if (_is.not.negative(versionDelta)) {
+                let needsReconfiguration = false;
+
+                // At current version
+                if (_is.equal(accessory.context.VERSION, ACCESSORY_VERSION)) {
+                    // Update the flag
+                    versionManaged = true;
+                }
+                // Upgrading from v1
+                else if (_is.equal(accessory.context.VERSION, 1)) {
+                    if (_is.above(ACCESSORY_VERSION, 1)) {
+                        this._log.debug(`Accessory '${accessory.displayName}' upgrading from v${accessory.context.VERSION} to v${ACCESSORY_VERSION}`);
+
+                        // Append the services added since v1.0
+                        // Added in v1.1
+                        accessory.addService(_hap.Service.TimeInformation, SERVICE_INFO.DUE_TIME.uuid,       SERVICE_INFO.DUE_TIME.udst);
+                        accessory.addService(_hap.Service.LightSensor,     SERVICE_INFO.TIME_REMAINING.uuid, SERVICE_INFO.TIME_REMAINING.udst);
+
+                        // Update the version of the accessory. This is used for depersistence
+                        accessory.context.VERSION = ACCESSORY_VERSION;
+
+                        // Flag for re-configuration
+                        needsReconfiguration = true;
+
+                        // Update the flag
+                        versionManaged = true;
+                    }
+                }
+                else {
+                    this._log.debug(`Accessory '${accessory.displayName}' unsupported upgrade from v${accessory.context.VERSION} to v${ACCESSORY_VERSION}`);
+                }
+
+                // Reconfigure if needed.
+                if (versionManaged && needsReconfiguration) {
+                    this._log.debug(`Reconfiguring accessory '${accessory.displayName}'`);
+                    this._configureAccessory(accessory, true);
+                }
+            }
+            else {
+                this._log.debug(`Accessory '${accessory.displayName}' downgrading from v${accessory.context.VERSION} to v${ACCESSORY_VERSION}`);
+            }
+        }
+        else {
+            this._log.debug(`Invalid accessory version for '${accessory.displayName}'. Version:'${accessory.context.VERSION}'`);
+        }
+
+        return versionManaged;
     }
 
     /**
@@ -616,12 +720,14 @@ class TimeTriggerPlatform {
         accessory.context.SETTINGS = {SwitchState: true};
 
         // Create our services.
-        accessory.addService(_hap.Service.Switch,       SERVICE_INFO.CONTROL.uuid,  SERVICE_INFO.CONTROL.udst);
-        accessory.addService(_hap.Service.MotionSensor, SERVICE_INFO.MOTION.uuid,   SERVICE_INFO.MOTION.udst);
+        accessory.addService(_hap.Service.Switch,          SERVICE_INFO.CONTROL.uuid,        SERVICE_INFO.CONTROL.udst);
+        accessory.addService(_hap.Service.MotionSensor,    SERVICE_INFO.MOTION.uuid,         SERVICE_INFO.MOTION.udst);
+        accessory.addService(_hap.Service.TimeInformation, SERVICE_INFO.DUE_TIME.uuid,       SERVICE_INFO.DUE_TIME.udst);
+        accessory.addService(_hap.Service.LightSensor,     SERVICE_INFO.TIME_REMAINING.uuid, SERVICE_INFO.TIME_REMAINING.udst);
 
         try {
             // Configure the accessory
-            this._configureAccessory(accessory);
+            this._configureAccessory(accessory, false);
         }
         catch (error) {
             this._log.debug(`Error when configuring accessory.`);
@@ -658,6 +764,9 @@ class TimeTriggerPlatform {
 
         this._log.debug(`Removing accessory '${accessory.displayName}'`);
 
+        // Get the accessory identifier from the context.
+        const id = accessory.context.ID;
+
         // Event Handler cleanup.
         accessory.removeAllListeners(_PlatformAccessory.PlatformAccessoryEvent.IDENTIFY);
         // Iterate through all the services on the accessory
@@ -666,14 +775,24 @@ class TimeTriggerPlatform {
             if (service instanceof _hap.Service.Switch) {
                 // Get the On characteristic.
                 const charOn = service.getCharacteristic(_hap.Characteristic.On);
-                // Build the identification id
-                const id = `${service.displayName}.${service.subtype}`;
                 // Register for the "get" event notification.
                 // eslint-disable-next-line object-shorthand
                 charOn.off('get', this._handleOnGet.bind(this, {accessory: accessory, service_id: id}));
                 // Register for the "get" event notification.
                 // eslint-disable-next-line object-shorthand
                 charOn.off('set', this._handleOnSet.bind(this, {accessory: accessory, service_id: id}));
+            }
+            else if (service instanceof _hap.Service.LightSensor) {
+                // Get the 'Current Ambient Light Level' characteristic for the light sensor.
+                const charLightLevel = service.getCharacteristic(_hap.Characteristic.CurrentAmbientLightLevel);
+                // Register for the "get" event notification.
+                charLightLevel.off('get', this._handleCurrentAmbientLightLevelGet.bind(this, id));
+            }
+            else if (service instanceof _hap.Service.TimeInformation) {
+                // Get the 'CurrentTime' characteristic for the time information.
+                const charCurrTime = service.getCharacteristic(_hap.Characteristic.CurrentTime);
+                // Register for the "get" event notification.
+                charCurrTime.off('get', this._handleCurrentTimeGet.bind(this, id));
             }
         }
 
@@ -779,7 +898,114 @@ class TimeTriggerPlatform {
         }
         else {
             this._log.debug(`No service: Accessory '${accessory.displayName}'`);
-            throw new Error(`Accessory ${accessory.displayName} does not have a valid ${serviceInfo.uuid}:${serviceInfo.udst} service`);
+        }
+    }
+
+    /**
+     * @description Internal function to perform accessory configuration for Time Information services.
+     * @param {_PlatformAccessory} accessory - Accessory to be configured.
+     * @param {object} serviceInfo - Name information of the service to be configured.
+     * @param {string} serviceInfo.uuid   - UUID of the service
+     * @param {string} serviceInfo.name   - Name of the service.
+     * @param {string} serviceInfo.udst   - User Defined Sub-Type of the service.
+     * @param {DueTime} values            - Object containing due time
+     * @returns {void}
+     * @throws {TypeError} - thrown if 'accessory' is not a PlatformAccessory
+     * @throws {TypeError} - thrown if 'serviceInfo' does not conform to a serviceInfo item.
+     * @throws {TypeError} - thrown if 'values' is not an object or does not contain the expected fields.
+     * @throws {Error} - thrown if the service for the serviceName is not a Carbon Dioxide Sensor.
+     * @private
+     */
+    _updateTimeInformationService(accessory, serviceInfo, values) {
+        if (_is.not.existy(accessory) ||
+            (!(accessory instanceof _PlatformAccessory))) {
+            throw new TypeError(`accessory must be a PlatformAccessory`);
+        }
+        if (_is.not.existy(serviceInfo) ||
+            _is.not.object(serviceInfo) ||
+            (!Object.prototype.hasOwnProperty.call(serviceInfo, 'uuid') || _is.not.string(serviceInfo.uuid) || (serviceInfo.uuid.length <= 0)) ||
+            (!Object.prototype.hasOwnProperty.call(serviceInfo, 'name') || _is.not.string(serviceInfo.name) || (serviceInfo.name.length <= 0)) ||
+            (!Object.prototype.hasOwnProperty.call(serviceInfo, 'udst') || _is.not.string(serviceInfo.udst) || (serviceInfo.udst.length <= 0))   ) {
+            throw new TypeError(`serviceName does not conform to a SERVICE_INFO item.`);
+        }
+        if (_is.not.existy(values) || _is.not.object(values) ||
+            (!Object.prototype.hasOwnProperty.call(values, 'due_time')) || (_is.not.string(values.due_time) && !(values.due_time instanceof Error)) ||
+            (!Object.prototype.hasOwnProperty.call(values, 'due_dow')) || (_is.not.number(values.due_dow) && !(values.due_dow instanceof Error)) ) {
+            throw new TypeError(`values must be an object with properties named 'due_time' (string or Error) and 'due_dow' (number or Error)`);
+        }
+
+        // Attempt to get the named service and validate that it is a Carbon Dioxie Sensor
+        const serviceTimeInfo = accessory.getServiceById(serviceInfo.uuid, serviceInfo.udst);
+        if (_is.existy(serviceTimeInfo) &&
+            (serviceTimeInfo instanceof _hap.Service.TimeInformation)) {
+            try {
+                // Set the characteristics.
+                serviceTimeInfo.updateCharacteristic(_hap.Characteristic.CurrentTime,  values.due_time);
+                serviceTimeInfo.updateCharacteristic(_hap.Characteristic.DayoftheWeek, values.due_dow);
+                serviceTimeInfo.updateCharacteristic(_hap.Characteristic.TimeUpdate,   false);
+            }
+            catch (err) {
+                this._log.debug(`Error setting characteristics for '${accessory.displayName}'. Error: ${err}`);
+            }
+        }
+        else {
+            this._log.debug(`No service: Accessory '${accessory.displayName}'`);
+        }
+    }
+
+    /**
+     * @description Internal function to perform accessory configuration for Light Sensor services.
+     * @param {_PlatformAccessory} accessory - Accessory to be configured.
+     * @param {object} serviceInfo - Name information of the service to be configured.
+     * @param {string} serviceInfo.uuid   - UUID of the service
+     * @param {string} serviceInfo.name   - Name of the service.
+     * @param {string} serviceInfo.udst   - User Defined Sub-Type of the service.
+     * @param {object} values             - Object containing the values being set
+     * @param {boolean | Error} values.active      - true if active.
+     * @param {number | Error}  values.lightlevel  - light level
+     * @returns {void}
+     * @throws {TypeError} - thrown if 'accessory' is not a PlatformAccessory
+     * @throws {TypeError} - thrown if 'serviceInfo' does not conform to a serviceInfo item.
+     * @throws {TypeError} - thrown if 'values' is not an object or does not contain the expected fields.
+     * @throws {Error} - thrown if the service for the serviceName is not a Carbon Dioxide Sensor.
+     * @private
+     */
+    _updateLightSensorService(accessory, serviceInfo, values) {
+        if (_is.not.existy(accessory) ||
+            (!(accessory instanceof _PlatformAccessory))) {
+            throw new TypeError(`accessory must be a PlatformAccessory`);
+        }
+        if (_is.not.existy(serviceInfo) ||
+            _is.not.object(serviceInfo) ||
+            (!Object.prototype.hasOwnProperty.call(serviceInfo, 'uuid') || _is.not.string(serviceInfo.uuid) || (serviceInfo.uuid.length <= 0)) ||
+            (!Object.prototype.hasOwnProperty.call(serviceInfo, 'name') || _is.not.string(serviceInfo.name) || (serviceInfo.name.length <= 0)) ||
+            (!Object.prototype.hasOwnProperty.call(serviceInfo, 'udst') || _is.not.string(serviceInfo.udst) || (serviceInfo.udst.length <= 0))   ) {
+            throw new TypeError(`serviceName does not conform to a SERVICE_INFO item.`);
+        }
+        if (_is.not.existy(values) || _is.not.object(values) ||
+            (!Object.prototype.hasOwnProperty.call(values, 'active')) || (_is.not.boolean(values.active) && !(values.active instanceof Error)) ||
+            (!Object.prototype.hasOwnProperty.call(values, 'lightlevel')) || (_is.not.number(values.lightlevel) && !(values.lightlevel instanceof Error)) ) {
+            throw new TypeError(`values must be an object with properties named 'lightlevel' (number or Error) and 'motion' (boolean or Error)`);
+        }
+
+        // Attempt to get the named service and validate that it is a Carbon Dioxie Sensor
+        const serviceLight = accessory.getServiceById(serviceInfo.uuid, serviceInfo.udst);
+        if (_is.existy(serviceLight) &&
+            (serviceLight instanceof _hap.Service.LightSensor)) {
+            try {
+                // Set the characteristics.
+                serviceLight.updateCharacteristic(_hap.Characteristic.StatusActive,             values.active);
+                serviceLight.updateCharacteristic(_hap.Characteristic.CurrentAmbientLightLevel, values.lightlevel);
+                serviceLight.updateCharacteristic(_hap.Characteristic.StatusFault,              _hap.Characteristic.StatusFault.NO_FAULT);
+                serviceLight.updateCharacteristic(_hap.Characteristic.StatusLowBattery,         _hap.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL);
+                serviceLight.updateCharacteristic(_hap.Characteristic.StatusTampered,           _hap.Characteristic.StatusTampered.NOT_TAMPERED);
+            }
+            catch (err) {
+                this._log.debug(`Error setting characteristics for '${accessory.displayName}'. Error: ${err}`);
+            }
+        }
+        else {
+            this._log.debug(`No service: Accessory '${accessory.displayName}'`);
         }
     }
 
@@ -904,6 +1130,159 @@ class TimeTriggerPlatform {
     }
 
     /**
+     * @description Event handler for the "get" event for the TimeInformation.CurrentTime characteristic.
+     * @param {string} id - id of the accessory switch service being querried.
+     * @param {Function} callback - Function callback for homebridge.
+     * @returns {void}
+     * @throws {TypeError} - thrown when 'id' is not a non-zero string.
+     * @throws {Error} - Thrown when there is no accessory keyed with 'id'
+     * @private
+     */
+    _handleCurrentTimeGet(id, callback) {
+        // Validate arguments
+        if ((id === undefined) ||
+            (typeof(id) !== 'string') || (id.length <= 0)) {
+            throw new TypeError(`id must be a non-zero length string.`);
+        }
+
+        let status = new Error(`id:${id} has no matching accessory`);
+        let result = false
+        this._triggers.forEach((item, index) => {
+            if (_is.existy(item.accessory) &&
+                _is.equal(item.accessory.context.ID, id)) {
+                // Get the accessory for this id.
+                const accessory = item.accessory;
+
+                // Get the accessory for this id.
+                this._log.debug(`Trigger '${accessory.displayName}' Get CurrentTime Request.`);
+
+                try {
+                    // Get the amount of time remaining
+                    if (_is.existy(item.trigger)) {
+                        const dueTime = this._getNextDueTime(item.trigger);
+                        result = dueTime.due_time;
+                        this._log.debug(`Trigger '${accessory.displayName}' Time=${result}.`);
+                    }
+                    else {
+                        status = new Error(`id:${id} has no matching trigger`);
+                    }
+                }
+                catch (err) {
+                    this._log.debug(`  Unexpected error encountered: ${err.message}`);
+                    result = false;
+                    status = new Error(`Accessory ${accessory.displayName} is not ressponding.`);
+                }
+            }
+        });
+
+        // Invoke the callback function with our result.
+        callback(status, result);
+    }
+
+    /**
+     * @description Event handler for the "get" event for the LightSensor.CurrentAmbientLightLevel characteristic.
+     * @param {string} id - id of the accessory switch service being querried.
+     * @param {Function} callback - Function callback for homebridge.
+     * @returns {void}
+     * @throws {TypeError} - thrown when 'id' is not a non-zero string.
+     * @throws {Error} - Thrown when there is no accessory keyed with 'id'
+     * @private
+     */
+    _handleCurrentAmbientLightLevelGet(id, callback) {
+        // Validate arguments
+        if ((id === undefined) ||
+            (typeof(id) !== 'string') || (id.length <= 0)) {
+            throw new TypeError(`id must be a non-zero length string.`);
+        }
+
+        let status = null;
+        let result = new Error(`id:${id} has no matching accessory`);
+        this._triggers.forEach((item, index) => {
+            if (_is.existy(item.accessory) &&
+                _is.equal(item.accessory.context.ID, id)) {
+                // Get the accessory for this id.
+                const accessory = item.accessory;
+
+                // Get the accessory for this id.
+                this._log.debug(`Trigger '${accessory.displayName}' Get CurrentAmbientLightLevel Request.`);
+
+                try {
+                    // Get the amount of time remaining
+                    if (_is.existy(item.trigger)) {
+                        result = this._getTimeRemaining(item.trigger);
+                        this._log.debug(`Trigger '${accessory.displayName}' TimeRemaining=${result}.`);
+                    }
+                    else {
+                        result = new Error(`id:${id} has no matching trigger`);
+                    }
+                }
+                catch (err) {
+                    this._log.debug(`  Unexpected error encountered: ${err.message}`);
+                    result = false;
+                    status = new Error(`Accessory ${accessory.displayName} is not ressponding.`);
+                }
+            }
+        });
+
+        // Invoke the callback function with our result.
+        callback(status, result);
+    }
+
+    /**
+     * @description Get the due time for the next trigger event
+     * @param {object} trigger - trigger being querried.
+     * @returns {DueTime} - Due time of the next trigger event.
+     * @throws {TypeError} - TThrown when 'trigger' is not an instance of TimeTrigger.
+     * @private
+     */
+    _getNextDueTime(trigger) {
+        // Validate arguments
+        if ((_is.not.existy(trigger)) || !(trigger instanceof TimeTrigger)) {
+            throw new TypeError(`trigger must be a Time Trigger`);
+        }
+
+        // Get the amount of time remaining
+        const timeRemaining = trigger.TimeRemaining;
+
+        // Create the due time.
+        const dueTime = new Date(Date.now() + timeRemaining);
+
+        return {due_time: dueTime.toString(), due_dow: (dueTime.getDay() + 1)};
+    }
+
+    /**
+     * @description Get the amount of time remaining for the specified trigger
+     * @param {object} trigger - trigger being querried.
+     * @returns {number} the time, in minutes, remaining.
+     * @throws {TypeError} - TThrown when 'trigger' is not an instance of TimeTrigger.
+     * @private
+     */
+    _getTimeRemaining(trigger) {
+        const MIN_TIME = 0.0001;
+        const MAX_TIME = 100000.0;
+
+        // Validate arguments
+        if ((_is.not.existy(trigger)) || !(trigger instanceof TimeTrigger)) {
+            throw new TypeError(`trigger must be a Time Trigger`);
+        }
+
+        // Get the amount of time remaining
+        let timeRemaining = trigger.TimeRemaining;
+        // Convert from milliseconds to minutes.
+        timeRemaining *= (1.0 /* milliseconds */ / (1000.0 /* milliseconds/second */ * 60.0 /* seconds/minute */));
+
+        // Cap the result.
+        if (timeRemaining < MIN_TIME) {
+            timeRemaining = MIN_TIME;
+        }
+        else if (timeRemaining > MAX_TIME) {
+            timeRemaining = MAX_TIME;
+        }
+
+        return timeRemaining;
+    }
+
+    /**
      * @description Get the value of the Service.Switch.On characteristic value
      * @param {object} accessory - accessory being querried.
      * @returns {boolean} the value of the On characteristic (true or false)
@@ -984,6 +1363,16 @@ class TimeTriggerPlatform {
                         serviceSwitch.setCharacteristic(_hap.Characteristic.On, isActive);
                     }
                 }
+
+                if (_is.existy(match.trigger)) {
+                    // Get the amount of time remaining
+                    const timeRemaining = this._getTimeRemaining(match.trigger);
+                    this._updateLightSensorService(match.accessory, SERVICE_INFO.TIME_REMAINING, {active: isActive, lightlevel: timeRemaining});
+
+                    // Get the due time of the next event.
+                    const dueTime = this._getNextDueTime(match.trigger);
+                    this._updateTimeInformationService(match.accessory, SERVICE_INFO.DUE_TIME, dueTime);
+                }
             }
             catch {
             }
@@ -1022,6 +1411,16 @@ class TimeTriggerPlatform {
             try {
                 this._log(`TriggerStateNotify: Updating motion status for trigger ${match.accessory.displayName}. active=${isActive} motion=${isMotion}`);
                 this._updateMotionSensorService(match.accessory, SERVICE_INFO.MOTION, {active: isActive, motion: isMotion});
+
+                if (_is.existy(match.trigger)) {
+                    // Get the amount of time remaining
+                    const timeRemaining = this._getTimeRemaining(match.trigger);
+                    this._updateLightSensorService(match.accessory, SERVICE_INFO.TIME_REMAINING, {active: isActive, lightlevel: timeRemaining});
+
+                    // Get the due time of the next event.
+                    const dueTime = this._getNextDueTime(match.trigger);
+                    this._updateTimeInformationService(match.accessory, SERVICE_INFO.DUE_TIME, dueTime);
+                }
             }
             catch {
             }

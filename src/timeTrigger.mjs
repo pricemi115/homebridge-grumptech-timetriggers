@@ -184,6 +184,7 @@ export class TimeTrigger extends EventEmitter {
         this._timeout_ms = -1;
         this._trippedDuration_ms = -1;
         this._tripCount = 0;
+        this._expectedTripTime = new Date();
 
         // Force a decoupled transition into the Idle State.
         this._initializing = true;
@@ -238,6 +239,22 @@ export class TimeTrigger extends EventEmitter {
      */
     get Duration() {
         return this._trippedDuration_ms;
+    }
+
+    /**
+     * @description Read property accessor for the time remaining until the next trip event
+     * @returns {number} - Time remaining in milliseconds.
+     */
+    get TimeRemaining() {
+        // Compute the time remaining until the next trip event.
+        const now = new Date();
+        let timeRemaining = this._expectedTripTime - now;
+        // Cap the time remaining at 0.
+        if (timeRemaining < 0) {
+            timeRemaining = 0;
+        }
+
+        return timeRemaining;
     }
 
     /**
@@ -370,6 +387,9 @@ export class TimeTrigger extends EventEmitter {
         // Set the timer.
         this._timeoutID = setTimeout(this._CB__timerTripped, timeout);
         _debug(`timeTrigger::_doStart: timeoutID=${this._timeoutID} delay=${timeout}`);
+
+        // Compute the expected trip time
+        this._expectedTripTime = new Date(Date.now() + timeout);
     }
 
     /**

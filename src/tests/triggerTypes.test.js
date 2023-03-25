@@ -30,12 +30,13 @@ describe('Module-level tests', ()=>{
 
     describe('Module TRIGGER_STATES expected value(s)', ()=>{
         test('TRIGGER_EVENTS size test', ()=>{
-            expect(Object.values(TRIGGER_STATES).length).toBe(3);
+            expect(Object.values(TRIGGER_STATES).length).toBe(4);
         });
         describe.each([
             ['Inactive', 'Inactive', 0],
-            ['Armed',    'Armed',    1],
-            ['Tripped',  'Tripped',  2],
+            ['Arming',   'Arming',   1],
+            ['Armed',    'Armed',    2],
+            ['Tripped',  'Tripped',  3],
         ])('Enumeration exists.', (desc, input, result) =>{
             test(desc, ()=>{
                 expect(TRIGGER_STATES).toHaveProperty(input, result);

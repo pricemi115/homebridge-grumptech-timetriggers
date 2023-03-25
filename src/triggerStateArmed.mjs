@@ -24,7 +24,7 @@ import {TriggerStateBase} from './triggerStateBase.mjs';
 const _debug = _debugModule('time_trigger_state');
 
 /**
- * @description Base class for managing trigger states.
+ * @description Class for managing trigger armed state.
  * @augments TriggerStateBase
  */
 export class TriggerStateArmed extends TriggerStateBase {
@@ -50,13 +50,27 @@ export class TriggerStateArmed extends TriggerStateBase {
     }
 
     /**
-     * @description Read-only property for the name of the state.
+     * @description Read-only property for the id of the state.
      * @returns {TRIGGER_STATES} - state identifier
      * @throws {Error} - Thrown when calling the base class
      * @private
      */
     get State() {
         return TRIGGER_STATES.Armed;
+    }
+
+    /**
+     * @description Read-only property for state ids for valid transitions.
+     * @returns {TRIGGER_STATES[]} - array of state ids
+     * @throws {Error} - Thrown when calling the base class
+     * @private
+     */
+    get ValidTransitionStates() {
+        const validStates = [];
+        validStates.push(TRIGGER_STATES.Inactive);
+        validStates.push(TRIGGER_STATES.Tripped);
+
+        return validStates;
     }
 
     /**
@@ -81,7 +95,7 @@ export class TriggerStateArmed extends TriggerStateBase {
     _doNext() {
         let handled = false;
         if (_is.not.undefined(this._owner)) {
-            // Transitioon to tripped.
+            // Transition to tripped.
             handled = this._owner.EnterTripped();
         }
 
@@ -96,7 +110,7 @@ export class TriggerStateArmed extends TriggerStateBase {
     _doAbort() {
         let handled = false;
         if (_is.not.undefined(this._owner)) {
-            // Transitioon to idle.
+            // Transition to idle.
             handled = this._owner.EnterIdle();
         }
 

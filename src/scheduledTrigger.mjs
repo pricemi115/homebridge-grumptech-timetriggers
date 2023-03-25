@@ -13,10 +13,12 @@
 // External dependencies and imports.
 import _debugModule from 'debug';
 import _is from 'is-it-check';
+import _https from 'node:https';
 
 // Internal dependencies
 import {TRIGGER_STATES, TRIGGER_DAYS} from './triggerTypes.mjs';
 import {TimeTrigger} from './timeTrigger.mjs';
+import {TRIGGER_ACTIONS} from './triggerStateBase.mjs';
 
 /**
  * @description Debugging function pointer for runtime related diagnostics.
@@ -55,7 +57,49 @@ const MIN_HOUR = 0;
  * @private
  */
 const MAX_HOUR = 23;
+/**
+ * @description Minimum Latitude
+ * @private
+ */
+const MIN_LATITUDE = -90.0;
+/**
+ * @description Maximum Latitude
+ * @private
+ */
+const MAX_LATITUDE = 90.0;
+/**
+ * @description Minimum Longitude
+ * @private
+ */
+const MIN_LATITUDE = -180.0;
+/**
+ * @description Maximum Longitude
+ * @private
+ */
+const MAX_LATITUDE = 180.0;
 
+/**
+ * @description Enumeration of published events.
+ * @readonly
+ * @private
+ * @enum {string}
+ * @property {string} EVENT_STATE_CHANGED - Identification for the event published when the trigger state changes.
+ * @property {string} EVENT_STATE_NOTIFY  - Identification for the event published when the trigger state does not change.
+ */
+export const SCHEDULED_TRIGGER_EVENTS = {
+    /* eslint-disable key-spacing */
+    EVENT_ASTRONOMICAL_DATA_READY : 'astronomical_data_ready',
+    /* eslint-enable key-spacing */
+};
+
+/**
+ * @description Scheduled Time Trigger state changed notification
+ * @event module:ScheduledTimeTriggerModule#event:astronomical_data_ready
+ * @type {object}
+ * @param {boolean} e.error -Flag indicating the error status
+ * @param {string} e.data - JSON formatted data containing astronomical data
+ * @private
+ */
 /**
  * @description Time Trigger state changed notification
  * @event module:TimeTriggerModule#event:state_changed
@@ -141,7 +185,33 @@ export class ScheduledTrigger extends TimeTrigger {
             /* eslint-enable key-spacing */
         }
 
+        this._latitude = 0;
+        this._longitude = 0;
+        this._isAstronimical = false;
+
         this._triggerDelta = this._computeTriggerTimeDelta(this._time);
+
+        // Register for astronomical data ready.
+        this.on(SCHEDULED_TRIGGER_EVENTS.EVENT_ASTRONOMICAL_DATA_READY, this._handleAstrologicalDataReady.bind(this));
+    }
+
+    /**
+     * @description Enter Arming State
+     * @returns {boolean} Always return true.
+     */
+    EnterArming() {
+        // If the scheduled trigger is not configured as astronomical,
+        // defer to the base class.
+        if (!this._isAstronimical) {
+            // This will automatically kick us to Armed.
+            super.EnterArming();
+        }
+        else {
+            // Astronomical setting. Just perform the state change.
+            this._doStateChange(this._armingState);
+        }
+
+        return true;
     }
 
     /**
@@ -150,6 +220,23 @@ export class ScheduledTrigger extends TimeTrigger {
      * @private
      */
     GenerateNewTimerValues() {
+        // If the scheduled trigger is not configured as astronomical,
+        // generate the next time now.
+        if (!this._isAstronimical) {
+            this._doGenerateNewTimerValues();
+        }
+        else {
+            // Astronomical setting. Request the astronomical data.
+            this._getAstrologicalData();
+        }
+    }
+
+    /**
+     * @description Generates new timeout values for the timer.
+     * @returns {void}
+     * @private
+     */
+    _doGenerateNewTimerValues() {
         // Determine the current day so we can see when the next alarm is due.
         const now = new Date();
         const dayOfWeek = now.getDay();
@@ -308,6 +395,102 @@ export class ScheduledTrigger extends TimeTrigger {
         _debug(`Trigger delta in milliseconds: ${triggerDelta}`);
 
         return triggerDelta;
+    }
+
+    /**
+     * @description Event handler for the astrological data ready event.
+     * @param {object} e - Event data
+     * @param {boolean} e.error -Flag indicating the error status
+     * @param {string} e.data - JSON formatted data containing astronomical data
+     * @returns {void}
+     * @private
+     */
+    _handleAstrologicalDataReady(e) {
+        console.log(e.data);
+
+        // Have we previously determined the astronomical value?
+        if (e.error && (this.Timeout <= 0)) {
+            // Abort. We do not have a previous valid scheduled time
+            this._currentState.Evaluate(TRIGGER_ACTIONS.Abort);
+        }
+        else {
+            // TODO: Process Astronomical Data.
+
+            // Generate new timer values
+            this._doGenerateNewTimerValues();
+
+            // Transition to armed.
+            this._currentState.Evaluate(TRIGGER_ACTIONS.Next);
+        }
+    }
+
+    /**
+     * @description Helper for requesting and collecting astronomical data.
+     * @returns {void}
+     * @fires module:ScheduledTimeTriggerModule#event:astronomical_data_ready
+     * @private
+     */
+    _getAstrologicalData() {
+        const MARKER_YEAR = '{YEAR}';
+        const MARKER_MONTH = '{MONTH}';
+        const MARKER_DAY = '{DAY}';
+        const MARKER_LATITUDE = '{LATITUDE}';
+        const MARKER_LONGITUDE = '{LONGITUDE}';
+        const ASTRO_REQUEST_TEMPLATE = `/api/rstt/oneday?date=${MARKER_YEAR}-${MARKER_MONTH}-${MARKER_DAY}&coords=${MARKER_LATITUDE},${MARKER_LONGITUDE}`;
+
+        // Compute the request path.
+        const now = new Date();
+        let requestPath = ASTRO_REQUEST_TEMPLATE;
+        requestPath = requestPath.replace(MARKER_YEAR, now.getFullYear().toString());
+        requestPath = requestPath.replace(MARKER_MONTH, (now.getMonth() + 1).toString());
+        requestPath = requestPath.replace(MARKER_DAY, now.getDate().toString());
+        requestPath = requestPath.replace(MARKER_LATITUDE, this._latitude.toString());
+        requestPath = requestPath.replace(MARKER_LONGITUDE, this._longitude.toString());
+
+        // eslint-disable-next-line no-unused-vars
+        let responseLength = 0;
+        let result = undefined;
+        // Connection information to get the astronomical data.
+        const options = {
+            hostname: 'aa.usno.navy.mil',
+            protocol: 'https:',
+            port: 443,
+            path: requestPath,
+            method: 'GET',
+        };
+
+        // Create the request.
+        const req = _https.request(options, (res) => {
+            _debug(`statusCode: ${res.statusCode}`);
+            _debug(`headers: ${res.headers}`);
+
+            // Handle the 'data' notifications.
+            res.on('data', (d) => {
+                if (result === undefined) {
+                    result = d;
+                }
+                else {
+                    result += d;
+                }
+                responseLength += d.length;
+            });
+
+            // Handle the completion event.
+            res.on('end', ()=>{
+                this.emit(SCHEDULED_TRIGGER_EVENTS.EVENT_ASTRONOMICAL_DATA_READY, {data: result.toString(), error: false});
+            });
+        });
+
+        // Handle errors with the request.
+        req.on('error', (e) => {
+            _debug(`Error getting astronomical data.`);
+            _debug(e);
+            console.log(`Error getting astronomical data.`);
+            console.log(e);
+            this.emit(SCHEDULED_TRIGGER_EVENTS.EVENT_ASTRONOMICAL_DATA_READY, {data: undefined, error: true});
+        });
+        // Initiate the transaction
+        req.end();
     }
 
     /**

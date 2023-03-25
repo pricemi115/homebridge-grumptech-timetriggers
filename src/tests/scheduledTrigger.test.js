@@ -91,17 +91,26 @@ describe('ScheduledTrigger class tests', ()=>{
             ['Next Week',   {minOffset: -2, maxOffset: -1}, 7, 0],
         ])('Trigger Window Tests.', (desc, offsets, deltaDays, additionalDays) =>{
             test(desc, done =>{
-                function handlerStateNotify(e) {
+                function handlerStateChanged(e) {
                     try {
-                       /* UUID */
+                        /* UUID */
                         expect(e).toHaveProperty('uuid');
                         expect(e.uuid).toBe(trigger.Identifier);
 
-                        const timeout = trigger.Timeout;
-                        expect(timeout).toBeGreaterThanOrEqual(0.950*expectedMin);
-                        expect(timeout).toBeLessThanOrEqual(1.050*expectedMax);
+                        /* Manage Trigger Life Cycle */
+                        if ((e.old_state === TRIGGER_STATES.Arming) &&
+                            (e.new_state === TRIGGER_STATES.Armed)) {
 
-                        done();
+                            const timeout = trigger.Timeout;
+                            expect(timeout).toBeGreaterThanOrEqual(0.950*expectedMin);
+                            expect(timeout).toBeLessThanOrEqual(1.050*expectedMax);
+
+                            // Cleanup and end the test.
+                            trigger.Stop();
+                            trigger.off(TRIGGER_EVENTS.EVENT_STATE_CHANGED, handlerStateChanged);
+
+                            done();
+                        }
                     }
                     catch (error) {
                         // Abort the test.
@@ -166,7 +175,11 @@ describe('ScheduledTrigger class tests', ()=>{
 
                 const config = {days: (triggerDay  | additionalDays), time: {nominal: {hour: nominalTime.getHours(), minute: nominalTime.getMinutes()}, tolerance: {hour: tolHr, minute: tolMin}}};
                 const trigger = new ScheduledTrigger(config);
-                trigger.on(TRIGGER_EVENTS.EVENT_STATE_NOTIFY, handlerStateNotify);
+                trigger.on(TRIGGER_EVENTS.EVENT_STATE_CHANGED, handlerStateChanged);
+                // Decouple the start.
+                setImmediate(() => {
+                    trigger.Start();
+                });
             });
         });
     });

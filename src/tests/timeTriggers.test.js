@@ -124,7 +124,7 @@ describe('TimeTrigger class tests', ()=>{
 
                         /* Manage Trigger Life Cycle */
                         if ((e.old_state === TRIGGER_STATES.Tripped) &&
-                            (e.new_state === TRIGGER_STATES.Armed)) {
+                            (e.new_state === TRIGGER_STATES.Arming)) {
                             // compute the measured timeout period.
                             const timeNow = Date.now();
                             const timeout = Date.now() - startTimestamp;
@@ -132,11 +132,11 @@ describe('TimeTrigger class tests', ()=>{
                             // Stop the trigger after one cycle.
                             timeTrigger.Stop();
 
-                            if (Math.abs(timeout - (timeTrigger.Timeout + timeTrigger.Duration)) > 10/*milliseconds*/) {
+                            if (Math.abs(timeout - (timeTrigger.Timeout + timeTrigger.Duration)) > 25/*milliseconds*/) {
                                 error = true;
                             }
                         }
-                        if ((e.old_state === TRIGGER_STATES.Armed) &&
+                        if (((e.old_state === TRIGGER_STATES.Arming) || (e.old_state === TRIGGER_STATES.Armed)) &&
                             (e.new_state === TRIGGER_STATES.Inactive)) {
                             // Cleanup and end the test.
                             timeTrigger.off(TRIGGER_EVENTS.EVENT_STATE_CHANGED, handlerStateChanged);

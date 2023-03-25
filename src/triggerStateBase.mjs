@@ -81,13 +81,24 @@ export class TriggerStateBase {
 
     // eslint-disable-next-line jsdoc/require-returns-check
     /**
-     * @description Read-only property for the name of the state.
+     * @description Read-only property for the id of the state.
      * @returns {TRIGGER_STATES} - state identifier
      * @throws {Error} - Thrown when calling the base class
      * @private
      */
     get State() {
         throw new Error(`Abstract Property: State`);
+    }
+
+    // eslint-disable-next-line jsdoc/require-returns-check
+    /**
+     * @description Read-only property for state ids for valid transitions.
+     * @returns {TRIGGER_STATES[]} - array of state ids
+     * @throws {Error} - Thrown when calling the base class
+     * @private
+     */
+    get ValidTransitionStates() {
+        throw new Error(`Abstract Property: ValidTransitionStates`);
     }
 
     /**
@@ -155,6 +166,12 @@ export class TriggerStateBase {
     OnExit(newState) {
         if (!(newState instanceof TriggerStateBase)) {
             throw new TypeError(`${this.Name}::OnEntrance(). newState is invalid.`);
+        }
+
+        // Validate that we are transitioning to a valid state.
+        if (!this.ValidTransitionStates.includes(newState.State)) {
+            // Invalid transition.
+            throw new Error(`Invalid transition from ${this.Name} to ${newState.Name}`);
         }
 
         _debug(`${this.Name}::OnExit() called. Transitioning to state ${newState.Name}`);

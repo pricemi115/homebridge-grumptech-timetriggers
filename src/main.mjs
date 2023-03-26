@@ -168,7 +168,7 @@ class TimeTriggerPlatform {
             config.settings.triggers.forEach((triggerSettings, index) => {
                 // Get the identifier.
                 let identifier = null;
-                if (_is.not.undefined(triggerSettings.trigger_identifier) && 
+                if (_is.not.undefined(triggerSettings.trigger_identifier) &&
                     _is.string(triggerSettings.trigger_identifier) && (triggerSettings.trigger_identifier.length > 0) ) {
                     identifier = triggerSettings.trigger_identifier;
                 }
@@ -1146,7 +1146,7 @@ class TimeTriggerPlatform {
         }
 
         let status = new Error(`id:${id} has no matching accessory`);
-        let result = false
+        let result = false;
         this._triggers.forEach((item, index) => {
             if (_is.existy(item.accessory) &&
                 _is.equal(item.accessory.context.ID, id)) {

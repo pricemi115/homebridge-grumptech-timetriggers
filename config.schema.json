@@ -88,11 +88,115 @@
                                     },
                                     "required": true
                                 },
+                                "is_astronomical": {
+                                    "title": "Astronomical Trigger",
+                                    "description": "Trigger trip time is based on astronomical events",
+                                    "type": "boolean",
+                                    "default": false,
+                                    "required": true,
+                                    "condition": {
+                                        "functionBody": "return (model.settings.triggers[arrayIndices] && (model.settings.triggers[arrayIndices].trigger_type === 1));"
+                                    }
+                                },
+                                "astronomical_type": {
+                                    "title": "Astronomical Type",
+                                    "description": "Type of astronomical trigger",
+                                    "type": "string",
+                                    "default": "sunset",
+                                    "oneOf": [
+                                        { "title": "Moon Rise", "enum": ["moon_rise"] },
+                                        { "title": "Moon Set", "enum": ["moon_setmoon_set"] },
+                                        { "title": "Sunrise", "enum": ["sunrise"] },
+                                        { "title": "Sunset", "enum": ["sunset"] },
+                                        { "title": "Twilight End", "enum": ["twilight_end"] },
+                                        { "title": "Twilight Start", "enum": ["twilight_start"] },
+                                        { "title": "Lunar Transit", "enum": ["lunar_transit"] },
+                                        { "title": "Solar Transit", "enum": ["solar_transit"] }
+                                    ],
+                                    "required": true,
+                                    "condition": {
+                                        "functionBody": "return (model.settings.triggers[arrayIndices] && (model.settings.triggers[arrayIndices].trigger_type === 1) && (model.settings.triggers[arrayIndices].is_astronomical === true));"
+                                    }
+                                },
+                                "location": {
+                                    "title": "Location",
+                                    "description": "Location reference for the astronomical trigger",
+                                    "type": "object",
+                                    "properties": {
+                                        "latitude": {
+                                            "title": "Latitude",
+                                            "description": "Latitude, expressed in 'north-positive' format",
+                                            "type": "number",
+                                            "minimum": -90,
+                                            "maximum": 90,
+                                            "default": 0,
+                                            "required": true
+                                        },
+                                        "longitude": {
+                                            "title": "Longitude",
+                                            "description": "Longitude, expressed in 'east-positive' format",
+                                            "type": "number",
+                                            "minimum": -180,
+                                            "maximum": 180,
+                                            "default": 0,
+                                            "required": true
+                                        }
+                                    },
+                                    "condition": {
+                                        "functionBody": "return (model.settings.triggers[arrayIndices] && (model.settings.triggers[arrayIndices].trigger_type === 1) && (model.settings.triggers[arrayIndices].is_astronomical === true));"
+                                    }
+                                },
                                 "time" : {
                                     "title": "Time settings",
                                     "description": "Time settings for scheduled triggers.",
                                     "type": "object",
                                     "properties": {
+                                        "astronomical_offset": {
+                                            "title": "Time Offset",
+                                            "description": "Offset time for astronomical triggers",
+                                            "type": "object",
+                                            "properties": {
+                                                "type": {
+                                                    "title": "Offset Type",
+                                                    "description": "Type of offset",
+                                                    "type": "string",
+                                                    "default": "none",
+                                                    "oneOf": [
+                                                        { "title": "After", "enum": ["after"] },
+                                                        { "title": "Before", "enum": ["before"] },
+                                                        { "title": "None", "enum": ["none"] }
+                                                    ],
+                                                    "required": true
+                                                },
+                                                "hour": {
+                                                    "title": "Hour",
+                                                    "description": "Hour(s) to offset from the astrological time. (00-05)",
+                                                    "type": "number",
+                                                    "minimum": 0,
+                                                    "maximum": 5,
+                                                    "default": 0,
+                                                    "required": true,
+                                                    "condition": {
+                                                        "functionBody": "return (model.settings.triggers[arrayIndices] && (model.settings.triggers[arrayIndices].time.astronomical_offset.type !== \"none\"));"
+                                                    }
+                                                },
+                                                "minute": {
+                                                    "title": "Minute",
+                                                    "description": "Minute(s) to offset from the astrological time. (00-59)",
+                                                    "type": "number",
+                                                    "minimum": 0,
+                                                    "maximum": 59,
+                                                    "default": 0,
+                                                    "required": true,
+                                                    "condition": {
+                                                        "functionBody": "return (model.settings.triggers[arrayIndices] && (model.settings.triggers[arrayIndices].time.astronomical_offset.type !== \"none\"));"
+                                                    }
+                                                }
+                                            },
+                                            "condition": {
+                                                "functionBody": "return (model.settings.triggers[arrayIndices] && (model.settings.triggers[arrayIndices].trigger_type === 1) && (model.settings.triggers[arrayIndices].is_astronomical === true));"
+                                            }
+                                        },
                                         "nominal": {
                                             "title": "Trip Time",
                                             "description": "Nominal time of day to trip the trigger",
@@ -116,6 +220,9 @@
                                                     "default": 0,
                                                     "required": true
                                                 }
+                                            },
+                                            "condition": {
+                                                "functionBody": "return (model.settings.triggers[arrayIndices] && (model.settings.triggers[arrayIndices].trigger_type === 1) && (model.settings.triggers[arrayIndices].time.is_astronomical === false));"
                                             }
                                         },
                                         "tolerance": {

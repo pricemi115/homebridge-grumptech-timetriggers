@@ -4,6 +4,11 @@ Change history for _homebridge-grumptech-timetriggers_
 ---
 ---
 
+## [1.3.0] - 2023-APR-15
+### What's new
+- [Issue #5](https://github.com/pricemi115/homebridge-grumptech-timetriggers/issues/5): Add support for astronomical triggers. 🌞 🌖
+
+---
 ## [1.2.0] - 2023-MAR-20
 ### What's new
 - [Issue #23](https://github.com/pricemi115/homebridge-grumptech-timetriggers/issues/23): Add a service to see the amount of time remaining before the next trigger event.

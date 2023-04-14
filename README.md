@@ -35,6 +35,10 @@ The plugin configuration consists of an array of objects containing the configur
 | Scheduled Trip Hour Tolerance | The tolarance to appply to the hour of a scheduled trigger | time:tolerance:hour | Per Trigger | Number | Hours | 0 | 0 | 23 | Applies to _Scheduled_ triggers only. |
 | Scheduled Trip Minute Tolerance | The tolarance to appply to the minute of a scheduled trigger | time:tolerance:minute | Per Trigger | Number | Minutes | 0 | 0 | 59 | Applies to _Scheduled_ triggers only. |
 | Days to Trip | Bitmask of the days to trip the trigger | days | Per Trigger | Number | | 127 | 1 | 127 |  Applies to _Scheduled_ triggers only.</br>1:Sunday, 2:Monday, 4:Tuesday, 8:Wednesday,</br>16:Thursday, 32:Friday, 64:Saturday |
+| Is Astronomical | Flag indicating that the scheduled trigger source is an astronomical event | is_astronomical | Per Trigger | Boolean | | False | True, False | | Applies to _Scheduled_ triggers only |
+| Astronomical Type | Type of astronomical event | astronomical_type | Per Trigger | String | | sunset | moon_rise, moon_set, sunrise, sunset, twilight_end, twilight_start, lunar_transit, solar_transit | | Applies to _Scheduled_ triggers only |
+| Latitude | Location latitude for the astronomical event | location:latitude | Per Trigger | Number | | 0 | -90 | 90 | Applies to _Scheduled_ triggers only</br>north-positive format |
+| Longitude | Location longitude for the astronomical event | location:longitude | Per Trigger | Number | | 0 | -180 | 180 | Applies to _Scheduled_ triggers only</br>east-positive format |
 | Trip Limit | Place a cap on the number of sequential trip events | trip_limit | Per Trigger | Number | | 0 | 0 | | A value of 0 diables the limit and the trigger will re-arm indefinitely |
 
 ## Usage
@@ -43,7 +47,9 @@ The plugin will create, or restore, a dynamic accessory for each trigger specifi
 The control switch will enable/disable the trigger. The state of this setting is saved and will be restored to the last known state upon restart.</br>
 The motion sensor will report that motion is detected when the trigger is in the tripped state. Otherwise, there will be no motion detected.</br>
 The light sensor will be used to indicate the time, in minutes, until the next trigger event.</br>
-The time informaiton service is used to indicate the time, in the local timezone, of the next trigger event. However, to date, no Homekit app has been found that resolves this service. This service is only accessible via the [_homebridge-config-ui-x_](https://www.npmjs.com/package/homebridge-config-ui-x) web view on the `Accessories` page.</br> 
+The time informaiton service is used to indicate the time, in the local timezone, of the next trigger event. However, to date, no Homekit app has been found that resolves this service. This service is only accessible via the [_homebridge-config-ui-x_](https://www.npmjs.com/package/homebridge-config-ui-x) web view on the `Accessories` page.</br>
+
+The plugin supports an option to configue _scheduled triggers_ to be based on astronomical events. The supported events are: sunrise, sunset, twilight start, twilight end, moon rise, moon set, solar transit, lunar transit. The plugin determines the time of these events by using the API proviced by the [United States Naval Observatory](https://aa.usno.navy.mil/data/api). When issuing these querries, the plugin with tag the requests with the identifier `gt_trigr`. The plugin only uses the configured location (latitude, longitude) solely for the purppose of querring for the astronomical events.
 
 Some example use cases are:</br>
 1. Use the Scheduled Trigger to control lights that turn on/off randomly within a user specified window to give the appearance of being home when you are away on holiday.

@@ -105,7 +105,7 @@
                                     "default": "sunset",
                                     "oneOf": [
                                         { "title": "Moon Rise", "enum": ["moon_rise"] },
-                                        { "title": "Moon Set", "enum": ["moon_setmoon_set"] },
+                                        { "title": "Moon Set", "enum": ["moon_set"] },
                                         { "title": "Sunrise", "enum": ["sunrise"] },
                                         { "title": "Sunset", "enum": ["sunset"] },
                                         { "title": "Twilight End", "enum": ["twilight_end"] },

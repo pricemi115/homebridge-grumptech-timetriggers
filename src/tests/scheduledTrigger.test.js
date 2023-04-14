@@ -3,7 +3,7 @@
 /* eslint-disable brace-style */
 /* eslint-disable semi */
 /* eslint-disable new-cap */
-import { TRIGGER_STATES, TRIGGER_DAYS, TRIGGER_EVENTS } from '../triggerTypes.mjs';
+import { TRIGGER_STATES, TRIGGER_DAYS, TRIGGER_EVENTS, ASTRONOMICAL_TRIGGERS, TIME_OFFSET_TYPES } from '../triggerTypes.mjs';
 import { ScheduledTrigger } from '../scheduledTrigger.mjs';
 import _is from 'is-it-check';
 
@@ -82,7 +82,7 @@ describe('ScheduledTrigger class tests', ()=>{
             expect(trigInvalidTimeHighMaxMinute).toThrow(RangeError);
         });
     });
-    describe('Instance functionality tests', ()=>{
+    describe('Fixed Schedule Instance functionality tests', ()=>{
         describe.each([
             ['Pre Window',  {minOffset:  1, maxOffset:  2}, 0, TRIGGER_DAYS.AllDays],
             ['Pre Window - No Tolerance',  {minOffset:  1, maxOffset:  1}, 0, TRIGGER_DAYS.AllDays],
@@ -175,6 +175,123 @@ describe('ScheduledTrigger class tests', ()=>{
 
                 const config = {days: (triggerDay  | additionalDays), time: {nominal: {hour: nominalTime.getHours(), minute: nominalTime.getMinutes()}, tolerance: {hour: tolHr, minute: tolMin}}};
                 const trigger = new ScheduledTrigger(config);
+                trigger.on(TRIGGER_EVENTS.EVENT_STATE_CHANGED, handlerStateChanged);
+                // Decouple the start.
+                setImmediate(() => {
+                    trigger.Start();
+                });
+            });
+        });
+    });
+
+    describe('Astronomical Instance functionality tests', ()=>{
+        describe.each([
+            ['No offset',               {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SUNRISE, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 0, minute: 0},   location: {latitude: 42, longitude: -71.25}}],
+            ['No offset - with values', {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SUNRISE, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 1, minute: 1},   location: {latitude: 42, longitude: -71.25}}],
+            ['Before',                  {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SUNSET, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_BEFORE, hour: 1, minute: 30}, location: {latitude: 42, longitude: -71.25}}],
+            ['After',                   {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SUNSET, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_AFTER, hour: 1, minute: 59},  location: {latitude: 42, longitude: -71.25}}],
+        ])('Astro Tests.', (desc, config) =>{
+            test(desc, done =>{
+                function getAstroTime(type) {
+                    let date = undefined;
+                    switch (type) {
+                        case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_LUNAR_TRANSIT: {
+                            date = trigger._astroHelper.LunarTransit;
+                            break;
+                        }
+                        case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_MOON_RISE: {
+                            date = trigger._astroHelper.LunarRise;
+                            break;
+                        }
+                        case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_MOON_SET: {
+                            date = trigger._astroHelper.LunarSet;
+                            break;
+                        }
+                        case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SOALAR_TRANSIT: {
+                            date = trigger._astroHelper.SolarTransit;
+                            break;
+                        }
+                        case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SUNRISE: {
+                            date = trigger._astroHelper.SolarRise;
+                            break;
+                        }
+                        case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SUNSET: {
+                            date = trigger._astroHelper.SolarSet;
+                            break;
+                        }
+                        case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_TWILIGHT_START: {
+                            date = trigger._astroHelper.TwilightStart;
+                            break;
+                        }
+                        case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_TWILIGHT_END: {
+                            date = trigger._astroHelper.TwilightEnd;
+                            break;
+                        }
+                        default: {
+                            // Not handled.
+                            break;
+                        }
+                    }
+
+                    return date;
+                }
+                function handlerStateChanged(e) {
+                    try {
+                        /* UUID */
+                        expect(e).toHaveProperty('uuid');
+                        expect(e.uuid).toBe(trigger.Identifier);
+
+                        /* Manage Trigger Life Cycle */
+                        if ((e.old_state === TRIGGER_STATES.Arming) &&
+                            (e.new_state === TRIGGER_STATES.Armed)) {
+
+                            // Get the astronomical date.
+                            const date = getAstroTime(config.astroType);
+
+                            // Update the date based on the offset.
+                            switch (config.astroOffset.type) {
+                                case TIME_OFFSET_TYPES.TYPE_BEFORE: {
+                                    date.setHours(date.getHours() - config.astroOffset.hour);
+                                    date.setMinutes(date.getMinutes() - config.astroOffset.minute);
+
+                                    break;
+                                }
+                                case TIME_OFFSET_TYPES.TYPE_AFTER: {
+                                    date.setHours(date.getHours() + config.astroOffset.hour);
+                                    date.setMinutes(date.getMinutes() + config.astroOffset.minute);
+
+                                    break;
+                                }
+                                case TIME_OFFSET_TYPES.TYPE_NONE: 
+                                default: {
+                                    // No-op
+                                    break;
+                                }
+                            }
+
+                            expect(trigger._time.nominal.hour).toEqual(date.getHours());
+                            expect(trigger._time.nominal.minute).toEqual(date.getMinutes());
+
+                            // Cleanup and end the test.
+                            trigger.Stop();
+                            trigger.off(TRIGGER_EVENTS.EVENT_STATE_CHANGED, handlerStateChanged);
+
+                            done();
+                        }
+                    }
+                    catch (error) {
+                        // Abort the test.
+                        console.log(`Aborting test.`);
+                        console.log(error);
+                        done(error);
+                    }
+                };
+
+                // Initiate the trigger test.
+                const trgCfg = {astronomical_type: config.astroType, time: {astronomical_offset: config.astroOffset,
+                                                                            tolerance: {hour: 0, minute: 0}},
+                                location: {latitude: 42, longitude: -71.5}};
+                const trigger = new ScheduledTrigger(trgCfg);
                 trigger.on(TRIGGER_EVENTS.EVENT_STATE_CHANGED, handlerStateChanged);
                 // Decouple the start.
                 setImmediate(() => {

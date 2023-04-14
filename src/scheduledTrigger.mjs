@@ -13,12 +13,12 @@
 // External dependencies and imports.
 import _debugModule from 'debug';
 import _is from 'is-it-check';
-import _https from 'node:https';
 
 // Internal dependencies
-import {TRIGGER_STATES, TRIGGER_DAYS} from './triggerTypes.mjs';
+import {TRIGGER_STATES, TRIGGER_DAYS, ASTRONOMICAL_TRIGGERS, TIME_OFFSET_TYPES} from './triggerTypes.mjs';
 import {TimeTrigger} from './timeTrigger.mjs';
 import {TRIGGER_ACTIONS} from './triggerStateBase.mjs';
+import {ASTRONOMICAL_DATA_EVENTS, AstronomicalData} from './astronomicalDataService.mjs';
 
 /**
  * @description Debugging function pointer for runtime related diagnostics.
@@ -57,49 +57,7 @@ const MIN_HOUR = 0;
  * @private
  */
 const MAX_HOUR = 23;
-/**
- * @description Minimum Latitude
- * @private
- */
-const MIN_LATITUDE = -90.0;
-/**
- * @description Maximum Latitude
- * @private
- */
-const MAX_LATITUDE = 90.0;
-/**
- * @description Minimum Longitude
- * @private
- */
-const MIN_LATITUDE = -180.0;
-/**
- * @description Maximum Longitude
- * @private
- */
-const MAX_LATITUDE = 180.0;
 
-/**
- * @description Enumeration of published events.
- * @readonly
- * @private
- * @enum {string}
- * @property {string} EVENT_STATE_CHANGED - Identification for the event published when the trigger state changes.
- * @property {string} EVENT_STATE_NOTIFY  - Identification for the event published when the trigger state does not change.
- */
-export const SCHEDULED_TRIGGER_EVENTS = {
-    /* eslint-disable key-spacing */
-    EVENT_ASTRONOMICAL_DATA_READY : 'astronomical_data_ready',
-    /* eslint-enable key-spacing */
-};
-
-/**
- * @description Scheduled Time Trigger state changed notification
- * @event module:ScheduledTimeTriggerModule#event:astronomical_data_ready
- * @type {object}
- * @param {boolean} e.error -Flag indicating the error status
- * @param {string} e.data - JSON formatted data containing astronomical data
- * @private
- */
 /**
  * @description Time Trigger state changed notification
  * @event module:TimeTriggerModule#event:state_changed
@@ -125,18 +83,26 @@ export class ScheduledTrigger extends TimeTrigger {
     /**
      * @description Constructor
      * @param {object} config - Configuration data
-     * @param {string=} config.identifier - Identifier
-     * @param {module:TriggerTypes.TRIGGER_DAYS} config.days - Bitmask of days of the week to schedule the trigger.
+     * @param {string} [config.identifier] - Identifier
+     * @param {module:TriggerTypes.TRIGGER_DAYS} [config.days] - Bitmask of days of the week to schedule the trigger.
+     * @param {ASTRONOMICAL_TRIGGERS} [config.astronomical_type] - Type of astronomical trigger. Not used if not astronomical.
      * @param {object} config.time - Structure of time to trip the trigger
-     * @param {object} config.time.nominal - Nominal time to trip the trigger.
+     * @param {object} [config.time.astronomical_offset] - Offset from the astronomical event. Not used if not astronomical.
+     * @param {TIME_OFFSET_TYPES} config.astronomical_offset.type - Type of offset.
+     * @param {number} config.time.astronomical_offset.hour - Hour (0-23)
+     * @param {number} config.time.astronomical_offset.minute - Minute (0-59)
+     * @param {object} [config.time.nominal] - Nominal time to trip the trigger. Not used if astronomical.
      * @param {number} config.time.nominal.hour - Hour (0-23)
      * @param {number} config.time.nominal.minute - Minute (0-59)
      * @param {object} config.time.tolerance - Tolerance around the nominal time to trip the trigger.
      * @param {number} config.time.tolerance.hour - Hour (0-23)
      * @param {number} config.time.tolerance.minute - Minute (0-59)
-     * @param {object=} config.duration - Range of times for the tripped duration.
+     * @param {object} [config.duration] - Range of times for the tripped duration.
      * @param {number} config.duration.nominal - Minimum time, in milliseconds for the tripped duration.
      * @param {number} config.duration.tolerance - Maximum time, in milliseconds for the tripped duration.
+     * @param {object} [config.location] - Location used when trigger is astronomical. ** Required for Astronomical Triggers.
+     * @param {number} config.location.latitude - Latitude
+     * @param {number} config.location.longitude - Longitude
      * @throws {TypeError} - Thrown if 'config' is invalid.
      * @throws {RangeError} - Thrown if 'config' is invalid.
      * @class
@@ -151,8 +117,17 @@ export class ScheduledTrigger extends TimeTrigger {
             if (_is.not.undefined(config.days) && _is.not.within(config.days, (TRIGGER_DAYS.Sunday-1), (TRIGGER_DAYS.AllDays+1))) {
                 throw new RangeError(`Invalid configuration. Days=${config.days}`);
             }
+            // Validate the astronomical type.
+            if (_is.not.undefined(config.astronomical_type) &&
+                _is.not.inArray(config.astronomical_type, Object.values(ASTRONOMICAL_TRIGGERS))) {
+                throw new RangeError(`Invalid configuration. Astronomical Type=${config.astronomical_type}`);
+            }
+            if (_is.not.undefined(config.astronomical_type)) {
+                AstronomicalData.CheckLocation(config);
+            }
+
             // Validate the time.
-            ScheduledTrigger._checkTime(config.time);
+            ScheduledTrigger._checkTime(_is.not.undefined(config.astronomical_type), config.time);
         }
 
         // Initialize the base class.
@@ -168,10 +143,18 @@ export class ScheduledTrigger extends TimeTrigger {
             this._days = TRIGGER_DAYS.AllDays;
         }
 
+        // Set the astronomical type. (May be undefined)
+        if (_is.not.undefined(config)) {
+            this._astronomicalType = config.astronomical_type;
+        }
+
         // Set the scheduled time.
         if (_is.not.undefined(config) &&
             _is.not.undefined(config.time)) {
             this._time = config.time;
+            if (_is.undefined(this._time.nominal)) {
+                this._time.nominal = {hour: -1, minute: -1};
+            }
         }
         else {
             // Set to the default to 1 Minute from now.
@@ -185,14 +168,39 @@ export class ScheduledTrigger extends TimeTrigger {
             /* eslint-enable key-spacing */
         }
 
-        this._latitude = 0;
-        this._longitude = 0;
-        this._isAstronimical = false;
+        // Trigger type-specific initialization.
+        if (_is.not.undefined(config) &&
+            _is.not.undefined(this._astronomicalType)) {
+            // Cache the location
+            this._location = config.location;
 
-        this._triggerDelta = this._computeTriggerTimeDelta(this._time);
+            // Commpute and the astronomical offset in minutes
+            let offsetPolarity = 0.0;
+            switch (config.time.astronomical_offset.type) {
+                case TIME_OFFSET_TYPES.TYPE_BEFORE: {
+                    offsetPolarity = -1.0;
+                    break;
+                }
+                case TIME_OFFSET_TYPES.TYPE_AFTER: {
+                    offsetPolarity = 1.0;
+                    break;
+                }
+                default: {
+                    offsetPolarity = 0.0;
+                    break;
+                }
+            }
+            this._astronomicalOffset = offsetPolarity * ((config.time.astronomical_offset.hour * 60.0) +
+                                                         config.time.astronomical_offset.minute);
 
-        // Register for astronomical data ready.
-        this.on(SCHEDULED_TRIGGER_EVENTS.EVENT_ASTRONOMICAL_DATA_READY, this._handleAstrologicalDataReady.bind(this));
+            // Create the astronomical helpwe and register for events of interest.
+            this._astroHelper = new AstronomicalData();
+            this._astroHelper.on(ASTRONOMICAL_DATA_EVENTS.EVENT_DATA_PROCESS_COMPLETE, this._processAstronomicalResults.bind(this));
+        }
+        else {
+            // Fixed schedule. Compute the trigger time delta now.
+            this._triggerDelta = this._computeTriggerTimeDelta(this._time);
+        }
     }
 
     /**
@@ -202,7 +210,7 @@ export class ScheduledTrigger extends TimeTrigger {
     EnterArming() {
         // If the scheduled trigger is not configured as astronomical,
         // defer to the base class.
-        if (!this._isAstronimical) {
+        if (_is.undefined(this._astroHelper)) {
             // This will automatically kick us to Armed.
             super.EnterArming();
         }
@@ -222,12 +230,80 @@ export class ScheduledTrigger extends TimeTrigger {
     GenerateNewTimerValues() {
         // If the scheduled trigger is not configured as astronomical,
         // generate the next time now.
-        if (!this._isAstronimical) {
+        if (_is.undefined(this._astroHelper)) {
             this._doGenerateNewTimerValues();
         }
         else {
-            // Astronomical setting. Request the astronomical data.
-            this._getAstrologicalData();
+            // Get th current time
+            const now = new Date();
+            this._makeAstronomicalRequest(now);
+        }
+    }
+
+    /**
+     * @description Helper to post a request for astronomical results.
+     * @param {Date} date - Date for the request.
+     * @returns {void}
+     */
+    _makeAstronomicalRequest(date) {
+        // Astronomical setting. Request the astronomical data.
+        this._astroHelper.RequestAstronomicalOneDayData({id: 'gt_trigr', date: date, location: this._location});
+    }
+
+    /**
+     * @description - Event handler to process the astronomical request results and manage the dtate.
+     * @param {object} e - Event notification data
+     * @param {boolean} e.status - Error indicator (false==no error)
+     * @returns {void}
+     */
+    _processAstronomicalResults(e) {
+        _debug(`Received Astro Results. status=${e.status}`);
+
+        // Manage the state change
+        // Note: Even if there was an error getting the astronimical results,
+        //       when we have previously established the event time, we will just use
+        //       the previous results.
+        if ((this.Timeout <= 0) &&
+            ((_is.undefined(e) || _is.undefined(e.status) ||
+              _is.truthy(e.status)))) {
+            // Abort.
+            this._currentState.Evaluate(TRIGGER_ACTIONS.Abort);
+        }
+        else {
+            // Extract the time of the desired 'phenomena', if the results indicate so.
+            if (this._astroHelper.Valid) {
+                // Get the astronomical time.
+                const triggerDate = this._astroDateTime;
+
+                // Set the 'nominal' time
+                this._time.nominal.hour = triggerDate.getHours();
+                this._time.nominal.minute = triggerDate.getMinutes();
+            }
+
+            // Update the new timer values.
+            this._triggerDelta = this._computeTriggerTimeDelta(this._time);
+            this._doGenerateNewTimerValues();
+
+            // Ensure that the resulting trigger occurs on the same day as our request.
+            const astroDay = this._astroHelper.Date;
+            const tripDate = new Date(Date.now() + this._timeout.nominal);
+
+            if ((astroDay.getFullYear() == tripDate.getFullYear()) &&
+                (astroDay.getMonth() == tripDate.getMonth()) &&
+                (astroDay.getDate() == tripDate.getDate())) {
+                // Move on
+                setImmediate(() => {
+                    this._currentState.Evaluate(TRIGGER_ACTIONS.Next);
+                });
+            }
+            else {
+                // The event has passed. Make another request.
+                _debug(`Requery for trigger time: day=${tripDate.toString()}`);
+                // Decouple the request.
+                setImmediate(() => {
+                    this._makeAstronomicalRequest(tripDate);
+                });
+            }
         }
     }
 
@@ -398,107 +474,75 @@ export class ScheduledTrigger extends TimeTrigger {
     }
 
     /**
-     * @description Event handler for the astrological data ready event.
-     * @param {object} e - Event data
-     * @param {boolean} e.error -Flag indicating the error status
-     * @param {string} e.data - JSON formatted data containing astronomical data
-     * @returns {void}
+     * @description Read-only accessor for the configured astronomical trigger.
+     * @returns {Date | undefined} - Date of the configured astronomical event. Undefined if not an astronomical trigger.
      * @private
      */
-    _handleAstrologicalDataReady(e) {
-        console.log(e.data);
+    get _astroDateTime() {
+        let date = undefined;
 
-        // Have we previously determined the astronomical value?
-        if (e.error && (this.Timeout <= 0)) {
-            // Abort. We do not have a previous valid scheduled time
-            this._currentState.Evaluate(TRIGGER_ACTIONS.Abort);
-        }
-        else {
-            // TODO: Process Astronomical Data.
-
-            // Generate new timer values
-            this._doGenerateNewTimerValues();
-
-            // Transition to armed.
-            this._currentState.Evaluate(TRIGGER_ACTIONS.Next);
-        }
-    }
-
-    /**
-     * @description Helper for requesting and collecting astronomical data.
-     * @returns {void}
-     * @fires module:ScheduledTimeTriggerModule#event:astronomical_data_ready
-     * @private
-     */
-    _getAstrologicalData() {
-        const MARKER_YEAR = '{YEAR}';
-        const MARKER_MONTH = '{MONTH}';
-        const MARKER_DAY = '{DAY}';
-        const MARKER_LATITUDE = '{LATITUDE}';
-        const MARKER_LONGITUDE = '{LONGITUDE}';
-        const ASTRO_REQUEST_TEMPLATE = `/api/rstt/oneday?date=${MARKER_YEAR}-${MARKER_MONTH}-${MARKER_DAY}&coords=${MARKER_LATITUDE},${MARKER_LONGITUDE}`;
-
-        // Compute the request path.
-        const now = new Date();
-        let requestPath = ASTRO_REQUEST_TEMPLATE;
-        requestPath = requestPath.replace(MARKER_YEAR, now.getFullYear().toString());
-        requestPath = requestPath.replace(MARKER_MONTH, (now.getMonth() + 1).toString());
-        requestPath = requestPath.replace(MARKER_DAY, now.getDate().toString());
-        requestPath = requestPath.replace(MARKER_LATITUDE, this._latitude.toString());
-        requestPath = requestPath.replace(MARKER_LONGITUDE, this._longitude.toString());
-
-        // eslint-disable-next-line no-unused-vars
-        let responseLength = 0;
-        let result = undefined;
-        // Connection information to get the astronomical data.
-        const options = {
-            hostname: 'aa.usno.navy.mil',
-            protocol: 'https:',
-            port: 443,
-            path: requestPath,
-            method: 'GET',
-        };
-
-        // Create the request.
-        const req = _https.request(options, (res) => {
-            _debug(`statusCode: ${res.statusCode}`);
-            _debug(`headers: ${res.headers}`);
-
-            // Handle the 'data' notifications.
-            res.on('data', (d) => {
-                if (result === undefined) {
-                    result = d;
+        if (_is.not.undefined(this._astroHelper) &&
+            _is.not.undefined(this._astronomicalType) &&
+            _is.truthy(this._astroHelper.Valid)) {
+            switch (this._astronomicalType) {
+                case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_LUNAR_TRANSIT: {
+                    date = this._astroHelper.LunarTransit;
+                    break;
                 }
-                else {
-                    result += d;
+                case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_MOON_RISE: {
+                    date = this._astroHelper.LunarRise;
+                    break;
                 }
-                responseLength += d.length;
-            });
+                case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_MOON_SET: {
+                    date = this._astroHelper.LunarSet;
+                    break;
+                }
+                case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SOALAR_TRANSIT: {
+                    date = this._astroHelper.SolarTransit;
+                    break;
+                }
+                case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SUNRISE: {
+                    date = this._astroHelper.SolarRise;
+                    break;
+                }
+                case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SUNSET: {
+                    date = this._astroHelper.SolarSet;
+                    break;
+                }
+                case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_TWILIGHT_START: {
+                    date = this._astroHelper.TwilightStart;
+                    break;
+                }
+                case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_TWILIGHT_END: {
+                    date = this._astroHelper.TwilightEnd;
+                    break;
+                }
+                default: {
+                    // Not handled.
+                    break;
+                }
+            }
+        }
 
-            // Handle the completion event.
-            res.on('end', ()=>{
-                this.emit(SCHEDULED_TRIGGER_EVENTS.EVENT_ASTRONOMICAL_DATA_READY, {data: result.toString(), error: false});
-            });
-        });
+        // Adjust for the offset, if appropriate.
+        if (_is.not.undefined(date) &&
+            _is.not.undefined(this._astronomicalOffset)) {
+            date.setMinutes(date.getMinutes() + this._astronomicalOffset);
+        }
 
-        // Handle errors with the request.
-        req.on('error', (e) => {
-            _debug(`Error getting astronomical data.`);
-            _debug(e);
-            console.log(`Error getting astronomical data.`);
-            console.log(e);
-            this.emit(SCHEDULED_TRIGGER_EVENTS.EVENT_ASTRONOMICAL_DATA_READY, {data: undefined, error: true});
-        });
-        // Initiate the transaction
-        req.end();
+        return date;
     }
 
     /**
      * @description Helper to validate time configuration parameters,
+     * @param {boolean} isAstronomical - Flag indicating that the time object is astronomical (or not).
      * @param {object} time - Structure of time to trip the trigger
-     * @param {object} time.nominal - Nominal time to trip the trigger.
+     * @param {object} [time.nominal] - Nominal time to trip the trigger. Not used if astronomical.
      * @param {number} time.nominal.hour - Hour (0-23)
      * @param {number} time.nominal.minute - Minute (0-59)
+     * @param {object} [time.astronomical_offset] - Offset from the astronomical event. Not used if not astronomical.
+     * @param {number} time.astronomical_offset.hour - Hour (0-23)
+     * @param {number} time.astronomical_offset.minute - Minute (0-59)
      * @param {object} time.tolerance - Tolerance time around nominal to trip the trigger.
      * @param {number} time.tolerance.hour - Hour (0-23)
      * @param {number} time.tolerance.minute - Minute (0-59)
@@ -507,19 +551,30 @@ export class ScheduledTrigger extends TimeTrigger {
      * @throws {RangeError} - Thrown if either the hour or minute are out of range.
      * @private
      */
-    static _checkTime(time) {
+    static _checkTime(isAstronomical, time) {
         if (_is.not.undefined(time)) {
             if (_is.not.object(time) ||
-                _is.not.object(time.nominal) ||
-                _is.not.number(time.nominal.hour) ||
-                _is.not.number(time.nominal.minute) ||
+                _is.not.boolean(isAstronomical) ||
+                // Normal Scheduled Trigger.
+                (_is.falsy(isAstronomical) &&
+                 (_is.not.object(time.nominal) ||
+                  _is.not.number(time.nominal.hour) ||
+                  _is.not.number(time.nominal.minute)))||
+                (_is.truthy(isAstronomical) &&
+                 (_is.not.object(time.astronomical_offset) ||
+                  _is.not.number(time.astronomical_offset.hour) ||
+                  _is.not.number(time.astronomical_offset.minute))) ||
                 _is.not.object(time.tolerance) ||
                 _is.not.number(time.tolerance.hour) ||
                 _is.not.number(time.tolerance.minute)) {
                 throw new TypeError(`time is invalid.`);
             }
-            if (_is.not.within(time.nominal.hour, (MIN_HOUR-1), (MAX_HOUR+1)) ||
-                _is.not.within(time.nominal.minute, (MIN_MINUTE-1), (MAX_MINUTE+1)) ||
+            if ((_is.falsy(isAstronomical) &&
+                 (_is.not.within(time.nominal.hour, (MIN_HOUR-1), (MAX_HOUR+1)) ||
+                  _is.not.within(time.nominal.minute, (MIN_MINUTE-1), (MAX_MINUTE+1)))) ||
+                (_is.truthy(isAstronomical) &&
+                 (_is.not.within(time.astronomical_offset.hour, (MIN_HOUR-1), (MAX_HOUR+1)) ||
+                  _is.not.within(time.astronomical_offset.minute, (MIN_MINUTE-1), (MAX_MINUTE+1)))) ||
                 _is.not.within(time.tolerance.hour, (MIN_HOUR-1), (MAX_HOUR+1)) ||
                 _is.not.within(time.tolerance.minute, (MIN_MINUTE-1), (MAX_MINUTE+1))) {
                 throw new RangeError(`range is invalid.`);

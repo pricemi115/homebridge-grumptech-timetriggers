@@ -89,3 +89,6 @@ typings/
 
 # Mermaid design output
 design/output/
+
+# macOS Files
+.DS_Store

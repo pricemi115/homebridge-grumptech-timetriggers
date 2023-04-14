@@ -46,14 +46,16 @@ classDiagram
     class ScheduledTrigger{
         -number _lattitude
         -number _longitude
+        -AstronomicalData _astroHelper
 
         -GenerateNewTimerValues()
-        -Lattitude() number
-        -Longitude() number
+
+        -EnterArming()
 
         -_computeDeltaDays()
+        -_doGenerateNewTimerValues()
         -_computeTriggerTimeDelta()
-        -_requestAstronomicalData()
+        -_processAstronomicalResults()
 
         -_checkTime()$
     }
@@ -96,6 +98,36 @@ classDiagram
        -doNext() boolean
        -doAbort() boolean
     }
+    class AstronomicalData {
+        -_rawData Object
+        -_isValid boolean
+
+        +APIVersion() string
+        +Valid() boolean
+        +RawData() Object
+        +Date() Date
+        +TwilightStart() DateTime
+        +TwilightEnd() DateTime
+        +SolarRise() DateTime
+        +SolarSet() DateTime
+        +SolarTransit() DateTime
+        +LunarRise() DateTime
+        +LunarSet() DateTime
+        +LunarTraansit() DateTime
+        +LunarPhase() string
+        +Type() string
+        +Latitude() number
+        +Longitude() number
+
+        +RequestAstronomicalPointData()
+        +CheckLocation()$
+
+        -_reset()
+        -_internalDate()
+        -_getPhenomenonDateTime()
+        -_getSolarPhenomenonDateTime()
+        -_getLunarPhenomenonDateTime()
+    }
     TimeTrigger <|-- ScheduledTrigger
     TimeTrigger "1" *-- TriggerStateIdle
     TimeTrigger "1" *-- TriggerStateArming
@@ -103,6 +135,7 @@ classDiagram
     TimeTrigger "1" *-- TriggerStateTripped
     TimeTrigger "1" o-- "1" TimeTriggerActions
     TimeTrigger "1" o-- "1" TimeTriggerStates
+    ScheduledTrigger "1" *-- AstronomicalData
     TriggerStateBase "1" o-- "1" TimeTriggerActions
     TriggerStateBase "1" o-- "1" TimeTriggerStates
     TriggerStateBase "1" o-- TimeTrigger

@@ -24,7 +24,7 @@ import {TriggerStateBase} from './triggerStateBase.mjs';
 const _debug = _debugModule('time_trigger_state');
 
 /**
- * @description Base class for managing trigger states.
+ * @description Class for managing trigger tripped state.
  * @augments TriggerStateBase
  */
 export class TriggerStateTripped extends TriggerStateBase {
@@ -50,13 +50,27 @@ export class TriggerStateTripped extends TriggerStateBase {
     }
 
     /**
-     * @description Read-only property for the name of the state.
+     * @description Read-only property for the id of the state.
      * @returns {TRIGGER_STATES} - state identifier
      * @throws {Error} - Thrown when calling the base class
      * @private
      */
     get State() {
         return TRIGGER_STATES.Tripped;
+    }
+
+    /**
+     * @description Read-only property for state ids for valid transitions.
+     * @returns {TRIGGER_STATES[]} - array of state ids
+     * @throws {Error} - Thrown when calling the base class
+     * @private
+     */
+    get ValidTransitionStates() {
+        const validStates = [];
+        validStates.push(TRIGGER_STATES.Inactive);
+        validStates.push(TRIGGER_STATES.Arming);
+
+        return validStates;
     }
 
     /**
@@ -74,24 +88,6 @@ export class TriggerStateTripped extends TriggerStateBase {
     }
 
     /**
-     * @description Perform actions when exiting this state.
-     * @param {TriggerStateBase} newState - State being transitioned to.
-     * @returns {void}
-     * @throws {TypeError} thrown if 'oldState' is not a TriggerStateBase object.
-     * @private
-     */
-    OnExit(newState) {
-        super.OnExit(newState);
-
-        // Are the trigger being re-armed?
-        if (newState.State == TRIGGER_STATES.Armed) {
-            // Re-Arming. Generate new timer values, in case the owner has
-            // a random element or is a scheduled trigger.
-            this._owner.GenerateNewTimerValues();
-        }
-    }
-
-    /**
      * @description Perform actions for the transition to the next state.
      * @returns {boolean} - true if handled.
      * @private
@@ -105,8 +101,8 @@ export class TriggerStateTripped extends TriggerStateBase {
                 handled = this._owner.EnterIdle();
             }
             else {
-                // Transitioon to armed.
-                handled = this._owner.EnterArmed();
+                // Transition to armed.
+                handled = this._owner.EnterArming();
             }
         }
 
@@ -121,7 +117,7 @@ export class TriggerStateTripped extends TriggerStateBase {
     _doAbort() {
         let handled = false;
         if (_is.not.undefined(this._owner)) {
-            // Transitioon to idle.
+            // Transition to idle.
             handled = this._owner.EnterIdle();
         }
 

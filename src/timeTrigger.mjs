@@ -24,6 +24,7 @@ import _is from 'is-it-check';
 import {TRIGGER_STATES, TRIGGER_EVENTS} from './triggerTypes.mjs';
 import {TRIGGER_ACTIONS, TriggerStateBase} from './triggerStateBase.mjs';
 import {TriggerStateIdle} from './triggerStateIdle.mjs';
+import {TriggerStateArming} from './triggerStateArming.mjs';
 import {TriggerStateArmed} from './triggerStateArmed.mjs';
 import {TriggerStateTripped} from './triggerStateTripped.mjs';
 
@@ -115,6 +116,7 @@ export class TimeTrigger extends EventEmitter {
 
         // Create the states.
         this._idleState = new TriggerStateIdle({owner: this});
+        this._armingState = new TriggerStateArming({owner: this});
         this._armedState = new TriggerStateArmed({owner: this});
         this._trippedState = new TriggerStateTripped({owner: this});
 
@@ -299,15 +301,28 @@ export class TimeTrigger extends EventEmitter {
         // Stop the timer.
         this._doStop();
 
-        // Generate new timer values, in case there is a random element.
-        // or we are actually a Scheduled Trigger.
-        this.GenerateNewTimerValues();
-
         // Manage the state.
         this._doStateChange(this._idleState);
 
         // Clear the initializing flag.
         this._initializing = false;
+
+        return true;
+    }
+
+    /**
+     * @description Enter Arming State
+     * @returns {boolean} Always return true.
+     */
+    EnterArming() {
+        // Manage the state.
+        this._doStateChange(this._armingState);
+
+        // Jump to the next state.
+        setImmediate(() => {
+            // Ensure that we are not transitioning.
+            this._currentState.Evaluate(TRIGGER_ACTIONS.Next);
+        });
 
         return true;
     }
@@ -439,17 +454,22 @@ export class TimeTrigger extends EventEmitter {
         if (state.State !== this._currentState.State) {
             // Decouple the state change.
             setImmediate(() => {
-                // Cache the old state.
-                const oldState = this._currentState;
-                // Exit the current state, providing it the new state.
-                this._currentState.OnExit(state);
-                // Update the state.
-                this._currentState = state;
-                // Enter the new state.
-                this._currentState.OnEntrance(oldState);
+                try {
+                    // Cache the old state.
+                    const oldState = this._currentState;
+                    // Exit the current state, providing it the new state.
+                    this._currentState.OnExit(state);
+                    // Update the state.
+                    this._currentState = state;
+                    // Enter the new state.
+                    this._currentState.OnEntrance(oldState);
 
-                // Raise the state changed event.
-                this.emit(TRIGGER_EVENTS.EVENT_STATE_CHANGED, {uuid: this.Identifier, old_state: oldState.State, new_state: this.State});
+                    // Raise the state changed event.
+                    this.emit(TRIGGER_EVENTS.EVENT_STATE_CHANGED, {uuid: this.Identifier, old_state: oldState.State, new_state: this.State});
+                }
+                catch (err) {
+                    _debug(`Illegal state transition. ${err.message}`);
+                }
             });
         }
         else {

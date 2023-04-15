@@ -14,8 +14,8 @@
  */
 export const TRIGGER_TYPES = {
     /* eslint-disable key-spacing */
-    TimedTrigger   : 0,
-    ScheduledTrigger       : 1,
+    TimedTrigger     : 0,
+    ScheduledTrigger : 1,
     /* eslint-enable key-spacing */
 };
 
@@ -25,14 +25,16 @@ export const TRIGGER_TYPES = {
  * @readonly
  * @enum {number}
  * @property {number} Inactive- Trigger Inactive
+ * @property {number} Arming - Trigger Arming
  * @property {number} Armed - Trigger Armed
  * @property {number} Tripped - Trigger Tripped
  */
 export const TRIGGER_STATES = {
     /* eslint-disable key-spacing */
     Inactive  : 0,
-    Armed     : 1,
-    Tripped   : 2,
+    Arming    : 1,
+    Armed     : 2,
+    Tripped   : 3,
     /* eslint-enable key-spacing */
 };
 
@@ -79,5 +81,49 @@ export const TRIGGER_EVENTS = {
     /* eslint-disable key-spacing */
     EVENT_STATE_CHANGED : 'state_changed',
     EVENT_STATE_NOTIFY  : 'state_notify',
+    /* eslint-enable key-spacing */
+};
+
+/**
+ * @description Enumeration of astronomical triggers.
+ * @readonly
+ * @private
+ * @enum {string}
+ * @property {string} ASTRONOMICAL_TWILIGHT_START - Start of Twilight
+ * @property {string} ASTRONOMICAL_SUNRISE  - Sunrise
+ * @property {string} ASTRONOMICAL_SOALAR_TRANSIT  - Highest point of the sun
+ * @property {string} ASTRONOMICAL_SUNSET - Sunset
+ * @property {string} ASTRONOMICAL_TWILIGHT_END - End of twilight
+ * @property {string} ASTRONOMICAL_MOON_RISE - Moon rise
+ * @property {string} ASTRONOMICAL_LUNAR_TRANSIT - Highest point of the moon
+ * @property {string} ASTRONOMICAL_MOON_SET - Moon set
+ */
+export const ASTRONOMICAL_TRIGGERS = {
+    /* eslint-disable key-spacing */
+    ASTRONOMICAL_TWILIGHT_START : 'twilight_start',
+    ASTRONOMICAL_SUNRISE        : 'sunrise',
+    ASTRONOMICAL_SOALAR_TRANSIT : 'solar_transit',
+    ASTRONOMICAL_SUNSET         : 'sunset',
+    ASTRONOMICAL_TWILIGHT_END   : 'twilight_end',
+    ASTRONOMICAL_MOON_RISE      : 'moon_rise',
+    ASTRONOMICAL_LUNAR_TRANSIT  : 'lunar_transit',
+    ASTRONOMICAL_MOON_SET       : 'moon_set',
+    /* eslint-enable key-spacing */
+};
+
+/**
+ * @description Enumeration of offset types.
+ * @readonly
+ * @private
+ * @enum {string}
+ * @property {string} TYPE_NONE - No offset
+ * @property {string} TYPE_BEFORE - Offset before
+ * @property {string} TYPE_AFTER - Offset after
+ */
+export const TIME_OFFSET_TYPES = {
+    /* eslint-disable key-spacing */
+    TYPE_NONE   : 'none',
+    TYPE_BEFORE : 'before',
+    TYPE_AFTER  : 'after',
     /* eslint-enable key-spacing */
 };

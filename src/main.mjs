@@ -64,7 +64,8 @@ import _is from 'is-it-check';
 // Internal dependency and imports
 import {TimeTrigger} from './timeTrigger.mjs';
 import {ScheduledTrigger} from './scheduledTrigger.mjs';
-import {TRIGGER_STATES, TRIGGER_EVENTS, TRIGGER_DAYS, TRIGGER_TYPES} from './triggerTypes.mjs';
+import {TRIGGER_STATES, TRIGGER_EVENTS, TRIGGER_DAYS, TRIGGER_TYPES, TIME_OFFSET_TYPES} from './triggerTypes.mjs';
+import {AstronomicalData} from './astronomicalDataService.mjs';
 
 // Internal complex types
 /**
@@ -168,7 +169,7 @@ class TimeTriggerPlatform {
             config.settings.triggers.forEach((triggerSettings, index) => {
                 // Get the identifier.
                 let identifier = null;
-                if (_is.not.undefined(triggerSettings.trigger_identifier) && 
+                if (_is.not.undefined(triggerSettings.trigger_identifier) &&
                     _is.string(triggerSettings.trigger_identifier) && (triggerSettings.trigger_identifier.length > 0) ) {
                     identifier = triggerSettings.trigger_identifier;
                 }
@@ -250,11 +251,55 @@ class TimeTriggerPlatform {
                                 (Object.values(TRIGGER_DAYS).indexOf(triggerSettings.days) >= 0)) {
                                 triggerConfig.days = triggerSettings.days;
                             }
+                            // Astronomical Type
+                            if (_is.not.undefined(triggerSettings.is_astronomical) && _is.boolean(triggerSettings.is_astronomical)) {
+                                if (_is.not.undefined(triggerSettings.astronomical_type) && _is.string(triggerSettings.astronomical_type)) {
+                                    triggerConfig.astronomical_type = triggerSettings.astronomical_type;
+                                }
+                            }
+                            // Astronomical Location
+                            if (_is.not.undefined(triggerConfig.astronomical_type)) {
+                                triggerConfig.location = {latitude: 0, longitude: 0};
+                                if (_is.not.undefined(triggerSettings.location)) {
+                                    // Validate the location
+                                    // eslint-disable-next-line new-cap
+                                    AstronomicalData.CheckLocation(triggerSettings);
+
+                                    triggerConfig.location = triggerSettings.location;
+                                }
+                            }
                             // Trigger time window
-                            triggerConfig.time = {nominal: {hour: 12, minute: 0}, tolerance: {hour: 0, minute: 0}};
+                            if (_is.undefined(triggerConfig.astronomical_type)) {
+                                triggerConfig.time = {nominal: {hour: 12, minute: 0}, tolerance: {hour: 0, minute: 0}};
+                            }
+                            else {
+                                triggerConfig.time = {astronomical_offset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 0, minute: 0}, tolerance: {hour: 0, minute: 0}};
+                            }
                             if (_is.not.undefined(triggerSettings.time) && _is.object(triggerSettings.time)) {
+                                // Time Window - Astronomical Offset
+                                if (_is.not.undefined(triggerConfig.astronomical_type) &&
+                                    _is.not.undefined(triggerSettings.time.astronomical_offset) && _is.object(triggerSettings.time.astronomical_offset)) {
+                                    // Type
+                                    if (_is.not.undefined(triggerSettings.time.astronomical_offset.type) && _is.string(triggerSettings.time.astronomical_offset.type)) {
+                                        // Set the type
+                                        triggerConfig.time.astronomical_offset.type = triggerSettings.time.astronomical_offset.type;
+                                    }
+                                    // Hour
+                                    if (_is.not.undefined(triggerSettings.time.astronomical_offset.hour) && _is.number(triggerSettings.time.astronomical_offset.hour) &&
+                                        _is.within(triggerSettings.time.astronomical_offset.hour, -1, 6)) {
+                                        // Set the astronomical offset hour
+                                        triggerConfig.time.astronomical_offset.hour = triggerSettings.time.astronomical_offset.hour;
+                                    }
+                                    // Minute
+                                    if (_is.not.undefined(triggerSettings.time.astronomical_offset.minute) && _is.number(triggerSettings.time.astronomical_offset.minute) &&
+                                        _is.within(triggerSettings.time.astronomical_offset.minute, -1, 60)) {
+                                        // Set the astronomical offset minute
+                                        triggerConfig.time.astronomical_offset.minute = triggerSettings.time.astronomical_offset.minute;
+                                    }
+                                }
                                 // Time Window - Nominal
-                                if (_is.not.undefined(triggerSettings.time.nominal) && _is.object(triggerSettings.time.nominal)) {
+                                if (_is.undefined(triggerConfig.astronomical_type) &&
+                                    _is.not.undefined(triggerSettings.time.nominal) && _is.object(triggerSettings.time.nominal)) {
                                     // Hour
                                     if (_is.not.undefined(triggerSettings.time.nominal.hour) && _is.number(triggerSettings.time.nominal.hour) &&
                                         _is.within(triggerSettings.time.nominal.hour, -1, 24)) {
@@ -1146,7 +1191,7 @@ class TimeTriggerPlatform {
         }
 
         let status = new Error(`id:${id} has no matching accessory`);
-        let result = false
+        let result = false;
         this._triggers.forEach((item, index) => {
             if (_is.existy(item.accessory) &&
                 _is.equal(item.accessory.context.ID, id)) {

@@ -30,6 +30,7 @@ export default [
         },
         externals: [
             'crypto',
+            'node:https',
         ],
         module: {
             parser: {

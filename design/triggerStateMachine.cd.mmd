@@ -10,8 +10,9 @@ classDiagram
         Armed
         Triggered
     }
-    class Trigger{
+    class TimeTrigger{
         -TriggerStateIdle _stateIdle
+        -TriggerStateArmed _stateArming
         -TriggerStateArmed _stateArmed
         -TriggerStateTripped _stateTripped
         -TriggerStateBase _currentState
@@ -28,6 +29,7 @@ classDiagram
         +Stop()
 
         +EnterIdle()
+        +EnterArming()
         +EnterArmed()
         +EnterTripped()
 
@@ -39,7 +41,23 @@ classDiagram
         -_on_timerTripped()
         -_doStateChange()
         -_checkRange()$
-        __getNextValue()$
+        -_getNextValue()$
+    }
+    class ScheduledTrigger{
+        -number _lattitude
+        -number _longitude
+        -AstronomicalData _astroHelper
+
+        -GenerateNewTimerValues()
+
+        -EnterArming()
+
+        -_computeDeltaDays()
+        -_doGenerateNewTimerValues()
+        -_computeTriggerTimeDelta()
+        -_processAstronomicalResults()
+
+        -_checkTime()$
     }
     class TriggerStateBase{
        <<Abstract>>
@@ -53,6 +71,13 @@ classDiagram
        +OnExit()
     }
     class TriggerStateIdle{
+       +constructor(Object config)
+       +Name() string
+       +State number
+       -doNext() boolean
+       -doAbort() boolean
+    }
+    class TriggerStateArming{
        +constructor(Object config)
        +Name() string
        +State number
@@ -73,14 +98,79 @@ classDiagram
        -doNext() boolean
        -doAbort() boolean
     }
-    Trigger "1" *-- TriggerStateIdle
-    Trigger "1" *-- TriggerStateArmed
-    Trigger "1" *-- TriggerStateTripped
-    Trigger "1" o-- "1" TimeTriggerActions
-    Trigger "1" o-- "1" TimeTriggerStates
+    class AstronomicalData {
+        -_rawData Object
+        -_isValid boolean
+
+        +APIVersion() string
+        +Valid() boolean
+        +RawData() Object
+        +Date() Date
+        +TwilightStart() DateTime
+        +TwilightEnd() DateTime
+        +SolarRise() DateTime
+        +SolarSet() DateTime
+        +SolarTransit() DateTime
+        +LunarRise() DateTime
+        +LunarSet() DateTime
+        +LunarTraansit() DateTime
+        +LunarPhase() string
+        +Type() string
+        +Latitude() number
+        +Longitude() number
+
+        +RequestAstronomicalPointData()
+        +CheckLocation()$
+
+        -_reset()
+        -_internalDate()
+        -_getPhenomenonDateTime()
+        -_getSolarPhenomenonDateTime()
+        -_getLunarPhenomenonDateTime()
+    }
+    TimeTrigger <|-- ScheduledTrigger
+    TimeTrigger "1" *-- TriggerStateIdle
+    TimeTrigger "1" *-- TriggerStateArming
+    TimeTrigger "1" *-- TriggerStateArmed
+    TimeTrigger "1" *-- TriggerStateTripped
+    TimeTrigger "1" o-- "1" TimeTriggerActions
+    TimeTrigger "1" o-- "1" TimeTriggerStates
+    ScheduledTrigger "1" *-- AstronomicalData
     TriggerStateBase "1" o-- "1" TimeTriggerActions
     TriggerStateBase "1" o-- "1" TimeTriggerStates
-    TriggerStateBase "1" o-- Trigger
+    TriggerStateBase "1" o-- TimeTrigger
     TriggerStateBase <|-- TriggerStateIdle
+    TriggerStateBase <|-- TriggerStateArming
     TriggerStateBase <|-- TriggerStateArmed
     TriggerStateBase <|-- TriggerStateTripped
+
+    class TRIGGER_TYPES {
+        <<enumeration>>
+        TimedTrigger
+        ScheduledTrigger
+    }
+    class TRIGGER_STATES {
+        <<enumeration>>
+        Inactive
+        Arming
+        Armed
+        Tripped
+    }
+    class TRIGGER_DAYS {
+        <<enumeration>>
+        Sunday
+        Monday
+        Tuesday
+        Wednesday
+        Thursday
+        Friday
+        Saturday
+        Weekday
+        Weekend
+        AllDays
+    }
+    class TRIGGER_EVENTS {
+        <<enumeration>>
+        EVENT_STATE_CHANGED
+        EVENT_STATE_NOTIFY
+    }

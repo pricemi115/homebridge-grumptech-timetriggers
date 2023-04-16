@@ -59,6 +59,24 @@ const MIN_HOUR = 0;
 const MAX_HOUR = 23;
 
 /**
+ * @description Flag value for an invalid timeout
+ * @private
+ */
+const INVALID_TIMEOUT_ID = -1;
+
+/**
+ * @description Tolerance for checking/validating active timeouts.
+ * @private
+ */
+const REMAINING_TIME_TOLERANCE = 10/* milliseconds */;
+
+/**
+ * @description Period for checking/validating active timeouts.
+ * @private
+ */
+const REMAINING_TIME_CHECK_PERIOD = 60000/* milliseconds */;
+
+/**
  * @description Time Trigger state changed notification
  * @event module:TimeTriggerModule#event:state_changed
  * @type {object}
@@ -201,6 +219,13 @@ export class ScheduledTrigger extends TimeTrigger {
             // Fixed schedule. Compute the trigger time delta now.
             this._triggerDelta = this._computeTriggerTimeDelta(this._time);
         }
+
+        // Data for managing updates to the system time (ex. DST time changes)
+        this._CB_checkTimeRemaining = this._on_CheckTimeRemainingTripped.bind(this);
+        this._lastTimeRemaining = -1;
+        this._checkTimeoutID = INVALID_TIMEOUT_ID;
+        // Used to support unit tests
+        this._remainingTimeCheckPeriod = REMAINING_TIME_CHECK_PERIOD;
     }
 
     /**
@@ -237,6 +262,39 @@ export class ScheduledTrigger extends TimeTrigger {
             // Get th current time
             const now = new Date();
             this._makeAstronomicalRequest(now);
+        }
+    }
+
+    /**
+     * @description Helper to start the trigger timer.
+     * @param {number} timeout - Timeout period, in milliseconds
+     * @returns {void}
+     * @throws {TypeError} - thrown if timeout is not a number
+     * @throws {RangeError} - thrown if the timeout is not positive
+     * @private
+     */
+    DoStart(timeout) {
+        // Defer to base class.
+        super.DoStart(timeout);
+
+        // Initialize the last known amount of time remaining.
+        this._lastTimeRemaining = this.TimeRemaining;
+        this._checkTimeoutID = setInterval(this._CB_checkTimeRemaining, this._remainingTimeCheckPeriod);
+    }
+
+    /**
+     * @description Helper to stop the trigger timer.
+     * @returns {void}
+     * @private
+     */
+    _doStop() {
+        // Defer to base class.
+        super._doStop();
+
+        // Clear the check .
+        if (this._checkTimeoutID !== INVALID_TIMEOUT_ID) {
+            clearInterval(this._checkTimeoutID);
+            this._checkTimeoutID = INVALID_TIMEOUT_ID;
         }
     }
 
@@ -531,6 +589,44 @@ export class ScheduledTrigger extends TimeTrigger {
         }
 
         return date;
+    }
+
+    /**
+     * @description Event handler for checking and validating remaining time.
+     * @returns {void}
+     */
+    _on_CheckTimeRemainingTripped() {
+        // Get the time remaining
+        const timeRemaining = this.TimeRemaining;
+        // Compute the expected time remaining
+        const expectedTimeRemaining = this._lastTimeRemaining - this._remainingTimeCheckPeriod;
+        // Update last known remaining time.
+        this._lastTimeRemaining = timeRemaining;
+        // Check the difference bwtween the actual and expected time remaining.
+        _debug(`Checking remaining time: Actual=${timeRemaining} Expected=${expectedTimeRemaining}`);
+        if (_is.above(Math.abs(timeRemaining - expectedTimeRemaining), REMAINING_TIME_TOLERANCE)) {
+            _debug(`Remaining time out of spec.`);
+
+            if (timeRemaining <= 0) {
+                // Trigger has elapsed.
+
+                // Kill current timer(s)
+                this._doStop();
+
+                // Move on
+                setImmediate(() => {
+                    _debug(`Forcing state change`);
+                    this._currentState.Evaluate(TRIGGER_ACTIONS.Next);
+                });
+            }
+            else {
+                // Reset the timer based on expectations.
+                _debug(`Resetting timer to ${expectedTimeRemaining}`);
+                this.DoStart(expectedTimeRemaining);
+                // Force a state notification
+                this._doStateChange(this._currentState);
+            }
+        }
     }
 
     /**

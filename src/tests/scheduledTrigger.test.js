@@ -183,7 +183,6 @@ describe('ScheduledTrigger class tests', ()=>{
             });
         });
     });
-
     describe('Astronomical Instance functionality tests', ()=>{
         describe.each([
             ['No offset',               {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SUNRISE, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 0, minute: 0},   location: {latitude: 42, longitude: -71.25}}],
@@ -292,6 +291,100 @@ describe('ScheduledTrigger class tests', ()=>{
                                                                             tolerance: {hour: 0, minute: 0}},
                                 location: {latitude: 42, longitude: -71.5}};
                 const trigger = new ScheduledTrigger(trgCfg);
+                trigger.on(TRIGGER_EVENTS.EVENT_STATE_CHANGED, handlerStateChanged);
+                // Decouple the start.
+                setImmediate(() => {
+                    trigger.Start();
+                });
+            });
+        });
+    });
+    describe('Time Shift Instance functionality tests', ()=>{
+        describe.each([
+            ['Shift Early',  {hour:  0, minute:  20}, (60*(60*1000))],
+            ['Shift Later',  {hour:  0, minute:  20}, (-60*(60*1000))],
+        ])('Time Shift tests', (desc, time_delta, time_shift_ms) =>{
+            test(desc, done =>{
+                function handlerStateNotification(e) {
+                    try {
+                        console.log(`TimeShift-handlerStateNotification`);
+                        console.log(e);
+
+                        /* UUID */
+                        expect(e).toHaveProperty('uuid');
+                        expect(e.uuid).toBe(trigger.Identifier);
+    
+                        /* current_state */
+                        expect(e).toHaveProperty('current_state');
+                        expect(_is.sameType(e.current_state, TRIGGER_STATES.Inactive)).toBeTruthy();
+                        
+                        if (e.current_state == TRIGGER_STATES.Armed) {
+                            expect(time_shift_ms).toBeGreaterThan(0);
+
+                            // Check the time remaining
+                            const actualTimeRemaining = trigger.TimeRemaining;
+                            const expectedTimeRemaining = ((time_delta.hour * 3600 * 1000) + 
+                                                           (time_delta.minute * 60 * 1000)) -
+                                                          trigger._remainingTimeCheckPeriod;
+                            expect(actualTimeRemaining).toBeGreaterThanOrEqual(expectedTimeRemaining - 60000);
+                            expect(actualTimeRemaining).toBeLessThanOrEqual(expectedTimeRemaining + 60000);
+
+                            // Cleanup and end the test.
+                            trigger.Stop();
+                            trigger.off(TRIGGER_EVENTS.EVENT_STATE_NOTIFY, handlerStateNotification);
+                            trigger.off(TRIGGER_EVENTS.EVENT_STATE_CHANGED, handlerStateChanged);
+
+                            done();
+                        }
+                    }
+                    catch (error) {
+                        // Abort the test.
+                        console.log(`Aborting test.`);
+                        console.log(error);
+                        done(error);
+                    }
+                };
+                function handlerStateChanged(e) {
+                    try {
+                        /* UUID */
+                        expect(e).toHaveProperty('uuid');
+                        expect(e.uuid).toBe(trigger.Identifier);
+
+                        /* Manage Trigger Life Cycle */
+                        if ((e.old_state === TRIGGER_STATES.Arming) &&
+                            (e.new_state === TRIGGER_STATES.Armed)) {
+                            // Fake out the time remaining.
+                            trigger._expectedTripTime.setTime(trigger._expectedTripTime.getTime() + time_shift_ms);
+                        }
+                        else if ((e.old_state === TRIGGER_STATES.Armed) &&
+                                 (e.new_state === TRIGGER_STATES.Tripped)) {
+                            expect(time_shift_ms).toBeLessThan(0);
+                        }
+                        else if ((e.old_state === TRIGGER_STATES.Tripped) &&
+                                 (e.new_state === TRIGGER_STATES.Inactive)) {
+                            // Cleanup and end the test.
+                            trigger.off(TRIGGER_EVENTS.EVENT_STATE_NOTIFY, handlerStateNotification);
+                            trigger.off(TRIGGER_EVENTS.EVENT_STATE_CHANGED, handlerStateChanged);
+
+                            done();
+                        }
+                    }
+                    catch (error) {
+                        // Abort the test.
+                        console.log(`Aborting test.`);
+                        console.log(error);
+                        done(error);
+                    }
+                };
+
+                const triggerTime = new Date();
+                triggerTime.setHours(triggerTime.getHours() + time_delta.hour);
+                triggerTime.setMinutes(triggerTime.getMinutes() + time_delta.minute);
+
+                const config = {time: {nominal: {hour: triggerTime.getHours(), minute: triggerTime.getMinutes()}, tolerance: {hour: 0, minute: 0}}, trip_limit: 1};
+                const trigger = new ScheduledTrigger(config);
+                trigger._remainingTimeCheckPeriod = 2000;
+                trigger.on(TRIGGER_EVENTS.EVENT_STATE_NOTIFY, handlerStateNotification);
                 trigger.on(TRIGGER_EVENTS.EVENT_STATE_CHANGED, handlerStateChanged);
                 // Decouple the start.
                 setImmediate(() => {

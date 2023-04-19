@@ -382,6 +382,8 @@ export class AstronomicalData extends EventEmitter {
         // eslint-disable-next-line no-unused-vars
         let responseLength = 0;
         let result = undefined;
+        let responseInitiated = false;
+        let error = false;
         // Connection information to get the astronomical data.
         const options = {
             hostname: 'aa.usno.navy.mil',
@@ -389,13 +391,16 @@ export class AstronomicalData extends EventEmitter {
             port: 443,
             path: requestPath,
             method: 'GET',
+            timeout: 10000,
         };
 
         // Create the request.
+        _debug(`${config.location.latitude},${config.location.longitude}: request`);
         const req = _https.request(options, (res) => {
             _debug(`statusCode: ${res.statusCode}`);
             _debug(`headers: ${res.headers}`);
 
+            // Response event handlers.
             // Handle the 'data' notifications.
             res.on('data', (d) => {
                 if (result === undefined) {
@@ -409,12 +414,8 @@ export class AstronomicalData extends EventEmitter {
 
             // Handle the completion event.
             res.on('end', ()=>{
-                // Issue the notification that the processing has ended.
-                this.emit(ASTRONOMICAL_DATA_EVENTS.EVENT_DATA_PROCESSING, {processing: false});
-
                 // Process the response
                 // Convert the response data to an object.
-                let error = false;
                 try {
                     this._rawData = JSON.parse(result.toString());
 
@@ -434,20 +435,53 @@ export class AstronomicalData extends EventEmitter {
                     _debug(e);
                     error = true;
                 }
+            });
+        });
+        // Request event handlers.
+        // Handle the request close event
+        req.on('close', () => {
+            // Issue event notifications.
+            setImmediate(() => {
+                this.emit(ASTRONOMICAL_DATA_EVENTS.EVENT_DATA_PROCESSING, {processing: false});
+            });
 
-                // Issue the notification
+            if (_is.falsy(responseInitiated)) {
+                _debug(`No response when getting astronomical data.`);
+
+                // Flag the error.
+                error = true;
+            }
+
+            _debug(`${config.location.latitude},${config.location.longitude}: close - resp:${responseInitiated}  err:${error}`);
+
+            // Issue the notification
+            setImmediate(() => {
                 this.emit(ASTRONOMICAL_DATA_EVENTS.EVENT_DATA_PROCESS_COMPLETE, {status: error});
             });
         });
+        // Handle the request response notification.
+        req.on('response', () => {
+            _debug(`${config.location.latitude},${config.location.longitude}: response`);
 
-        // Handle errors with the request.
+            responseInitiated = true;
+        });
+        // Handle the "timeout" event. Used to abort the request
+        req.on('timeout', () => {
+            _debug(`${config.location.latitude},${config.location.longitude}: timeout - resp:${responseInitiated}`);
+
+            // Has the request response been initiated.
+            if (_is.falsy(responseInitiated)) {
+                // Abort the request
+                req.destroy();
+            }
+        });
+        // Handle error notification.
         req.on('error', (e) => {
-            _debug(`Error getting astronomical data.`);
+            _debug(`${config.location.latitude},${config.location.longitude}: error - ${responseInitiated}`);
             _debug(e);
 
-            // Issue event notifications.
-            this.emit(ASTRONOMICAL_DATA_EVENTS.EVENT_DATA_PROCESSING, {processing: false});
-            this.emit(ASTRONOMICAL_DATA_EVENTS.EVENT_DATA_PROCESS_COMPLETE, {status: true});
+            // Flag the error
+            error = true;
         });
         // Notify that processing has started.
         this.emit(ASTRONOMICAL_DATA_EVENTS.EVENT_DATA_PROCESSING, {processing: true});

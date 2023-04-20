@@ -222,7 +222,7 @@
                                                 }
                                             },
                                             "condition": {
-                                                "functionBody": "return (model.settings.triggers[arrayIndices] && (model.settings.triggers[arrayIndices].trigger_type === 1) && (model.settings.triggers[arrayIndices].time.is_astronomical === false));"
+                                                "functionBody": "return (model.settings.triggers[arrayIndices] && (model.settings.triggers[arrayIndices].trigger_type === 1) && (model.settings.triggers[arrayIndices].is_astronomical === false));"
                                             }
                                         },
                                         "tolerance": {

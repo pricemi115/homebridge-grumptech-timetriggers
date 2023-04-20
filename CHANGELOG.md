@@ -4,7 +4,12 @@ Change history for _homebridge-grumptech-timetriggers_
 ---
 ---
 
-## [1.3.0] - 2023-APR-15
+## [1.3.1] - 2023-APR-19
+### Fixes
+- Trip Time did not show up in the plug-in settings when Astronomical Triggers was _not_ set.
+
+---
+## [1.3.0] - 2023-APR-19
 ### What's new
 - [Issue #5](https://github.com/pricemi115/homebridge-grumptech-timetriggers/issues/5): Add support for astronomical triggers. 🌞 🌖
 

@@ -186,9 +186,15 @@ describe('ScheduledTrigger class tests', ()=>{
     describe('Astronomical Instance functionality tests', ()=>{
         describe.each([
             ['No offset',               {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SUNRISE, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 0, minute: 0},   location: {latitude: 42, longitude: -71.25}}],
+            ['No offset - MR',          {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_MOON_RISE, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 0, minute: 0},   location: {latitude: 42, longitude: -71.25}}],
+            ['No offset - ST',          {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SOALAR_TRANSIT, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 0, minute: 0},   location: {latitude: 42, longitude: -71.25}}],
+            ['No offset = TE',          {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_TWILIGHT_END, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 0, minute: 0},   location: {latitude: 42, longitude: -71.25}}],
+            ['No offset - TS',          {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_TWILIGHT_START, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 0, minute: 0},   location: {latitude: 42, longitude: -71.25}}],
+            ['No offset',               {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SUNRISE, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 0, minute: 0},   location: {latitude: 42, longitude: -71.25}}],
+            ['No offset',               {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SUNRISE, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 0, minute: 0},   location: {latitude: 42, longitude: -71.25}}],
             ['No offset - with values', {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SUNRISE, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 1, minute: 1},   location: {latitude: 42, longitude: -71.25}}],
             ['Before',                  {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_MOON_SET, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_BEFORE, hour: 1, minute: 30}, location: {latitude: 42, longitude: -71.25}}],
-            ['After',                   {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_TWILIGHT_END, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_AFTER, hour: 1, minute: 59},  location: {latitude: 42, longitude: -71.25}}],
+            ['After',                   {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_LUNAR_TRANSIT, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_AFTER, hour: 1, minute: 59},  location: {latitude: 42, longitude: -71.25}}],
         ])('Astro Tests.', (desc, config) =>{
             test(desc, done =>{
                 function getAstroTime(type) {

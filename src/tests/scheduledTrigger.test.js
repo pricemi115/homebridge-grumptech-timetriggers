@@ -187,8 +187,8 @@ describe('ScheduledTrigger class tests', ()=>{
         describe.each([
             ['No offset',               {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SUNRISE, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 0, minute: 0},   location: {latitude: 42, longitude: -71.25}}],
             ['No offset - with values', {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SUNRISE, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 1, minute: 1},   location: {latitude: 42, longitude: -71.25}}],
-            ['Before',                  {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SUNSET, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_BEFORE, hour: 1, minute: 30}, location: {latitude: 42, longitude: -71.25}}],
-            ['After',                   {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SUNSET, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_AFTER, hour: 1, minute: 59},  location: {latitude: 42, longitude: -71.25}}],
+            ['Before',                  {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_MOON_SET, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_BEFORE, hour: 1, minute: 30}, location: {latitude: 42, longitude: -71.25}}],
+            ['After',                   {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_TWILIGHT_END, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_AFTER, hour: 1, minute: 59},  location: {latitude: 42, longitude: -71.25}}],
         ])('Astro Tests.', (desc, config) =>{
             test(desc, done =>{
                 function getAstroTime(type) {
@@ -224,6 +224,7 @@ describe('ScheduledTrigger class tests', ()=>{
                         }
                         case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_TWILIGHT_END: {
                             date = trigger._astroHelper.TwilightEnd;
+                            console.log(`TwilightEnd: ${date}`)
                             break;
                         }
                         default: {
@@ -307,9 +308,6 @@ describe('ScheduledTrigger class tests', ()=>{
             test(desc, done =>{
                 function handlerStateNotification(e) {
                     try {
-                        console.log(`TimeShift-handlerStateNotification`);
-                        console.log(e);
-
                         /* UUID */
                         expect(e).toHaveProperty('uuid');
                         expect(e.uuid).toBe(trigger.Identifier);

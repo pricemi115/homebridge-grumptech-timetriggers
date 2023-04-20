@@ -302,6 +302,7 @@ export class ScheduledTrigger extends TimeTrigger {
      * @description Helper to post a request for astronomical results.
      * @param {Date} date - Date for the request.
      * @returns {void}
+     * @private
      */
     _makeAstronomicalRequest(date) {
         // Astronomical setting. Request the astronomical data.
@@ -313,6 +314,7 @@ export class ScheduledTrigger extends TimeTrigger {
      * @param {object} e - Event notification data
      * @param {boolean} e.status - Error indicator (false==no error)
      * @returns {void}
+     * @private
      */
     _processAstronomicalResults(e) {
         _debug(`Received Astro Results. status=${e.status}`);
@@ -594,6 +596,7 @@ export class ScheduledTrigger extends TimeTrigger {
     /**
      * @description Event handler for checking and validating remaining time.
      * @returns {void}
+     * @private
      */
     _on_CheckTimeRemainingTripped() {
         // Get the time remaining

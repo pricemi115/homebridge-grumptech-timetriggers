@@ -650,6 +650,7 @@ class TimeTriggerPlatform {
      * @param {_PlatformAccessory} accessory - Accessory to be configured.
      * @returns {boolean} - false if the accessory version cannot me managed. true, otherwise.
      * @throws {TypeError} - thrown if 'accessory' is not a PlatformAccessory
+     * @private
      */
     _managePluginVersion(accessory) {
         // Validate the argument(s)

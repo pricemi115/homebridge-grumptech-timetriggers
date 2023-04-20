@@ -3,7 +3,7 @@
 <head>
     
     <meta charset="utf-8">
-    <title>TriggerStateTrippedModule - Documentation</title>
+    <title>AstronomicalDataModule - Documentation</title>
     
     
     <script src="scripts/prettify/prettify.js"></script>
@@ -37,7 +37,7 @@
 
 <div id="main">
     
-    <h1 class="page-title">TriggerStateTrippedModule</h1>
+    <h1 class="page-title">AstronomicalDataModule</h1>
     
 
     
@@ -60,13 +60,13 @@
 <dl class="details">
     
     <dt class="tag-description">Description:</dt>
-    <dd class="tag-description"><ul class="dummy"><li><p>Class for managing tripped trigger states.</p></li></ul></dd>
+    <dd class="tag-description"><ul class="dummy"><li><p>Manages astronomical data using services from the US Naval Observatory @see <a href="https://aa.usno.navy.mil">https://aa.usno.navy.mil</a></p></li></ul></dd>
     
 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="triggerStateTripped.mjs.html">triggerStateTripped.mjs</a>, <a href="triggerStateTripped.mjs.html#line2">line 2</a>
+        <a href="astronomicalDataService.mjs.html">astronomicalDataService.mjs</a>, <a href="astronomicalDataService.mjs.html#line2">line 2</a>
     </li></ul></dd>
     
 
@@ -110,9 +110,13 @@
     <dt class="tag-see">See:</dt>
     <dd class="tag-see">
         <ul>
+            <li><a href="https://nodejs.org/dist/latest-v16.x/docs/api/events.html#events">https://nodejs.org/dist/latest-v16.x/docs/api/events.html#events</a></li>
+        
             <li><a href="https://github.com/debug-js/debug#readme">https://github.com/debug-js/debug#readme</a></li>
         
             <li><a href="https://github.com/evdama/is-it-check">https://github.com/evdama/is-it-check</a></li>
+        
+            <li><a href="https://nodejs.org/dist/latest-v18.x/docs/api/https.html#https">https://nodejs.org/dist/latest-v18.x/docs/api/https.html#https</a></li>
         </ul>
     </dd>
     
@@ -124,7 +128,7 @@
 
 
             
-                <div class="description usertext"><p>Class for managing tripped trigger states.</p></div>
+                <div class="description usertext"><p>Manages astronomical data using services from the US Naval Observatory @see <a href="https://aa.usno.navy.mil">https://aa.usno.navy.mil</a></p></div>
             
 
             
@@ -138,9 +142,13 @@
         <h3 class="subsection-title">Requires</h3>
 
         <ul>
+            <li>module:events</li>
+        
             <li>module:debug</li>
         
             <li>module:is-it-check</li>
+        
+            <li>module:https</li>
         </ul>
     
 
@@ -148,7 +156,7 @@
         <h3 class="subsection-title">Classes</h3>
 
         <dl>
-            <dt><a href="module-TriggerStateTrippedModule.TriggerStateTripped.html">TriggerStateTripped</a></dt>
+            <dt><a href="module-AstronomicalDataModule.AstronomicalData.html">AstronomicalData</a></dt>
             <dd></dd>
         </dl>
     
@@ -161,6 +169,429 @@
 
     
         <h3 class="subsection-title">Members</h3>
+
+        
+            
+<h4 class="name" id=".ASTRONOMICAL_DATA_EVENTS"><span class="type-signature type-signature-private, static, constant">(private, static, constant) </span>ASTRONOMICAL_DATA_EVENTS<span class="type-signature"> :string</span></h4>
+
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Enumeration of published events.</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="astronomicalDataService.mjs.html">astronomicalDataService.mjs</a>, <a href="astronomicalDataService.mjs.html#line59">line 59</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+
+<table class="props">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>EVENT_DATA_PROCESSING</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Identification for the event published when initiatng astronomical data processing.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>EVENT_DATA_PROCESS_COMPLETE</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Identification for the event published when initiatng astronomical data processing completes.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<div class="description usertext">
+    <p>Enumeration of published events.</p>
+</div>
+
+
+
+    <h5 class="h5-types">Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">string</span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="~MAX_LATITUDE"><span class="type-signature type-signature-private, inner, constant">(private, inner, constant) </span>MAX_LATITUDE<span class="type-signature"></span></h4>
+
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Maximum Latitude</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="astronomicalDataService.mjs.html">astronomicalDataService.mjs</a>, <a href="astronomicalDataService.mjs.html#line39">line 39</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Maximum Latitude</p>
+</div>
+
+
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="~MAX_LONGITUDE"><span class="type-signature type-signature-private, inner, constant">(private, inner, constant) </span>MAX_LONGITUDE<span class="type-signature"></span></h4>
+
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Maximum Longitude</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="astronomicalDataService.mjs.html">astronomicalDataService.mjs</a>, <a href="astronomicalDataService.mjs.html#line49">line 49</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Maximum Longitude</p>
+</div>
+
+
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="~MIN_LATITUDE"><span class="type-signature type-signature-private, inner, constant">(private, inner, constant) </span>MIN_LATITUDE<span class="type-signature"></span></h4>
+
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Minimum Latitude</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="astronomicalDataService.mjs.html">astronomicalDataService.mjs</a>, <a href="astronomicalDataService.mjs.html#line34">line 34</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Minimum Latitude</p>
+</div>
+
+
+
+
+
+
+
+
+        
+            
+<h4 class="name" id="~MIN_LONGITUDE"><span class="type-signature type-signature-private, inner, constant">(private, inner, constant) </span>MIN_LONGITUDE<span class="type-signature"></span></h4>
+
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Minimum Longitude</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="astronomicalDataService.mjs.html">astronomicalDataService.mjs</a>, <a href="astronomicalDataService.mjs.html#line44">line 44</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+<div class="description usertext">
+    <p>Minimum Longitude</p>
+</div>
+
+
+
+
+
+
+
 
         
             
@@ -179,7 +610,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="triggerStateTripped.mjs.html">triggerStateTripped.mjs</a>, <a href="triggerStateTripped.mjs.html#line24">line 24</a>
+        <a href="astronomicalDataService.mjs.html">astronomicalDataService.mjs</a>, <a href="astronomicalDataService.mjs.html#line28">line 28</a>
     </li></ul></dd>
     
 
@@ -236,6 +667,302 @@
 
     
 
+    
+        <h3 class="subsection-title">Events</h3>
+
+        
+            
+
+    
+
+    <h4 class="name" id="event:event:astronomical_data_process_complete">event:astronomical_data_process_complete</h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Astronomical Data Process Complete</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="astronomicalDataService.mjs.html">astronomicalDataService.mjs</a>, <a href="astronomicalDataService.mjs.html#line73">line 73</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+    <h5 class="h5-types">Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">object</span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>e.status</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Flag indicating the is the data was successfully processed.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+            
+
+    
+
+    <h4 class="name" id="event:event:astronomical_data_processing">event:astronomical_data_processing</h4>
+
+    
+
+
+
+
+<dl class="details">
+    
+    <dt class="tag-description">Description:</dt>
+    <dd class="tag-description"><ul class="dummy"><li><p>Astronomical Data Processing</p></li></ul></dd>
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="astronomicalDataService.mjs.html">astronomicalDataService.mjs</a>, <a href="astronomicalDataService.mjs.html#line66">line 66</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+    <h5 class="h5-types">Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type">object</span>
+
+
+
+        </li>
+    </ul>
+
+
+
+
+
+
+
+    <h5 class="h5-parameters">Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>e.processing</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>Flag indicating the astronomical data is being updated.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
     
 </article>
 

@@ -31,7 +31,7 @@
     <input type="text" id="nav-search" placeholder="Search" />
     
     
-    <h2><a href="index.html">Home</a></h2><h2><a href="https://github.com/pricemi115/homebridge-grumptech-timetriggers" target="_blank" >GrumpTech</a></h2><h3>Modules</h3><ul><li><a href="module-HomebridgeAPIModule.html">HomebridgeAPIModule</a></li><li><a href="module-TimeTriggerModule.html">TimeTriggerModule</a></li><li></li><li><a href="module-TriggerStateArmedModule.html">TriggerStateArmedModule</a></li><li><a href="module-TriggerStateBaseModule.html">TriggerStateBaseModule</a></li><li><a href="module-TriggerStateIdleModule.html">TriggerStateIdleModule</a></li><li><a href="module-TriggerStateTrippedModule.html">TriggerStateTrippedModule</a></li><li><a href="module-TriggerTypes.html">TriggerTypes</a><ul class='members'><li data-type='member' style='display: none;'><a href="module-TriggerTypes.html#.TRIGGER_DAYS">TRIGGER_DAYS</a></li><li data-type='member' style='display: none;'><a href="module-TriggerTypes.html#.TRIGGER_TYPES">TRIGGER_TYPES</a></li></ul></li></ul><h3>Classes</h3><ul><li><a href="module-HomebridgeAPIModule-TimeTriggerPlatform.html">TimeTriggerPlatform</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-HomebridgeAPIModule-TimeTriggerPlatform.html#_managePluginVersion">_managePluginVersion</a></li><li data-type='method' style='display: none;'><a href="module-HomebridgeAPIModule-TimeTriggerPlatform.html#configureAccessory">configureAccessory</a></li></ul></li><li><a href="module-TimeTriggerModule.ScheduledTrigger.html">ScheduledTrigger</a></li><li><a href="module-TimeTriggerModule.TimeTrigger.html">TimeTrigger</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#EnterArmed">EnterArmed</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#EnterIdle">EnterIdle</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#EnterTripped">EnterTripped</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#Start">Start</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#Stop">Stop</a></li></ul></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-license.html">license</a></li><li><a href="tutorial-security.html">security</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h2><a href="https://github.com/pricemi115/homebridge-grumptech-timetriggers" target="_blank" >GrumpTech</a></h2><h3>Modules</h3><ul><li><a href="module-AstronomicalDataModule.html">AstronomicalDataModule</a></li><li><a href="module-HomebridgeAPIModule.html">HomebridgeAPIModule</a></li><li><a href="module-TimeTriggerModule.html">TimeTriggerModule</a></li><li></li><li><a href="module-TriggerStateArmedModule.html">TriggerStateArmedModule</a></li><li><a href="module-TriggerStateArmingModule.html">TriggerStateArmingModule</a></li><li><a href="module-TriggerStateBaseModule.html">TriggerStateBaseModule</a></li><li><a href="module-TriggerStateIdleModule.html">TriggerStateIdleModule</a></li><li><a href="module-TriggerStateTrippedModule.html">TriggerStateTrippedModule</a></li><li><a href="module-TriggerTypes.html">TriggerTypes</a><ul class='members'><li data-type='member' style='display: none;'><a href="module-TriggerTypes.html#.TRIGGER_DAYS">TRIGGER_DAYS</a></li><li data-type='member' style='display: none;'><a href="module-TriggerTypes.html#.TRIGGER_TYPES">TRIGGER_TYPES</a></li></ul></li></ul><h3>Classes</h3><ul><li><a href="module-AstronomicalDataModule.AstronomicalData.html">AstronomicalData</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-AstronomicalDataModule.AstronomicalData.html#RequestAstronomicalOneDayData">RequestAstronomicalOneDayData</a></li></ul></li><li><a href="module-HomebridgeAPIModule-TimeTriggerPlatform.html">TimeTriggerPlatform</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-HomebridgeAPIModule-TimeTriggerPlatform.html#configureAccessory">configureAccessory</a></li></ul></li><li><a href="module-TimeTriggerModule.ScheduledTrigger.html">ScheduledTrigger</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.ScheduledTrigger.html#EnterArming">EnterArming</a></li></ul></li><li><a href="module-TimeTriggerModule.TimeTrigger.html">TimeTrigger</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#EnterArmed">EnterArmed</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#EnterArming">EnterArming</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#EnterIdle">EnterIdle</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#EnterTripped">EnterTripped</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#Start">Start</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#Stop">Stop</a></li></ul></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-license.html">license</a></li><li><a href="tutorial-security.html">security</a></li></ul>
     
 </nav>
 
@@ -73,6 +73,7 @@ import _is from 'is-it-check';
 import {TRIGGER_STATES, TRIGGER_EVENTS} from './triggerTypes.mjs';
 import {TRIGGER_ACTIONS, TriggerStateBase} from './triggerStateBase.mjs';
 import {TriggerStateIdle} from './triggerStateIdle.mjs';
+import {TriggerStateArming} from './triggerStateArming.mjs';
 import {TriggerStateArmed} from './triggerStateArmed.mjs';
 import {TriggerStateTripped} from './triggerStateTripped.mjs';
 
@@ -164,6 +165,7 @@ export class TimeTrigger extends EventEmitter {
 
         // Create the states.
         this._idleState = new TriggerStateIdle({owner: this});
+        this._armingState = new TriggerStateArming({owner: this});
         this._armedState = new TriggerStateArmed({owner: this});
         this._trippedState = new TriggerStateTripped({owner: this});
 
@@ -348,15 +350,28 @@ export class TimeTrigger extends EventEmitter {
         // Stop the timer.
         this._doStop();
 
-        // Generate new timer values, in case there is a random element.
-        // or we are actually a Scheduled Trigger.
-        this.GenerateNewTimerValues();
-
         // Manage the state.
         this._doStateChange(this._idleState);
 
         // Clear the initializing flag.
         this._initializing = false;
+
+        return true;
+    }
+
+    /**
+     * @description Enter Arming State
+     * @returns {boolean} Always return true.
+     */
+    EnterArming() {
+        // Manage the state.
+        this._doStateChange(this._armingState);
+
+        // Jump to the next state.
+        setImmediate(() => {
+            // Ensure that we are not transitioning.
+            this._currentState.Evaluate(TRIGGER_ACTIONS.Next);
+        });
 
         return true;
     }
@@ -488,17 +503,22 @@ export class TimeTrigger extends EventEmitter {
         if (state.State !== this._currentState.State) {
             // Decouple the state change.
             setImmediate(() => {
-                // Cache the old state.
-                const oldState = this._currentState;
-                // Exit the current state, providing it the new state.
-                this._currentState.OnExit(state);
-                // Update the state.
-                this._currentState = state;
-                // Enter the new state.
-                this._currentState.OnEntrance(oldState);
+                try {
+                    // Cache the old state.
+                    const oldState = this._currentState;
+                    // Exit the current state, providing it the new state.
+                    this._currentState.OnExit(state);
+                    // Update the state.
+                    this._currentState = state;
+                    // Enter the new state.
+                    this._currentState.OnEntrance(oldState);
 
-                // Raise the state changed event.
-                this.emit(TRIGGER_EVENTS.EVENT_STATE_CHANGED, {uuid: this.Identifier, old_state: oldState.State, new_state: this.State});
+                    // Raise the state changed event.
+                    this.emit(TRIGGER_EVENTS.EVENT_STATE_CHANGED, {uuid: this.Identifier, old_state: oldState.State, new_state: this.State});
+                }
+                catch (err) {
+                    _debug(`Illegal state transition. ${err.message}`);
+                }
             });
         }
         else {

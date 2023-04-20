@@ -31,7 +31,7 @@
     <input type="text" id="nav-search" placeholder="Search" />
     
     
-    <h2><a href="index.html">Home</a></h2><h2><a href="https://github.com/pricemi115/homebridge-grumptech-timetriggers" target="_blank" >GrumpTech</a></h2><h3>Modules</h3><ul><li><a href="module-HomebridgeAPIModule.html">HomebridgeAPIModule</a></li><li><a href="module-TimeTriggerModule.html">TimeTriggerModule</a></li><li></li><li><a href="module-TriggerStateArmedModule.html">TriggerStateArmedModule</a></li><li><a href="module-TriggerStateBaseModule.html">TriggerStateBaseModule</a></li><li><a href="module-TriggerStateIdleModule.html">TriggerStateIdleModule</a></li><li><a href="module-TriggerStateTrippedModule.html">TriggerStateTrippedModule</a></li><li><a href="module-TriggerTypes.html">TriggerTypes</a><ul class='members'><li data-type='member' style='display: none;'><a href="module-TriggerTypes.html#.TRIGGER_DAYS">TRIGGER_DAYS</a></li><li data-type='member' style='display: none;'><a href="module-TriggerTypes.html#.TRIGGER_TYPES">TRIGGER_TYPES</a></li></ul></li></ul><h3>Classes</h3><ul><li><a href="module-HomebridgeAPIModule-TimeTriggerPlatform.html">TimeTriggerPlatform</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-HomebridgeAPIModule-TimeTriggerPlatform.html#_managePluginVersion">_managePluginVersion</a></li><li data-type='method' style='display: none;'><a href="module-HomebridgeAPIModule-TimeTriggerPlatform.html#configureAccessory">configureAccessory</a></li></ul></li><li><a href="module-TimeTriggerModule.ScheduledTrigger.html">ScheduledTrigger</a></li><li><a href="module-TimeTriggerModule.TimeTrigger.html">TimeTrigger</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#EnterArmed">EnterArmed</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#EnterIdle">EnterIdle</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#EnterTripped">EnterTripped</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#Start">Start</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#Stop">Stop</a></li></ul></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-license.html">license</a></li><li><a href="tutorial-security.html">security</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h2><a href="https://github.com/pricemi115/homebridge-grumptech-timetriggers" target="_blank" >GrumpTech</a></h2><h3>Modules</h3><ul><li><a href="module-AstronomicalDataModule.html">AstronomicalDataModule</a></li><li><a href="module-HomebridgeAPIModule.html">HomebridgeAPIModule</a></li><li><a href="module-TimeTriggerModule.html">TimeTriggerModule</a></li><li></li><li><a href="module-TriggerStateArmedModule.html">TriggerStateArmedModule</a></li><li><a href="module-TriggerStateArmingModule.html">TriggerStateArmingModule</a></li><li><a href="module-TriggerStateBaseModule.html">TriggerStateBaseModule</a></li><li><a href="module-TriggerStateIdleModule.html">TriggerStateIdleModule</a></li><li><a href="module-TriggerStateTrippedModule.html">TriggerStateTrippedModule</a></li><li><a href="module-TriggerTypes.html">TriggerTypes</a><ul class='members'><li data-type='member' style='display: none;'><a href="module-TriggerTypes.html#.TRIGGER_DAYS">TRIGGER_DAYS</a></li><li data-type='member' style='display: none;'><a href="module-TriggerTypes.html#.TRIGGER_TYPES">TRIGGER_TYPES</a></li></ul></li></ul><h3>Classes</h3><ul><li><a href="module-AstronomicalDataModule.AstronomicalData.html">AstronomicalData</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-AstronomicalDataModule.AstronomicalData.html#RequestAstronomicalOneDayData">RequestAstronomicalOneDayData</a></li></ul></li><li><a href="module-HomebridgeAPIModule-TimeTriggerPlatform.html">TimeTriggerPlatform</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-HomebridgeAPIModule-TimeTriggerPlatform.html#configureAccessory">configureAccessory</a></li></ul></li><li><a href="module-TimeTriggerModule.ScheduledTrigger.html">ScheduledTrigger</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.ScheduledTrigger.html#EnterArming">EnterArming</a></li></ul></li><li><a href="module-TimeTriggerModule.TimeTrigger.html">TimeTrigger</a><ul class='methods'><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#EnterArmed">EnterArmed</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#EnterArming">EnterArming</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#EnterIdle">EnterIdle</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#EnterTripped">EnterTripped</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#Start">Start</a></li><li data-type='method' style='display: none;'><a href="module-TimeTriggerModule.TimeTrigger.html#Stop">Stop</a></li></ul></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-license.html">license</a></li><li><a href="tutorial-security.html">security</a></li></ul>
     
 </nav>
 
@@ -113,7 +113,8 @@ import _is from 'is-it-check';
 // Internal dependency and imports
 import {TimeTrigger} from './timeTrigger.mjs';
 import {ScheduledTrigger} from './scheduledTrigger.mjs';
-import {TRIGGER_STATES, TRIGGER_EVENTS, TRIGGER_DAYS, TRIGGER_TYPES} from './triggerTypes.mjs';
+import {TRIGGER_STATES, TRIGGER_EVENTS, TRIGGER_DAYS, TRIGGER_TYPES, TIME_OFFSET_TYPES} from './triggerTypes.mjs';
+import {AstronomicalData} from './astronomicalDataService.mjs';
 
 // Internal complex types
 /**
@@ -217,7 +218,7 @@ class TimeTriggerPlatform {
             config.settings.triggers.forEach((triggerSettings, index) => {
                 // Get the identifier.
                 let identifier = null;
-                if (_is.not.undefined(triggerSettings.trigger_identifier) &amp;&amp; 
+                if (_is.not.undefined(triggerSettings.trigger_identifier) &amp;&amp;
                     _is.string(triggerSettings.trigger_identifier) &amp;&amp; (triggerSettings.trigger_identifier.length > 0) ) {
                     identifier = triggerSettings.trigger_identifier;
                 }
@@ -299,11 +300,55 @@ class TimeTriggerPlatform {
                                 (Object.values(TRIGGER_DAYS).indexOf(triggerSettings.days) >= 0)) {
                                 triggerConfig.days = triggerSettings.days;
                             }
+                            // Astronomical Type
+                            if (_is.not.undefined(triggerSettings.is_astronomical) &amp;&amp; _is.boolean(triggerSettings.is_astronomical)) {
+                                if (_is.not.undefined(triggerSettings.astronomical_type) &amp;&amp; _is.string(triggerSettings.astronomical_type)) {
+                                    triggerConfig.astronomical_type = triggerSettings.astronomical_type;
+                                }
+                            }
+                            // Astronomical Location
+                            if (_is.not.undefined(triggerConfig.astronomical_type)) {
+                                triggerConfig.location = {latitude: 0, longitude: 0};
+                                if (_is.not.undefined(triggerSettings.location)) {
+                                    // Validate the location
+                                    // eslint-disable-next-line new-cap
+                                    AstronomicalData.CheckLocation(triggerSettings);
+
+                                    triggerConfig.location = triggerSettings.location;
+                                }
+                            }
                             // Trigger time window
-                            triggerConfig.time = {nominal: {hour: 12, minute: 0}, tolerance: {hour: 0, minute: 0}};
+                            if (_is.undefined(triggerConfig.astronomical_type)) {
+                                triggerConfig.time = {nominal: {hour: 12, minute: 0}, tolerance: {hour: 0, minute: 0}};
+                            }
+                            else {
+                                triggerConfig.time = {astronomical_offset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 0, minute: 0}, tolerance: {hour: 0, minute: 0}};
+                            }
                             if (_is.not.undefined(triggerSettings.time) &amp;&amp; _is.object(triggerSettings.time)) {
+                                // Time Window - Astronomical Offset
+                                if (_is.not.undefined(triggerConfig.astronomical_type) &amp;&amp;
+                                    _is.not.undefined(triggerSettings.time.astronomical_offset) &amp;&amp; _is.object(triggerSettings.time.astronomical_offset)) {
+                                    // Type
+                                    if (_is.not.undefined(triggerSettings.time.astronomical_offset.type) &amp;&amp; _is.string(triggerSettings.time.astronomical_offset.type)) {
+                                        // Set the type
+                                        triggerConfig.time.astronomical_offset.type = triggerSettings.time.astronomical_offset.type;
+                                    }
+                                    // Hour
+                                    if (_is.not.undefined(triggerSettings.time.astronomical_offset.hour) &amp;&amp; _is.number(triggerSettings.time.astronomical_offset.hour) &amp;&amp;
+                                        _is.within(triggerSettings.time.astronomical_offset.hour, -1, 6)) {
+                                        // Set the astronomical offset hour
+                                        triggerConfig.time.astronomical_offset.hour = triggerSettings.time.astronomical_offset.hour;
+                                    }
+                                    // Minute
+                                    if (_is.not.undefined(triggerSettings.time.astronomical_offset.minute) &amp;&amp; _is.number(triggerSettings.time.astronomical_offset.minute) &amp;&amp;
+                                        _is.within(triggerSettings.time.astronomical_offset.minute, -1, 60)) {
+                                        // Set the astronomical offset minute
+                                        triggerConfig.time.astronomical_offset.minute = triggerSettings.time.astronomical_offset.minute;
+                                    }
+                                }
                                 // Time Window - Nominal
-                                if (_is.not.undefined(triggerSettings.time.nominal) &amp;&amp; _is.object(triggerSettings.time.nominal)) {
+                                if (_is.undefined(triggerConfig.astronomical_type) &amp;&amp;
+                                    _is.not.undefined(triggerSettings.time.nominal) &amp;&amp; _is.object(triggerSettings.time.nominal)) {
                                     // Hour
                                     if (_is.not.undefined(triggerSettings.time.nominal.hour) &amp;&amp; _is.number(triggerSettings.time.nominal.hour) &amp;&amp;
                                         _is.within(triggerSettings.time.nominal.hour, -1, 24)) {
@@ -654,6 +699,7 @@ class TimeTriggerPlatform {
      * @param {_PlatformAccessory} accessory - Accessory to be configured.
      * @returns {boolean} - false if the accessory version cannot me managed. true, otherwise.
      * @throws {TypeError} - thrown if 'accessory' is not a PlatformAccessory
+     * @private
      */
     _managePluginVersion(accessory) {
         // Validate the argument(s)
@@ -1195,7 +1241,7 @@ class TimeTriggerPlatform {
         }
 
         let status = new Error(`id:${id} has no matching accessory`);
-        let result = false
+        let result = false;
         this._triggers.forEach((item, index) => {
             if (_is.existy(item.accessory) &amp;&amp;
                 _is.equal(item.accessory.context.ID, id)) {

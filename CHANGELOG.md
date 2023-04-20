@@ -8,6 +8,9 @@ Change history for _homebridge-grumptech-timetriggers_
 ### What's new
 - [Issue #5](https://github.com/pricemi115/homebridge-grumptech-timetriggers/issues/5): Add support for astronomical triggers. 🌞 🌖
 
+### Fixes
+- [Issue #24](https://github.com/pricemi115/homebridge-grumptech-timetriggers/issues/24): Periodically resynch active scheduled triggers. Note: May take up to 1 minute for a trigger to update.
+
 ---
 ## [1.2.0] - 2023-MAR-20
 ### What's new

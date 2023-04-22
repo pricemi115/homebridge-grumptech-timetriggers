@@ -4,6 +4,11 @@ Change history for _homebridge-grumptech-timetriggers_
 ---
 ---
 
+## [1.3.2] - 2023-APR-21
+### Fixes
+- [Issue #42](https://github.com/pricemi115/homebridge-grumptech-timetriggers/issues/42): Handle special cases when a subset of the astrological events are not valid on a specific day.
+
+---
 ## [1.3.1] - 2023-APR-19
 ### Fixes
 - Trip Time did not show up in the plug-in settings when Astronomical Triggers was _not_ set.

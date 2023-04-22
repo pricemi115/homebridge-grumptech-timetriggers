@@ -330,39 +330,47 @@ export class ScheduledTrigger extends TimeTrigger {
             this._currentState.Evaluate(TRIGGER_ACTIONS.Abort);
         }
         else {
+            // Get the astronomical time.
+            const triggerDate = this._astroDateTime;
             // Extract the time of the desired 'phenomena', if the results indicate so.
             if (this._astroHelper.Valid) {
-                // Get the astronomical time.
-                const triggerDate = this._astroDateTime;
-
                 // Set the 'nominal' time
-                this._time.nominal.hour = triggerDate.getHours();
-                this._time.nominal.minute = triggerDate.getMinutes();
+                if (_is.not.undefined(triggerDate)) {
+                    this._time.nominal.hour = triggerDate.getHours();
+                    this._time.nominal.minute = triggerDate.getMinutes();
+                }
             }
 
-            // Update the new timer values.
-            this._triggerDelta = this._computeTriggerTimeDelta(this._time);
-            this._doGenerateNewTimerValues();
+            if ((this.Timeout > 0) ||
+                (_is.not.undefined(triggerDate))) {
+                // Update the new timer values.
+                this._triggerDelta = this._computeTriggerTimeDelta(this._time);
+                this._doGenerateNewTimerValues();
 
-            // Ensure that the resulting trigger occurs on the same day as our request.
-            const astroDay = this._astroHelper.Date;
-            const tripDate = new Date(Date.now() + this._timeout.nominal);
+                // Ensure that the resulting trigger occurs on the same day as our request.
+                const astroDay = this._astroHelper.Date;
+                const tripDate = new Date(Date.now() + this._timeout.nominal);
 
-            if ((astroDay.getFullYear() == tripDate.getFullYear()) &&
-                (astroDay.getMonth() == tripDate.getMonth()) &&
-                (astroDay.getDate() == tripDate.getDate())) {
-                // Move on
-                setImmediate(() => {
-                    this._currentState.Evaluate(TRIGGER_ACTIONS.Next);
-                });
+                if ((astroDay.getFullYear() == tripDate.getFullYear()) &&
+                    (astroDay.getMonth() == tripDate.getMonth()) &&
+                    (astroDay.getDate() == tripDate.getDate())) {
+                    // Move on
+                    setImmediate(() => {
+                        this._currentState.Evaluate(TRIGGER_ACTIONS.Next);
+                    });
+                }
+                else {
+                    // The event has passed. Make another request.
+                    _debug(`Requery for trigger time: day=${tripDate.toString()}`);
+                    // Decouple the request.
+                    setImmediate(() => {
+                        this._makeAstronomicalRequest(tripDate);
+                    });
+                }
             }
             else {
-                // The event has passed. Make another request.
-                _debug(`Requery for trigger time: day=${tripDate.toString()}`);
-                // Decouple the request.
-                setImmediate(() => {
-                    this._makeAstronomicalRequest(tripDate);
-                });
+                // Abort.
+                this._currentState.Evaluate(TRIGGER_ACTIONS.Abort);
             }
         }
     }

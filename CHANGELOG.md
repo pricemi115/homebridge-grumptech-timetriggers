@@ -4,6 +4,11 @@ Change history for _homebridge-grumptech-timetriggers_
 ---
 ---
 
+## [1.3.3] - 2023-APR-24
+### Fixes 🐛
+- [Issue #46](https://github.com/pricemi115/homebridge-grumptech-timetriggers/issues/46): We appologize for totally breaking fixed schedule (non-astronomical) triggers. Scheduled triggers work correctly now. Sorry for missing a silly error.
+---
+
 ## [1.3.2] - 2023-APR-21
 ### Fixes
 - [Issue #42](https://github.com/pricemi115/homebridge-grumptech-timetriggers/issues/42): Handle special cases when a subset of the astrological events are not valid on a specific day.

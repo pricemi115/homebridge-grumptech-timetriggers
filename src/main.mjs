@@ -254,7 +254,10 @@ class TimeTriggerPlatform {
                             // Astronomical Type
                             if (_is.not.undefined(triggerSettings.is_astronomical) && _is.boolean(triggerSettings.is_astronomical)) {
                                 if (_is.not.undefined(triggerSettings.astronomical_type) && _is.string(triggerSettings.astronomical_type)) {
-                                    triggerConfig.astronomical_type = triggerSettings.astronomical_type;
+                                    // Only set the astronomical type if this is an astronomical trigger.
+                                    if (triggerSettings.is_astronomical) {
+                                        triggerConfig.astronomical_type = triggerSettings.astronomical_type;
+                                    }
                                 }
                             }
                             // Astronomical Location

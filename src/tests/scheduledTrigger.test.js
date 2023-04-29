@@ -398,5 +398,87 @@ describe('ScheduledTrigger class tests', ()=>{
             });
         });
     });
+    describe('Premature re-trigger Instance functionality tests', ()=>{
+        describe.each([
+            ['Short Duration',  1000],
+        ])('Re-trigger tests', (desc, duration_ms) =>{
+            test(desc, done =>{
+                function handlerStateNotification(e) {
+                    try {
+                        /* UUID */
+                        expect(e).toHaveProperty('uuid');
+                        expect(e.uuid).toBe(trigger.Identifier);
+    
+                        /* current_state */
+                        expect(e).toHaveProperty('current_state');
+                        expect(_is.sameType(e.current_state, TRIGGER_STATES.Inactive)).toBeTruthy();
+                    }
+                    catch (error) {
+                        // Abort the test.
+                        console.log(`Aborting test.`);
+                        console.log(error);
+                        done(error);
+                    }
+                };
+                function handlerStateChanged(e) {
+                    try {
+                        /* UUID */
+                        expect(e).toHaveProperty('uuid');
+                        expect(e.uuid).toBe(trigger.Identifier);
+
+                        /* Manage Trigger Life Cycle */
+                        if (e.new_state === TRIGGER_STATES.Arming) {
+                            if (trip_count === 1) {
+                                tripped_time = new Date();
+                            }
+
+                            trip_count += 1;
+                            expect(trip_count).toBeGreaterThan(0);
+                            expect(trip_count).toBeLessThanOrEqual(2);
+                        }
+                        else if ((e.old_state === TRIGGER_STATES.Arming) &&
+                                 (e.new_state === TRIGGER_STATES.Armed)) {
+                            if (trip_count === 2) {
+                                // Ensure that the trigger is scheduled for the next day.
+                                const expected = (tripped_time.getTime() + (24.0*60.0*60.0*1000.0)) - (2.0*(tolerance_min*60.0*1000.0));
+                                const actual = (Date.now() + trigger.TimeRemaining);
+                                expect(actual).toBeGreaterThanOrEqual(expected);
+
+                                // Cleanup and end the test.
+                                trigger.Stop();
+                            }
+                        }
+                        else if ((e.old_state === TRIGGER_STATES.Armed) &&
+                                 (e.new_state === TRIGGER_STATES.Inactive)) {
+                            trigger.off(TRIGGER_EVENTS.EVENT_STATE_NOTIFY, handlerStateNotification);
+                            trigger.off(TRIGGER_EVENTS.EVENT_STATE_CHANGED, handlerStateChanged);
+
+                            done();
+                        }
+                    }
+                    catch (error) {
+                        // Abort the test.
+                        console.log(`Aborting test.`);
+                        console.log(error);
+                        done(error);
+                    }
+                };
+
+                const tolerance_min = 1;
+                let trip_count = 0;
+                let tripped_time = undefined;
+                const triggerTime = new Date();
+                const config = {time: {nominal: {hour: triggerTime.getHours(), minute: triggerTime.getMinutes()}, tolerance: {hour: 0, minute: tolerance_min}}, trip_limit: 0};
+
+                const trigger = new ScheduledTrigger(config);
+                trigger.on(TRIGGER_EVENTS.EVENT_STATE_NOTIFY, handlerStateNotification);
+                trigger.on(TRIGGER_EVENTS.EVENT_STATE_CHANGED, handlerStateChanged);
+                // Decouple the start.
+                setImmediate(() => {
+                    trigger.Start();
+                });
+            });
+        });
+    });
 });
 

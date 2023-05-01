@@ -226,6 +226,23 @@ export class ScheduledTrigger extends TimeTrigger {
         this._checkTimeoutID = INVALID_TIMEOUT_ID;
         // Used to support unit tests
         this._remainingTimeCheckPeriod = REMAINING_TIME_CHECK_PERIOD;
+
+        // Date of the last trip
+        this._lastTripTime = undefined;
+    }
+
+    /**
+     * @description Enter Idle State
+     * @returns {boolean} Always return true.
+     */
+    EnterIdle() {
+        // Reset the date of the last trip
+        this._lastTripTime = new Date(0);
+
+        // Defer to the base class.
+        super.EnterIdle();
+
+        return true;
     }
 
     /**
@@ -243,6 +260,20 @@ export class ScheduledTrigger extends TimeTrigger {
             // Astronomical setting. Just perform the state change.
             this._doStateChange(this._armingState);
         }
+
+        return true;
+    }
+
+    /**
+     * @description Enter Tripped State
+     * @returns {boolean} Always return true.
+     */
+    EnterTripped() {
+        // Update the last trip time.
+        this._lastTripTime = new Date();
+
+        // Defer to the base class.
+        super.EnterTripped();
 
         return true;
     }
@@ -393,6 +424,7 @@ export class ScheduledTrigger extends TimeTrigger {
         // Build an array of candidates.
         let count = 0;
         const triggerDays = [];
+        let activeTriggeredDayIndex = 0;
         let nextTriggerDay = dayOfWeek;
         while (count <= MAX_DAY) {
             const candidate = (1 << nextTriggerDay);
@@ -420,7 +452,7 @@ export class ScheduledTrigger extends TimeTrigger {
         dateMin.setTime(dateMin.getTime() - (this._triggerDelta/2));
 
         // Get the number of days from now until the minimum trigger time
-        const deltaDaysMin = this._computeDeltaDays(dayOfWeek, triggerDays[0]);
+        const deltaDaysMin = this._computeDeltaDays(dayOfWeek, triggerDays[activeTriggeredDayIndex]);
         dateMin.setDate(date + deltaDaysMin);
 
         // Made a Date for the maximum trigger.
@@ -430,15 +462,29 @@ export class ScheduledTrigger extends TimeTrigger {
 
         // Manage the trigger window
         if (dateMin < now) {
+            let rescheduleTrigger = false;
             if (dateMax >= now) {
-                // The scheduled minimum trigger has already occured, set the minumum to now.
-                dateMin = now;
+                // Since we are within the originally scheduled window,
+                // make sure the last trigger was not within the original window
+                if ((dateMin <= this._lastTripTime) &&
+                    (dateMax >= this._lastTripTime)) {
+                    // Move to the next configured day.
+                    rescheduleTrigger = true;
+                }
+                else {
+                    // The scheduled minimum trigger has already occured, set the minumum to now.
+                    dateMin = now;
+                }
             }
             else {
+                rescheduleTrigger = true;
+            }
+            // Reschedule the trigger.
+            if (_is.truthy(rescheduleTrigger)) {
                 let offsetDays = 0;
-                // The scheduled minumum and maximum triggers have already occured.
-                if (triggerDays.length > 1) {
-                    offsetDays = this._computeDeltaDays(dayOfWeek, triggerDays[1]);
+                if (triggerDays.length > (activeTriggeredDayIndex + 1)) {
+                    activeTriggeredDayIndex += 1;
+                    offsetDays = this._computeDeltaDays(dayOfWeek, triggerDays[activeTriggeredDayIndex]);
                 }
                 else {
                     // The trigger is only once per week

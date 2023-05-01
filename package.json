@@ -1,7 +1,7 @@
 {
   "name": "homebridge-grumptech-timetriggers",
   "displayName": "Homebridge Time Triggers",
-  "version": "1.3.3",
+  "version": "1.3.4",
   "description": "Time-based triggers for use with Homebridge",
   "type": "module",
   "main": "dist/homegridge-grumptech-timetriggers.js",

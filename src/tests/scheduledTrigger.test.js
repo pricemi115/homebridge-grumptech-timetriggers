@@ -249,41 +249,65 @@ describe('ScheduledTrigger class tests', ()=>{
                         expect(e.uuid).toBe(trigger.Identifier);
 
                         /* Manage Trigger Life Cycle */
-                        if ((e.old_state === TRIGGER_STATES.Arming) &&
-                            (e.new_state === TRIGGER_STATES.Armed)) {
+                        if (e.old_state === TRIGGER_STATES.Arming) {
+                            if (e.new_state === TRIGGER_STATES.Armed) {
+                                // Get the astronomical date.
+                                const date = getAstroTime(config.astroType);
 
-                            // Get the astronomical date.
-                            const date = getAstroTime(config.astroType);
+                                // Update the date based on the offset.
+                                switch (config.astroOffset.type) {
+                                    case TIME_OFFSET_TYPES.TYPE_BEFORE: {
+                                        date.setHours(date.getHours() - config.astroOffset.hour);
+                                        date.setMinutes(date.getMinutes() - config.astroOffset.minute);
 
-                            // Update the date based on the offset.
-                            switch (config.astroOffset.type) {
-                                case TIME_OFFSET_TYPES.TYPE_BEFORE: {
-                                    date.setHours(date.getHours() - config.astroOffset.hour);
-                                    date.setMinutes(date.getMinutes() - config.astroOffset.minute);
+                                        break;
+                                    }
+                                    case TIME_OFFSET_TYPES.TYPE_AFTER: {
+                                        date.setHours(date.getHours() + config.astroOffset.hour);
+                                        date.setMinutes(date.getMinutes() + config.astroOffset.minute);
 
-                                    break;
+                                        break;
+                                    }
+                                    case TIME_OFFSET_TYPES.TYPE_NONE:
+                                    default: {
+                                        // No-op
+                                        break;
+                                    }
                                 }
-                                case TIME_OFFSET_TYPES.TYPE_AFTER: {
-                                    date.setHours(date.getHours() + config.astroOffset.hour);
-                                    date.setMinutes(date.getMinutes() + config.astroOffset.minute);
 
-                                    break;
-                                }
-                                case TIME_OFFSET_TYPES.TYPE_NONE: 
-                                default: {
-                                    // No-op
-                                    break;
-                                }
+                                expect(trigger._time.nominal.hour).toEqual(date.getHours());
+                                expect(trigger._time.nominal.minute).toEqual(date.getMinutes());
+
+                                // Cleanup and end the test.
+                                trigger.Stop();
+                                trigger.off(TRIGGER_EVENTS.EVENT_STATE_CHANGED, handlerStateChanged);
+
+                                done();
                             }
+                            // Trigger failed to arm.
+                            else if (e.new_state === TRIGGER_STATES.Inactive) {
+                                // Assume error.
+                                let error = true;
 
-                            expect(trigger._time.nominal.hour).toEqual(date.getHours());
-                            expect(trigger._time.nominal.minute).toEqual(date.getMinutes());
+                                // Handle known cases where astronomical dates are not available.
+                                switch (config.astroType) {
+                                    case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_MOON_SET: {
+                                        const lunarPhase = trigger._astroHelper.LunarPhase;
+                                        if (_is.equal(lunarPhase, 'New Moon') ||
+                                            _is.equal(lunarPhase, 'Waning Crescent')) {
+                                            // This is an expected result.
+                                            error = undefined;
+                                        }
+                                        break;
+                                    }
+                                    default: {
+                                        // Not handled.
+                                        break;
+                                    }
+                                }
 
-                            // Cleanup and end the test.
-                            trigger.Stop();
-                            trigger.off(TRIGGER_EVENTS.EVENT_STATE_CHANGED, handlerStateChanged);
-
-                            done();
+                                done(error);
+                            }
                         }
                     }
                     catch (error) {
@@ -318,17 +342,17 @@ describe('ScheduledTrigger class tests', ()=>{
                         /* UUID */
                         expect(e).toHaveProperty('uuid');
                         expect(e.uuid).toBe(trigger.Identifier);
-    
+
                         /* current_state */
                         expect(e).toHaveProperty('current_state');
                         expect(_is.sameType(e.current_state, TRIGGER_STATES.Inactive)).toBeTruthy();
-                        
+
                         if (e.current_state == TRIGGER_STATES.Armed) {
                             expect(time_shift_ms).toBeGreaterThan(0);
 
                             // Check the time remaining
                             const actualTimeRemaining = trigger.TimeRemaining;
-                            const expectedTimeRemaining = ((time_delta.hour * 3600 * 1000) + 
+                            const expectedTimeRemaining = ((time_delta.hour * 3600 * 1000) +
                                                            (time_delta.minute * 60 * 1000)) -
                                                           trigger._remainingTimeCheckPeriod;
                             expect(actualTimeRemaining).toBeGreaterThanOrEqual(expectedTimeRemaining - 60000);
@@ -408,7 +432,7 @@ describe('ScheduledTrigger class tests', ()=>{
                         /* UUID */
                         expect(e).toHaveProperty('uuid');
                         expect(e.uuid).toBe(trigger.Identifier);
-    
+
                         /* current_state */
                         expect(e).toHaveProperty('current_state');
                         expect(_is.sameType(e.current_state, TRIGGER_STATES.Inactive)).toBeTruthy();

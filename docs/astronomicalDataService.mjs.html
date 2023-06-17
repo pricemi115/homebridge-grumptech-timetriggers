@@ -446,7 +446,8 @@ export class AstronomicalData extends EventEmitter {
         _debug(`${config.location.latitude},${config.location.longitude}: request`);
         const req = _https.request(options, (res) => {
             _debug(`statusCode: ${res.statusCode}`);
-            _debug(`headers: ${res.headers}`);
+            _debug(`headers:`);
+            _debug(res.headers);
 
             // Response event handlers.
             // Handle the 'data' notifications.
@@ -466,6 +467,7 @@ export class AstronomicalData extends EventEmitter {
                 // Convert the response data to an object.
                 try {
                     this._rawData = JSON.parse(result.toString());
+                    _debug(`Response:\n${result.toString()}`);
 
                     // Determine if the result was successful.
                     if (_is.not.undefined(this.RawData.error)) {

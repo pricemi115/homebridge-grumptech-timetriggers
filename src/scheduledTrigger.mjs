@@ -68,7 +68,7 @@ const INVALID_TIMEOUT_ID = -1;
  * @description Tolerance for checking/validating active timeouts.
  * @private
  */
-const REMAINING_TIME_TOLERANCE = 10/* milliseconds */;
+const REMAINING_TIME_TOLERANCE = 500/* milliseconds */;
 
 /**
  * @description Period for checking/validating active timeouts.
@@ -272,6 +272,9 @@ export class ScheduledTrigger extends TimeTrigger {
         // Update the last trip time.
         this._lastTripTime = new Date();
 
+        // Clear the check timer, we don't need it anymore.
+        this._clearCheck();
+
         // Defer to the base class.
         super.EnterTripped();
 
@@ -310,6 +313,7 @@ export class ScheduledTrigger extends TimeTrigger {
 
         // Initialize the last known amount of time remaining.
         this._lastTimeRemaining = this.TimeRemaining;
+        this._remainingTimeCheckPeriod = REMAINING_TIME_CHECK_PERIOD;
         this._checkTimeoutID = setInterval(this._CB_checkTimeRemaining, this._remainingTimeCheckPeriod);
     }
 
@@ -322,6 +326,16 @@ export class ScheduledTrigger extends TimeTrigger {
         // Defer to base class.
         super._doStop();
 
+        // Clear the check .
+        this._clearCheck();
+    }
+
+    /**
+     * @description Helper to clear the check timer
+     * @returns {void}
+     * @private
+     */
+    _clearCheck() {
         // Clear the check .
         if (this._checkTimeoutID !== INVALID_TIMEOUT_ID) {
             clearInterval(this._checkTimeoutID);
@@ -660,9 +674,9 @@ export class ScheduledTrigger extends TimeTrigger {
         // Update last known remaining time.
         this._lastTimeRemaining = timeRemaining;
         // Check the difference bwtween the actual and expected time remaining.
-        _debug(`Checking remaining time: Actual=${timeRemaining} Expected=${expectedTimeRemaining}`);
-        if (_is.above(Math.abs(timeRemaining - expectedTimeRemaining), REMAINING_TIME_TOLERANCE)) {
-            _debug(`Remaining time out of spec.`);
+        if (_is.not.negative(timeRemaining) && _is.not.negative(expectedTimeRemaining) &&
+            _is.above(Math.abs(timeRemaining - expectedTimeRemaining), REMAINING_TIME_TOLERANCE)) {
+            _debug(`Remaining time out of spec: Actual=${timeRemaining} Expected=${expectedTimeRemaining}`);
 
             if (timeRemaining <= 0) {
                 // Trigger has elapsed.
@@ -672,7 +686,7 @@ export class ScheduledTrigger extends TimeTrigger {
 
                 // Move on
                 setImmediate(() => {
-                    _debug(`Forcing state change`);
+                    _debug(`Forcing 'Next' state change`);
                     this._currentState.Evaluate(TRIGGER_ACTIONS.Next);
                 });
             }

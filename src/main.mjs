@@ -1382,6 +1382,7 @@ class TimeTriggerPlatform {
             throw new TypeError(`Invalid state changed event.`);
         }
         if (!this._triggers.has(e.uuid)) {
+            this._log(`Unknown state change event. uuid:${e.uuid}`);
             throw new RangeError(`Unknown state change event. uuid:${e.uuid}`);
         }
 
@@ -1415,16 +1416,23 @@ class TimeTriggerPlatform {
 
                 if (_is.existy(match.trigger)) {
                     // Get the amount of time remaining
+                    this._log(`TriggerStateChanged: Updating time remaining for trigger ${match.accessory.displayName}. active=${isActive}`);
                     const timeRemaining = this._getTimeRemaining(match.trigger);
                     this._updateLightSensorService(match.accessory, SERVICE_INFO.TIME_REMAINING, {active: isActive, lightlevel: timeRemaining});
 
                     // Get the due time of the next event.
+                    this._log(`TriggerStateChanged: Updating due time for rigger ${match.accessory.displayName}.`);
                     const dueTime = this._getNextDueTime(match.trigger);
                     this._updateTimeInformationService(match.accessory, SERVICE_INFO.DUE_TIME, dueTime);
                 }
+
+                this._log(`TriggerStateChanged: Update complete.`);
             }
             catch {
             }
+        }
+        else {
+            this._log(`TriggerStateChanged: Accessory for ${e.uuid} not found.`);
         }
     }
 
@@ -1445,6 +1453,7 @@ class TimeTriggerPlatform {
             throw new TypeError(`Invalid state notify event.`);
         }
         if (!this._triggers.has(e.uuid)) {
+            this._log(`Unknown state notify event. uuid:${e.uuid}`);
             throw new RangeError(`Unknown state notify event. uuid:${e.uuid}`);
         }
 
@@ -1463,16 +1472,22 @@ class TimeTriggerPlatform {
 
                 if (_is.existy(match.trigger)) {
                     // Get the amount of time remaining
+                    this._log(`TriggerStateNotify: Updating time remaining for trigger ${match.accessory.displayName}. active=${isActive}`);
                     const timeRemaining = this._getTimeRemaining(match.trigger);
                     this._updateLightSensorService(match.accessory, SERVICE_INFO.TIME_REMAINING, {active: isActive, lightlevel: timeRemaining});
 
                     // Get the due time of the next event.
+                    this._log(`TriggerStateNotify: Updating due time for rigger ${match.accessory.displayName}.`);
                     const dueTime = this._getNextDueTime(match.trigger);
                     this._updateTimeInformationService(match.accessory, SERVICE_INFO.DUE_TIME, dueTime);
                 }
             }
             catch {
             }
+            this._log(`TriggerStateNotify: Update complete.`);
+        }
+        else {
+            this._log(`TriggerStateNotify: Accessory for ${e.uuid} not found.`);
         }
     }
 }

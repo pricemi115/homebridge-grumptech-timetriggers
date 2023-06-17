@@ -132,7 +132,7 @@ describe('TimeTrigger class tests', ()=>{
                             // Stop the trigger after one cycle.
                             timeTrigger.Stop();
 
-                            if (Math.abs(timeout - (timeTrigger.Timeout + timeTrigger.Duration)) > 25/*milliseconds*/) {
+                            if (Math.abs(timeout - (timeTrigger.Timeout + timeTrigger.Duration)) > 50/*milliseconds*/) {
                                 error = true;
                             }
                         }

@@ -4,6 +4,10 @@ Change history for _homebridge-grumptech-timetriggers_
 ---
 ---
 
+## [1.3.5] - 2023-JUN-17
+### Fixes 🐛
+- [Issue #70](https://github.com/pricemi115/homebridge-grumptech-timetriggers/issues/70): Fixed and issue causing scheduled triggers to fail to function.
+---
 ## [1.3.4] - 2023-MAY-01
 ### Fixes 🐛
 - [Issue #52](https://github.com/pricemi115/homebridge-grumptech-timetriggers/issues/52): Fixed and issue causing scheduled triggers to trip more than once per day when the trip tolerance exceeded the trip duration.

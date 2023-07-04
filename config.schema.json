@@ -199,7 +199,7 @@
                                         },
                                         "nominal": {
                                             "title": "Trip Time",
-                                            "description": "Nominal time of day to trip the trigger",
+                                            "description": "Nominal time of day to trip the trigger. (Default time if this is an astronomical trigger)",
                                             "type": "object",
                                             "properties": {
                                                 "hour": {
@@ -222,7 +222,7 @@
                                                 }
                                             },
                                             "condition": {
-                                                "functionBody": "return (model.settings.triggers[arrayIndices] && (model.settings.triggers[arrayIndices].trigger_type === 1) && (model.settings.triggers[arrayIndices].is_astronomical === false));"
+                                                "functionBody": "return (model.settings.triggers[arrayIndices] && (model.settings.triggers[arrayIndices].trigger_type === 1));"
                                             }
                                         },
                                         "tolerance": {

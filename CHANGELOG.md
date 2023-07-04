@@ -4,6 +4,10 @@ Change history for _homebridge-grumptech-timetriggers_
 ---
 ---
 
+## [1.3.6] - 2023-JUL-04 🇺🇸🎆
+### What's new 🐛
+- [Issue #77](https://github.com/pricemi115/homebridge-grumptech-timetriggers/issues/77): Allow users to specify a 'backup time' to use for astronomical triggers. This time is used when activating the trigger and the astronomical service is not available or the astronomical type is not available for the scheduled trip day.
+---
 ## [1.3.5] - 2023-JUN-17
 ### Fixes 🐛
 - [Issue #70](https://github.com/pricemi115/homebridge-grumptech-timetriggers/issues/70): Fixed and issue causing scheduled triggers to fail to function.

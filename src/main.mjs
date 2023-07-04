@@ -271,12 +271,13 @@ class TimeTriggerPlatform {
                                     triggerConfig.location = triggerSettings.location;
                                 }
                             }
-                            // Trigger time window
-                            if (_is.undefined(triggerConfig.astronomical_type)) {
-                                triggerConfig.time = {nominal: {hour: 12, minute: 0}, tolerance: {hour: 0, minute: 0}};
-                            }
-                            else {
-                                triggerConfig.time = {astronomical_offset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 0, minute: 0}, tolerance: {hour: 0, minute: 0}};
+
+                            // Trigger nominal/default time
+                            triggerConfig.time = {nominal: {hour: 12, minute: 0}, tolerance: {hour: 0, minute: 0}};
+
+                            // Astronomical Type
+                            if (_is.not.undefined(triggerConfig.astronomical_type)) {
+                                triggerConfig.time.astronomical_offset = {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 0, minute: 0, tolerance: {hour: 0, minute: 0}};
                             }
                             if (_is.not.undefined(triggerSettings.time) && _is.object(triggerSettings.time)) {
                                 // Time Window - Astronomical Offset
@@ -301,8 +302,7 @@ class TimeTriggerPlatform {
                                     }
                                 }
                                 // Time Window - Nominal
-                                if (_is.undefined(triggerConfig.astronomical_type) &&
-                                    _is.not.undefined(triggerSettings.time.nominal) && _is.object(triggerSettings.time.nominal)) {
+                                if (_is.not.undefined(triggerSettings.time.nominal) && _is.object(triggerSettings.time.nominal)) {
                                     // Hour
                                     if (_is.not.undefined(triggerSettings.time.nominal.hour) && _is.number(triggerSettings.time.nominal.hour) &&
                                         _is.within(triggerSettings.time.nominal.hour, -1, 24)) {

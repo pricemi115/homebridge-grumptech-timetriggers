@@ -320,8 +320,9 @@ describe('ScheduledTrigger class tests', ()=>{
 
                 // Initiate the trigger test.
                 const trgCfg = {astronomical_type: config.astroType, time: {astronomical_offset: config.astroOffset,
+                                                                            nominal: {hour: 19, minute: 0},
                                                                             tolerance: {hour: 0, minute: 0}},
-                                location: {latitude: 42, longitude: -71.5}};
+                                location: {latitude: config.location.latitude, longitude: config.location.longitude}};
                 const trigger = new ScheduledTrigger(trgCfg);
                 trigger.on(TRIGGER_EVENTS.EVENT_STATE_CHANGED, handlerStateChanged);
                 // Decouple the start.

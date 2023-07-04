@@ -222,6 +222,9 @@ export class ScheduledTrigger extends TimeTrigger {
             if (_is.undefined(this._time.nominal)) {
                 this._time.nominal = {hour: -1, minute: -1};
             }
+            if (_is.undefined(this._time.tolerance)) {
+                this._time.tolerance = {hour: 0, minute: 0};
+            }
         }
         else {
             // Set to the default to 1 Minute from now.
@@ -417,11 +420,18 @@ export class ScheduledTrigger extends TimeTrigger {
         // Note: Even if there was an error getting the astronimical results,
         //       when we have previously established the event time, we will just use
         //       the previous results.
-        if ((this.Timeout &lt;= 0) &amp;&amp;
-            ((_is.undefined(e) || _is.undefined(e.status) ||
+        if (((_is.undefined(e) || _is.undefined(e.status) ||
               _is.truthy(e.status)))) {
-            // Abort.
-            this._currentState.Evaluate(TRIGGER_ACTIONS.Abort);
+            if (_is.not.undefined(this._time) &amp;&amp;
+                _is.not.undefined(this._time.nominal)) {
+                // Update the new timer values using the default.
+                this._triggerDelta = this._computeTriggerTimeDelta(this._time);
+                this._doGenerateNewTimerValues();
+            }
+            else {
+                // Abort.
+                this._currentState.Evaluate(TRIGGER_ACTIONS.Abort);
+            }
         }
         else {
             // Get the astronomical time.
@@ -463,8 +473,18 @@ export class ScheduledTrigger extends TimeTrigger {
                 }
             }
             else {
-                // Abort.
-                this._currentState.Evaluate(TRIGGER_ACTIONS.Abort);
+                // Do we have a default time to work with? Could be the previous trigger time.
+                // Note: The desired trigger may be invalid on this particular date, so use what we have.
+                if (_is.not.undefined(this._time) &amp;&amp;
+                    _is.not.undefined(this._time.nominal)) {
+                    // Update the new timer values using the last known values.
+                    this._triggerDelta = this._computeTriggerTimeDelta(this._time);
+                    this._doGenerateNewTimerValues();
+                }
+                else {
+                    // Abort.
+                    this._currentState.Evaluate(TRIGGER_ACTIONS.Abort);
+                }
             }
         }
     }
@@ -771,26 +791,23 @@ export class ScheduledTrigger extends TimeTrigger {
         if (_is.not.undefined(time)) {
             if (_is.not.object(time) ||
                 _is.not.boolean(isAstronomical) ||
-                // Normal Scheduled Trigger.
-                (_is.falsy(isAstronomical) &amp;&amp;
-                 (_is.not.object(time.nominal) ||
-                  _is.not.number(time.nominal.hour) ||
-                  _is.not.number(time.nominal.minute)))||
                 (_is.truthy(isAstronomical) &amp;&amp;
                  (_is.not.object(time.astronomical_offset) ||
                   _is.not.number(time.astronomical_offset.hour) ||
                   _is.not.number(time.astronomical_offset.minute))) ||
+                _is.not.object(time.nominal) ||
+                _is.not.number(time.nominal.hour) ||
+                _is.not.number(time.nominal.minute) ||
                 _is.not.object(time.tolerance) ||
                 _is.not.number(time.tolerance.hour) ||
                 _is.not.number(time.tolerance.minute)) {
                 throw new TypeError(`time is invalid.`);
             }
-            if ((_is.falsy(isAstronomical) &amp;&amp;
-                 (_is.not.within(time.nominal.hour, (MIN_HOUR-1), (MAX_HOUR+1)) ||
-                  _is.not.within(time.nominal.minute, (MIN_MINUTE-1), (MAX_MINUTE+1)))) ||
-                (_is.truthy(isAstronomical) &amp;&amp;
+            if ((_is.truthy(isAstronomical) &amp;&amp;
                  (_is.not.within(time.astronomical_offset.hour, (MIN_HOUR-1), (MAX_HOUR+1)) ||
                   _is.not.within(time.astronomical_offset.minute, (MIN_MINUTE-1), (MAX_MINUTE+1)))) ||
+                _is.not.within(time.nominal.hour, (MIN_HOUR-1), (MAX_HOUR+1)) ||
+                _is.not.within(time.nominal.minute, (MIN_MINUTE-1), (MAX_MINUTE+1)) ||
                 _is.not.within(time.tolerance.hour, (MIN_HOUR-1), (MAX_HOUR+1)) ||
                 _is.not.within(time.tolerance.minute, (MIN_MINUTE-1), (MAX_MINUTE+1))) {
                 throw new RangeError(`range is invalid.`);

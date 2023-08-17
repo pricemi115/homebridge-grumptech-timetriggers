@@ -201,37 +201,38 @@ describe('ScheduledTrigger class tests', ()=>{
             test(desc, done =>{
                 function getAstroTime(type) {
                     let date = undefined;
+                    const astroResults = trigger._astroHelper.RSTOneDayData;
                     switch (type) {
                         case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_LUNAR_TRANSIT: {
-                            date = trigger._astroHelper.LunarTransit;
+                            date = astroResults.lunar_transit;
                             break;
                         }
                         case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_MOON_RISE: {
-                            date = trigger._astroHelper.LunarRise;
+                            date = astroResults.lunar_rise;
                             break;
                         }
                         case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_MOON_SET: {
-                            date = trigger._astroHelper.LunarSet;
+                            date = astroResults.lunar_set;
                             break;
                         }
                         case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SOALAR_TRANSIT: {
-                            date = trigger._astroHelper.SolarTransit;
+                            date = astroResults.solar_transit;
                             break;
                         }
                         case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SUNRISE: {
-                            date = trigger._astroHelper.SolarRise;
+                            date = astroResults.solar_rise;
                             break;
                         }
                         case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SUNSET: {
-                            date = trigger._astroHelper.SolarSet;
+                            date = astroResults.solar_set;
                             break;
                         }
                         case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_TWILIGHT_START: {
-                            date = trigger._astroHelper.TwilightStart;
+                            date = astroResults.twilight_start;
                             break;
                         }
                         case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_TWILIGHT_END: {
-                            date = trigger._astroHelper.TwilightEnd;
+                            date = astroResults.twilight_end;
                             break;
                         }
                         default: {
@@ -313,6 +314,34 @@ describe('ScheduledTrigger class tests', ()=>{
                     catch (error) {
                         // Abort the test.
                         console.log(`Aborting test.`);
+
+                        const astroResults = trigger._astroHelper.RSTOneDayData;
+                        switch (config.astroType) {
+                            case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_MOON_SET: {
+                                if (_is.equal(astroResults.lunar_phase, "New Moon")) {
+                                    // Error is expected.
+                                    error = undefined;
+                                }
+                                break;
+                            }
+
+                            case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_LUNAR_TRANSIT:
+                            case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_MOON_RISE:
+                            case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SOALAR_TRANSIT:
+                            case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SUNRISE:
+                            case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SUNSET:
+                            case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_TWILIGHT_START:
+                            case ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_TWILIGHT_END:
+                            default: {
+                                // Not handled.
+                                break;
+                            }
+                        }
+
+                        // Cleanup and end the test.
+                        trigger.Stop();
+                        trigger.off(TRIGGER_EVENTS.EVENT_STATE_CHANGED, handlerStateChanged);
+    
                         console.log(error);
                         done(error);
                     }
@@ -371,6 +400,12 @@ describe('ScheduledTrigger class tests', ()=>{
                         // Abort the test.
                         console.log(`Aborting test.`);
                         console.log(error);
+                        
+                        // Cleanup and end the test.
+                        trigger.Stop();
+                        trigger.off(TRIGGER_EVENTS.EVENT_STATE_NOTIFY, handlerStateNotification);
+                        trigger.off(TRIGGER_EVENTS.EVENT_STATE_CHANGED, handlerStateChanged);
+
                         done(error);
                     }
                 };
@@ -403,6 +438,12 @@ describe('ScheduledTrigger class tests', ()=>{
                         // Abort the test.
                         console.log(`Aborting test.`);
                         console.log(error);
+
+                        // Cleanup and end the test.
+                        trigger.Stop();
+                        trigger.off(TRIGGER_EVENTS.EVENT_STATE_NOTIFY, handlerStateNotification);
+                        trigger.off(TRIGGER_EVENTS.EVENT_STATE_CHANGED, handlerStateChanged);
+
                         done(error);
                     }
                 };

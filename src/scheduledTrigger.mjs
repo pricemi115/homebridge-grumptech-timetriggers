@@ -1,3 +1,4 @@
+/* eslint-disable jsdoc/no-undefined-types */
 /* eslint-disable new-cap */
 /**
  * @description Manages a scheduled trigger event.
@@ -8,6 +9,8 @@
  * @see {@link https://github.com/debug-js/debug#readme}
  * @requires is-it-check
  * @see {@link https://github.com/evdama/is-it-check}
+ * @requires grumptech-astrodata
+ * @see {@link https://github.com/pricemi115/grumptech-astrodata#readme}
  */
 
 // External dependencies and imports.

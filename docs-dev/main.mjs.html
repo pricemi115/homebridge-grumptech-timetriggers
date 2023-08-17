@@ -60,6 +60,8 @@
  * @see {@link https://nodejs.org/dist/latest-v16.x/docs/api/crypto.html#crypto}
  * @requires is-it-check
  * @see {@link https://github.com/evdama/is-it-check}
+ * @requires grumptech-astrodata
+ * @see {@link https://github.com/pricemi115/grumptech-astrodata#readme}
  */
 
 /*
@@ -109,12 +111,12 @@ import {
 // External dependencies and imports.
 import _debugModule from 'debug';
 import _is from 'is-it-check';
+import {AstronomicalDataAPI} from 'grumptech-astrodata';
 
 // Internal dependency and imports
 import {TimeTrigger} from './timeTrigger.mjs';
 import {ScheduledTrigger} from './scheduledTrigger.mjs';
 import {TRIGGER_STATES, TRIGGER_EVENTS, TRIGGER_DAYS, TRIGGER_TYPES, TIME_OFFSET_TYPES} from './triggerTypes.mjs';
-import {AstronomicalData} from './astronomicalDataService.mjs';
 
 // Internal complex types
 /**
@@ -314,8 +316,13 @@ class TimeTriggerPlatform {
                                 triggerConfig.location = {latitude: 0, longitude: 0};
                                 if (_is.not.undefined(triggerSettings.location)) {
                                     // Validate the location
+                                    const locValidator = new AstronomicalDataAPI();
                                     // eslint-disable-next-line new-cap
-                                    AstronomicalData.CheckLocation(triggerSettings);
+                                    const validLoc = locValidator.IsLocationValid(triggerSettings.location);
+                                    if (_is.not.truthy(validLoc)) {
+                                        // Invalid location.
+                                        throw new Error(`Invalid location`);
+                                    }
 
                                     triggerConfig.location = triggerSettings.location;
                                 }

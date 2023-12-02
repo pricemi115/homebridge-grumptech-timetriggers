@@ -400,9 +400,14 @@ export class ScheduledTrigger extends TimeTrigger {
               _is.truthy(e.status)))) {
             if (_is.not.undefined(this._time) &&
                 _is.not.undefined(this._time.nominal)) {
+                _debug(`Issue getting astro results. Defer to previous event settings.`);
                 // Update the new timer values using the default.
                 this._triggerDelta = this._computeTriggerTimeDelta(this._time);
                 this._doGenerateNewTimerValues();
+                // Move on
+                setImmediate(() => {
+                    this._currentState.Evaluate(TRIGGER_ACTIONS.Next);
+                });
             }
             else {
                 // Abort.

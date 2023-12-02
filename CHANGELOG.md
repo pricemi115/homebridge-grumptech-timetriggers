@@ -4,6 +4,11 @@ Change history for _homebridge-grumptech-timetriggers_
 ---
 ---
 
+## [1.3.8] - 2023-DEC-02
+### Fixes 🐛
+- [Issue #101](https://github.com/pricemi115/homebridge-grumptech-timetriggers/issues/101): Fixed an issue causing scheduled triggers to become inoperative when arming.
+- Updated dependencies.
+---
 ## [1.3.7] - 2023-AUG-16
 ### What's new ✨
 - Moved astronomical data processing into its own module and imported that module.
@@ -14,11 +19,11 @@ Change history for _homebridge-grumptech-timetriggers_
 ---
 ## [1.3.5] - 2023-JUN-17
 ### Fixes 🐛
-- [Issue #70](https://github.com/pricemi115/homebridge-grumptech-timetriggers/issues/70): Fixed and issue causing scheduled triggers to fail to function.
+- [Issue #70](https://github.com/pricemi115/homebridge-grumptech-timetriggers/issues/70): Fixed an issue causing scheduled triggers to fail to function.
 ---
 ## [1.3.4] - 2023-MAY-01
 ### Fixes 🐛
-- [Issue #52](https://github.com/pricemi115/homebridge-grumptech-timetriggers/issues/52): Fixed and issue causing scheduled triggers to trip more than once per day when the trip tolerance exceeded the trip duration.
+- [Issue #52](https://github.com/pricemi115/homebridge-grumptech-timetriggers/issues/52): Fixed an issue causing scheduled triggers to trip more than once per day when the trip tolerance exceeded the trip duration.
 ---
 ## [1.3.3] - 2023-APR-24
 ### Fixes 🐛

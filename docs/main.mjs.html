@@ -1472,13 +1472,13 @@ class TimeTriggerPlatform {
 
                 if (_is.existy(match.trigger)) {
                     // Get the amount of time remaining
-                    this._log(`TriggerStateChanged: Updating time remaining for trigger ${match.accessory.displayName}. active=${isActive}`);
                     const timeRemaining = this._getTimeRemaining(match.trigger);
+                    this._log(`TriggerStateChanged: Updating time remaining for trigger ${match.accessory.displayName}. active=${isActive} timeRemaining=${timeRemaining}`);
                     this._updateLightSensorService(match.accessory, SERVICE_INFO.TIME_REMAINING, {active: isActive, lightlevel: timeRemaining});
 
                     // Get the due time of the next event.
-                    this._log(`TriggerStateChanged: Updating due time for rigger ${match.accessory.displayName}.`);
                     const dueTime = this._getNextDueTime(match.trigger);
+                    this._log(`TriggerStateChanged: Updating due time for trigger ${match.accessory.displayName}. dueTime.time=${dueTime.due_time} dueTime.dow=${dueTime.due_dow}`);
                     this._updateTimeInformationService(match.accessory, SERVICE_INFO.DUE_TIME, dueTime);
                 }
 
@@ -1528,13 +1528,13 @@ class TimeTriggerPlatform {
 
                 if (_is.existy(match.trigger)) {
                     // Get the amount of time remaining
-                    this._log(`TriggerStateNotify: Updating time remaining for trigger ${match.accessory.displayName}. active=${isActive}`);
                     const timeRemaining = this._getTimeRemaining(match.trigger);
+                    this._log(`TriggerStateNotify: Updating time remaining for trigger ${match.accessory.displayName}. active=${isActive} timeRemaining=${timeRemaining}`);
                     this._updateLightSensorService(match.accessory, SERVICE_INFO.TIME_REMAINING, {active: isActive, lightlevel: timeRemaining});
 
                     // Get the due time of the next event.
-                    this._log(`TriggerStateNotify: Updating due time for rigger ${match.accessory.displayName}.`);
                     const dueTime = this._getNextDueTime(match.trigger);
+                    this._log(`TriggerStateNotify: Updating due time for trigger ${match.accessory.displayName}. dueTime.time=${dueTime.due_time} dueTime.dow=${dueTime.due_dow}`);
                     this._updateTimeInformationService(match.accessory, SERVICE_INFO.DUE_TIME, dueTime);
                 }
             }

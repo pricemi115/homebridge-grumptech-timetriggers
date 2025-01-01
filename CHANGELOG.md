@@ -4,6 +4,12 @@ Change history for _homebridge-grumptech-timetriggers_
 ---
 ---
 
+## [1.4.0] - 2025-JAN-01 🥳🍾
+### What's new ✨
+- [Issue #103](https://github.com/pricemi115/homebridge-grumptech-timetriggers/issues/103): Updates to support Homebridge v2.
+- [Issue #103](https://github.com/pricemi115/homebridge-grumptech-timetriggers/issues/103): Eliminted the now-obsolete [Time Information](https://developers.homebridge.io/#/service/TimeInformation) service, which was used to indicate the scheduled trip date and time. This information has been moved to the Accessory Information section of the accessories and services published by the plugin.
+- Updated dependencies.
+---
 ## [1.3.8] - 2023-DEC-02
 ### Fixes 🐛
 - [Issue #101](https://github.com/pricemi115/homebridge-grumptech-timetriggers/issues/101): Fixed an issue causing scheduled triggers to become inoperative when arming.

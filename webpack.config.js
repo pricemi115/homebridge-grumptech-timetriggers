@@ -23,7 +23,7 @@ export default [
         },
         output: {
             path: path.resolve(__dirname, 'dist'),
-            filename: 'homegridge-grumptech-timetriggers.js',
+            filename: 'homebridge-grumptech-timetriggers.js',
             library: {
                 type: 'module',
             },

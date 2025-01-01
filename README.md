@@ -9,7 +9,6 @@ The change history can be viewed [here](./CHANGELOG.md)
 Please refer to our [security policy](./SECURITY.md) for information on which versions are receiving security updates and how to report security vulnerabilities.
 
 ## Installation
-
 This plug-in is intended to be used with the [homebridge-config-ui-x](https://www.npmjs.com/package/homebridge-config-ui-x) homebridge management tool. If using _homebridge-config-ui-x_, simply search for _homebridge-grumptech-timetriggers_ for installation, plug-in management, and configuration.
 
 To install the plugin manually:
@@ -42,12 +41,12 @@ The plugin configuration consists of an array of objects containing the configur
 | Trip Limit | Place a cap on the number of sequential trip events | trip_limit | Per Trigger | Number | | 0 | 0 | | A value of 0 diables the limit and the trigger will re-arm indefinitely |
 
 ## Usage
-The plugin will create, or restore, a dynamic accessory for each trigger specified in the configuration. Each accessory will advertise four services: (1) switch, (1) motion sensor, (1) light sensor, and (1) time information.
+The plugin will create, or restore, a dynamic accessory for each trigger specified in the configuration. Each accessory will advertise three services: (1) switch, (1) motion sensor, and (1) light sensor.
 
 The control switch will enable/disable the trigger. The state of this setting is saved and will be restored to the last known state upon restart.</br>
 The motion sensor will report that motion is detected when the trigger is in the tripped state. Otherwise, there will be no motion detected.</br>
 The light sensor will be used to indicate the time, in minutes, until the next trigger event.</br>
-The time informaiton service is used to indicate the time, in the local timezone, of the next trigger event. However, to date, no Homekit app has been found that resolves this service. This service is only accessible via the [_homebridge-config-ui-x_](https://www.npmjs.com/package/homebridge-config-ui-x) web view on the `Accessories` page.</br>
+The time, in the local timezone, of the next trigger event will be published to the Accessory Information section of each accessory/service,</br>
 
 The plugin supports an option to configue _scheduled triggers_ to be based on astronomical events. The supported events are: sunrise, sunset, twilight start, twilight end, moon rise, moon set, solar transit, lunar transit. The plugin determines the time of these events by using the API proviced by the [United States Naval Observatory](https://aa.usno.navy.mil/data/api). When issuing these querries, the plugin with tag the requests with the identifier `gt_trigr`. The plugin only uses the configured location (latitude, longitude) solely for the purppose of querring for the astronomical events.
 

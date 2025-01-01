@@ -9,6 +9,7 @@ Change history for _homebridge-grumptech-timetriggers_
 - [Issue #103](https://github.com/pricemi115/homebridge-grumptech-timetriggers/issues/103): Updates to support Homebridge v2.
 - [Issue #103](https://github.com/pricemi115/homebridge-grumptech-timetriggers/issues/103): Eliminted the now-obsolete [Time Information](https://developers.homebridge.io/#/service/TimeInformation) service, which was used to indicate the scheduled trip date and time.
 - Updated dependencies.
+##### **Note: Restarting homebridge may be necessary when upgrading from a previous version.**
 ---
 ## [1.3.8] - 2023-DEC-02
 ### Fixes 🐛

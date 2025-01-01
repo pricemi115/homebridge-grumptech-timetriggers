@@ -921,6 +921,9 @@ class TimeTriggerPlatform {
 
             /* Software Revision */
             accessoryInfoService.updateCharacteristic(_hap.Characteristic.SoftwareRevision, `${ACCESSORY_VERSION}`);
+
+            /* Firmware/Plugin Revision */
+            accessoryInfoService.updateCharacteristic(_hap.Characteristic.FirmwareRevision, `${_PackageInfo.PLUGIN_VER}`);
         }
     }
 

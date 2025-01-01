@@ -46,7 +46,7 @@ The plugin will create, or restore, a dynamic accessory for each trigger specifi
 The control switch will enable/disable the trigger. The state of this setting is saved and will be restored to the last known state upon restart.</br>
 The motion sensor will report that motion is detected when the trigger is in the tripped state. Otherwise, there will be no motion detected.</br>
 The light sensor will be used to indicate the time, in minutes, until the next trigger event.</br>
-The time, in the local timezone, of the next trigger event will be published to the Accessory Information section of each accessory/service,</br>
+The time, in the local timezone, of the next trigger event will be published to the Accessory Information section of each accessory/service, under the _Product Data_ field. However, at this time, the _homebridge-config-ui-x_ i the only known way to view the data.</br>
 
 The plugin supports an option to configue _scheduled triggers_ to be based on astronomical events. The supported events are: sunrise, sunset, twilight start, twilight end, moon rise, moon set, solar transit, lunar transit. The plugin determines the time of these events by using the API proviced by the [United States Naval Observatory](https://aa.usno.navy.mil/data/api). When issuing these querries, the plugin with tag the requests with the identifier `gt_trigr`. The plugin only uses the configured location (latitude, longitude) solely for the purppose of querring for the astronomical events.
 

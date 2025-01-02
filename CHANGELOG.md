@@ -3,7 +3,11 @@ Change history for _homebridge-grumptech-timetriggers_
 
 ---
 ---
-
+## [1.4.1] - 2025-JAN-01 🥳🍾
+### Fixes 🐛
+- Updating package.json to include a _homepage_ field.
+##### **Note: Restarting homebridge may be necessary when upgrading from a version 1.3.8 pr earlier.**
+---
 ## [1.4.0] - 2025-JAN-01 🥳🍾
 ### What's new ✨
 - [Issue #103](https://github.com/pricemi115/homebridge-grumptech-timetriggers/issues/103): Updates to support Homebridge v2.

@@ -42,6 +42,7 @@
   "engines": {
     "homebridge": "^1.6.0 || ^2.0.0-beta.0"
   },
+  "homepage": "https://github.com/pricemi115/homebridge-grumptech-timetriggers#readme",
   "repository": {
     "type": "git",
     "url": "https://github.com/pricemi115/homebridge-grumptech-timetriggers"

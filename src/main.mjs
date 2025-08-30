@@ -170,6 +170,7 @@ class TimeTriggerPlatform {
         if (_is.not.undefined(config) &&
             _is.not.undefined(config.settings) && _is.not.undefined(config.settings.triggers) &&
             _is.array(config.settings.triggers)) {
+            this._configValid = true;
             config.settings.triggers.forEach((triggerSettings, index) => {
                 // Get the identifier.
                 let identifier = null;
@@ -382,7 +383,8 @@ class TimeTriggerPlatform {
             });
         }
         else {
-            throw new TypeError(`Configuration is invalid.`);
+            this._log('Configuration is invalid.');
+            this._configValid = false;
         }
 
         // Register for the Did Finish Launching event
@@ -433,6 +435,14 @@ class TimeTriggerPlatform {
      */
     async _doInitialization() {
         this._log(`Homebridge Plug-In ${_PackageInfo.CONFIG_INFO.platform} has finished launching.`);
+
+        if (_is.falsy(this._configValid))
+        {
+            this._log("Skipping initialization due to invaid configuration.");
+            return;
+        }
+
+        // Body -------
 
         // Flush any accessories as needed.
         const accessoriesToRemove = [];
@@ -511,6 +521,13 @@ class TimeTriggerPlatform {
      * @throws {TypeError} - thrown if 'accessory' is not a PlatformAccessory
      */
     configureAccessory(accessory) {
+        if (_is.falsy(this._configValid))
+        {
+            this._log("Skipping accessory configuration due to invaid configuration.");
+            return;
+        }
+        // Body -----
+        
         // Validate the argument(s)
         if ((_is.undefined(accessory)) ||
             (!(accessory instanceof _PlatformAccessory))) {

@@ -3,14 +3,19 @@ Change history for _homebridge-grumptech-timetriggers_
 
 ---
 ---
+## [1.4.3] - 2025-AUG-30 🎉🎊
+### What's new ✨
+GrumpTech TimeTriggers is now Homebridge Certified
+---
 ## [1.4.2] - 2025-AUG-30 🌞
 ### Fixes 🐛
 - [Issue #125](https://github.com/pricemi115/homebridge-grumptech-timetriggers/issues/125): Handle invalid configuration without causing restart loop.
-##### **Note: Restarting homebridge may be necessary when upgrading from a version 1.3.8 pr earlier.**
----## [1.4.1] - 2025-JAN-01 🥳🍾
+##### **Note: Restarting homebridge may be necessary when upgrading from a version 1.3.8 or earlier.**
+---
+## [1.4.1] - 2025-JAN-01 🥳🍾
 ### Fixes 🐛
 - Updating package.json to include a _homepage_ field.
-##### **Note: Restarting homebridge may be necessary when upgrading from a version 1.3.8 pr earlier.**
+##### **Note: Restarting homebridge may be necessary when upgrading from a version 1.3.8 or earlier.**
 ---
 ## [1.4.0] - 2025-JAN-01 🥳🍾
 ### What's new ✨

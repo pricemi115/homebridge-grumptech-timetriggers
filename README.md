@@ -1,4 +1,5 @@
 # Homebridge Time Triggers
+[![verified-by-homebridge](https://img.shields.io/badge/homebridge-verified-blueviolet?color=%23491F59&style=for-the-badge&logoColor=%23FFFFFF&logo=homebridge)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
 
 [Homebridge Time Triggers](https://github.com/pricemi115/homebridge-grumptech-timetriggers), by [GrumpTech](https://github.com/pricemi115/), is a [Homebridge](https://homebridge.io) dynamic platform plug-in that publishes a motion sensor, where the motion detected is a time-based event.
 

@@ -5,7 +5,7 @@ Change history for _homebridge-grumptech-timetriggers_
 ---
 ## [1.4.3] - 2025-AUG-30 🎉🎊
 ### What's new ✨
-GrumpTech TimeTriggers is now Homebridge Certified
+- GrumpTech TimeTriggers is now Homebridge Certified
 ---
 ## [1.4.2] - 2025-AUG-30 🌞
 ### Fixes 🐛

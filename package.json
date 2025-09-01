@@ -1,7 +1,7 @@
 {
   "name": "homebridge-grumptech-timetriggers",
   "displayName": "Homebridge Time Triggers",
-  "version": "1.4.3",
+  "version": "1.4.4",
   "description": "Time-based triggers for use with Homebridge",
   "type": "module",
   "main": "dist/homebridge-grumptech-timetriggers.js",
@@ -60,7 +60,7 @@
   "license": "MIT",
   "dependencies": {
     "debug": "^4.3.4",
-    "grumptech-astrodata": "^1.1.0",
+    "grumptech-astrodata": "^1.1.1",
     "is-it-check": "^1.0.12"
   },
   "devDependencies": {

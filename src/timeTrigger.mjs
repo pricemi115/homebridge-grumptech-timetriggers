@@ -1,4 +1,3 @@
-/* eslint-disable new-cap */
 /**
  * @description Manages a time-based trigger event.
  * @copyright 2023-2023
@@ -32,7 +31,6 @@ import {TriggerStateTripped} from './triggerStateTripped.mjs';
  * @description Debugging function pointer for runtime related diagnostics.
  * @private
  */
-// eslint-disable-next-line camelcase, no-unused-vars
 const _debug = _debugModule('time_trigger');
 
 /**

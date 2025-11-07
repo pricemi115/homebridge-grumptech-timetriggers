@@ -1,5 +1,3 @@
-/* eslint-disable jsdoc/no-undefined-types */
-/* eslint-disable new-cap */
 /**
  * @description Manages a scheduled trigger event.
  * @copyright 2023-2023
@@ -27,7 +25,6 @@ import {TRIGGER_ACTIONS} from './triggerStateBase.mjs';
  * @description Debugging function pointer for runtime related diagnostics.
  * @private
  */
-// eslint-disable-next-line camelcase, no-unused-vars
 const _debug = _debugModule('scheduled_trigger');
 
 /**
@@ -191,11 +188,9 @@ export class ScheduledTrigger extends TimeTrigger {
             const trigger = new Date();
             trigger.setMinutes(trigger.getMinutes() + 1);
             /* eslint-disable indent */
-            /* eslint-disable key-spacing */
             this._time = {nominal:   {hour: trigger.getHours(), minute: trigger.getMinutes()},
                           tolerance: {hour: 0, minute: 0}};
             /* eslint-enable indent */
-            /* eslint-enable key-spacing */
         }
 
         // Trigger type-specific initialization.

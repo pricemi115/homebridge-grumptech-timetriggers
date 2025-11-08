@@ -19,7 +19,6 @@ import {TimeTrigger} from './timeTrigger.mjs';
  * @description Debugging function pointer for runtime related diagnostics.
  * @private
  */
-// eslint-disable-next-line camelcase
 const _debug = _debugModule('time_trigger_state');
 
 /**
@@ -31,10 +30,8 @@ const _debug = _debugModule('time_trigger_state');
  * @property {string} Abort - Perform abort action
  */
 export const TRIGGER_ACTIONS = {
-    /* eslint-disable key-spacing */
     Next  : 'next',
     Abort : 'abort',
-    /* eslint-enable key-spacing */
 };
 
 /**
@@ -68,7 +65,6 @@ export class TriggerStateBase {
         this._owner = config.owner;
     }
 
-    // eslint-disable-next-line jsdoc/require-returns-check
     /**
      * @description Read-only property for the name of the state.
      * @returns {string} - name
@@ -79,7 +75,6 @@ export class TriggerStateBase {
         throw new Error(`Abstract Property: Name`);
     }
 
-    // eslint-disable-next-line jsdoc/require-returns-check
     /**
      * @description Read-only property for the id of the state.
      * @returns {TRIGGER_STATES} - state identifier
@@ -90,7 +85,6 @@ export class TriggerStateBase {
         throw new Error(`Abstract Property: State`);
     }
 
-    // eslint-disable-next-line jsdoc/require-returns-check
     /**
      * @description Read-only property for state ids for valid transitions.
      * @returns {TRIGGER_STATES[]} - array of state ids

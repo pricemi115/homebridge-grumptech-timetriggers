@@ -13,10 +13,8 @@
  * @property {number} ScheduledTrigger - Trigger configured to trip on a day/hour/minute and remained tripped for a specified duration
  */
 export const TRIGGER_TYPES = {
-    /* eslint-disable key-spacing */
     TimedTrigger     : 0,
     ScheduledTrigger : 1,
-    /* eslint-enable key-spacing */
 };
 
 /**
@@ -30,12 +28,10 @@ export const TRIGGER_TYPES = {
  * @property {number} Tripped - Trigger Tripped
  */
 export const TRIGGER_STATES = {
-    /* eslint-disable key-spacing */
     Inactive  : 0,
     Arming    : 1,
     Armed     : 2,
     Tripped   : 3,
-    /* eslint-enable key-spacing */
 };
 
 /**
@@ -54,7 +50,6 @@ export const TRIGGER_STATES = {
  * @property {number} AllDays - All Days
  */
 export const TRIGGER_DAYS = {
-    /* eslint-disable key-spacing */
     Sunday    :   1,
     Monday    :   2,
     Tuesday   :   4,
@@ -66,7 +61,6 @@ export const TRIGGER_DAYS = {
     Weekday   :  62,
     Weekend   :  65,
     AllDays   : 127,
-    /* eslint-enable key-spacing */
 };
 
 /**
@@ -78,10 +72,8 @@ export const TRIGGER_DAYS = {
  * @property {string} EVENT_STATE_NOTIFY  - Identification for the event published when the trigger state does not change.
  */
 export const TRIGGER_EVENTS = {
-    /* eslint-disable key-spacing */
     EVENT_STATE_CHANGED : 'state_changed',
     EVENT_STATE_NOTIFY  : 'state_notify',
-    /* eslint-enable key-spacing */
 };
 
 /**
@@ -99,7 +91,6 @@ export const TRIGGER_EVENTS = {
  * @property {string} ASTRONOMICAL_MOON_SET - Moon set
  */
 export const ASTRONOMICAL_TRIGGERS = {
-    /* eslint-disable key-spacing */
     ASTRONOMICAL_TWILIGHT_START : 'twilight_start',
     ASTRONOMICAL_SUNRISE        : 'sunrise',
     ASTRONOMICAL_SOALAR_TRANSIT : 'solar_transit',
@@ -108,7 +99,6 @@ export const ASTRONOMICAL_TRIGGERS = {
     ASTRONOMICAL_MOON_RISE      : 'moon_rise',
     ASTRONOMICAL_LUNAR_TRANSIT  : 'lunar_transit',
     ASTRONOMICAL_MOON_SET       : 'moon_set',
-    /* eslint-enable key-spacing */
 };
 
 /**
@@ -121,9 +111,7 @@ export const ASTRONOMICAL_TRIGGERS = {
  * @property {string} TYPE_AFTER - Offset after
  */
 export const TIME_OFFSET_TYPES = {
-    /* eslint-disable key-spacing */
     TYPE_NONE   : 'none',
     TYPE_BEFORE : 'before',
     TYPE_AFTER  : 'after',
-    /* eslint-enable key-spacing */
 };

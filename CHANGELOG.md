@@ -3,6 +3,10 @@ Change history for _homebridge-grumptech-timetriggers_
 
 ---
 ---
+## [1.4.5] - 2025-NOV-08
+### What's new ✨
+- Updating dependencies
+---
 ## [1.4.4] - 2025-AUG-31
 ### What's new ✨
 - Updating dependencies

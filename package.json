@@ -45,7 +45,7 @@
   "homepage": "https://github.com/pricemi115/homebridge-grumptech-timetriggers#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/pricemi115/homebridge-grumptech-timetriggers"
+    "url": "git+https://github.com/pricemi115/homebridge-grumptech-timetriggers.git"
   },
   "bugs": {
     "url": "https://github.com/pricemi115/homebridge-grumptech-timetriggers/issues"

@@ -185,18 +185,17 @@ describe('ScheduledTrigger class tests', ()=>{
     });
     describe('Astronomical Instance functionality tests', ()=>{
         describe.each([
-            ['No offset',               {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SUNRISE, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 0, minute: 0},   location: {latitude: 42, longitude: -71.25}}],
-            ['No offset - MR',          {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_MOON_RISE, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 0, minute: 0},   location: {latitude: 42, longitude: -71.25}}],
-            ['No offset - MS',          {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_MOON_SET, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 0, minute: 0},   location: {latitude: 42, longitude: -71.25}}],
-            ['No offset - ST',          {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SOALAR_TRANSIT, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 0, minute: 0},   location: {latitude: 42, longitude: -71.25}}],
-            ['No offset - LT',          {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_LUNAR_TRANSIT, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 0, minute: 0},   location: {latitude: 42, longitude: -71.25}}],
-            ['No offset = TE',          {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_TWILIGHT_END, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_BEFORE, hour: 0, minute: 20},   location: {latitude: 42, longitude: -71.25}}],
-            ['No offset - TS',          {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_TWILIGHT_START, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 0, minute: 0},   location: {latitude: 42, longitude: -71.25}}],
-            ['No offset',               {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SUNRISE, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 0, minute: 0},   location: {latitude: 42, longitude: -71.25}}],
-            ['No offset',               {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SUNRISE, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 0, minute: 0},   location: {latitude: 42, longitude: -71.25}}],
-            ['No offset - with values', {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SUNRISE, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 1, minute: 1},   location: {latitude: 42, longitude: -71.25}}],
-            ['Before',                  {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SUNSET, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_BEFORE, hour: 1, minute: 30}, location: {latitude: 42, longitude: -71.25}}],
-            ['After',                   {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SUNSET, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_AFTER, hour: 1, minute: 59},  location: {latitude: 42, longitude: -71.25}}],
+            ['No offset - MR',          {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_MOON_RISE, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 0, minute: 0},   location: {latitude: 42, longitude: -71.25}, required: false}],
+            ['No offset - MS',          {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_MOON_SET, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 0, minute: 0},   location: {latitude: 42, longitude: -71.25}, required: true}],
+            ['No offset - ST',          {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SOALAR_TRANSIT, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 0, minute: 0},   location: {latitude: 42, longitude: -71.25}, required: true}],
+            ['No offset - LT',          {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_LUNAR_TRANSIT, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 0, minute: 0},   location: {latitude: 42, longitude: -71.25}, required: true}],
+            ['No offset = TE',          {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_TWILIGHT_END, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_BEFORE, hour: 0, minute: 20},   location: {latitude: 42, longitude: -71.25}, required: true}],
+            ['No offset - TS',          {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_TWILIGHT_START, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 0, minute: 0},   location: {latitude: 42, longitude: -71.25}, required: true}],
+            ['No offset',               {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SUNRISE, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 0, minute: 0},   location: {latitude: 42, longitude: -71.25}, required: true}],
+            ['No offset',               {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SUNRISE, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 0, minute: 0},   location: {latitude: 42, longitude: -71.25}, required: true}],
+            ['No offset - with values', {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SUNRISE, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_NONE, hour: 1, minute: 1},   location: {latitude: 42, longitude: -71.25}, required: true}],
+            ['Before',                  {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SUNSET, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_BEFORE, hour: 1, minute: 30}, location: {latitude: 42, longitude: -71.25}, required: true}],
+            ['After',                   {astroType:  ASTRONOMICAL_TRIGGERS.ASTRONOMICAL_SUNSET, astroOffset: {type: TIME_OFFSET_TYPES.TYPE_AFTER, hour: 1, minute: 59},  location: {latitude: 42, longitude: -71.25}, required: true}],
         ])('Astro Tests.', (desc, config) =>{
             test(desc, done =>{
                 function getAstroTime(type) {
@@ -255,29 +254,37 @@ describe('ScheduledTrigger class tests', ()=>{
                                 // Get the astronomical date.
                                 const date = getAstroTime(config.astroType);
 
-                                // Update the date based on the offset.
-                                switch (config.astroOffset.type) {
-                                    case TIME_OFFSET_TYPES.TYPE_BEFORE: {
-                                        date.setHours(date.getHours() - config.astroOffset.hour);
-                                        date.setMinutes(date.getMinutes() - config.astroOffset.minute);
+                                if (_is.undefined(date) === false) {
+                                    // Update the date based on the offset.
+                                    switch (config.astroOffset.type) {
+                                        case TIME_OFFSET_TYPES.TYPE_BEFORE: {
+                                            date.setHours(date.getHours() - config.astroOffset.hour);
+                                            date.setMinutes(date.getMinutes() - config.astroOffset.minute);
 
-                                        break;
-                                    }
-                                    case TIME_OFFSET_TYPES.TYPE_AFTER: {
-                                        date.setHours(date.getHours() + config.astroOffset.hour);
-                                        date.setMinutes(date.getMinutes() + config.astroOffset.minute);
+                                            break;
+                                        }
+                                        case TIME_OFFSET_TYPES.TYPE_AFTER: {
+                                            date.setHours(date.getHours() + config.astroOffset.hour);
+                                            date.setMinutes(date.getMinutes() + config.astroOffset.minute);
 
-                                        break;
+                                            break;
+                                        }
+                                        case TIME_OFFSET_TYPES.TYPE_NONE:
+                                        default: {
+                                            // No-op
+                                            break;
+                                        }
                                     }
-                                    case TIME_OFFSET_TYPES.TYPE_NONE:
-                                    default: {
-                                        // No-op
-                                        break;
-                                    }
+
+                                    expect(trigger._time.nominal.hour).toEqual(date.getHours());
+                                    expect(trigger._time.nominal.minute).toEqual(date.getMinutes());
                                 }
-
-                                expect(trigger._time.nominal.hour).toEqual(date.getHours());
-                                expect(trigger._time.nominal.minute).toEqual(date.getMinutes());
+                                else {
+                                    // There was no astronomical date.
+                                    // This may be ok for some of the tests.
+                                    // Ensure this is one of the blessed cases.
+                                    expect(config.required).toBeFalsy();
+                                }
 
                                 // Cleanup and end the test.
                                 trigger.Stop();

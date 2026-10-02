@@ -61,7 +61,8 @@
   "dependencies": {
     "debug": "^4.3.4",
     "grumptech-astrodata": "^1.1.3",
-    "is-it-check": "^1.1.1"
+    "is-it-check": "^1.1.1",
+    "suncalc": "^2.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",

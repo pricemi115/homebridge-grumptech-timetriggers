@@ -51,6 +51,8 @@ The time, in the local timezone, of the next trigger event will be published to 
 
 The plugin supports an option to configue _scheduled triggers_ to be based on astronomical events. The supported events are: sunrise, sunset, twilight start, twilight end, moon rise, moon set, solar transit, lunar transit. The plugin determines the time of these events by using the API proviced by the [United States Naval Observatory](https://aa.usno.navy.mil/data/api). When issuing these querries, the plugin with tag the requests with the identifier `gt_trigr`. The plugin only uses the configured location (latitude, longitude) solely for the purppose of querring for the astronomical events.
 
+If the USNO request fails or returns invalid data, the plugin calculates the events locally with [SunCalc](https://github.com/mourner/suncalc), using the requested date, configured coordinates, and Homebridge's local time zone. Configured offsets and tolerances still apply. If no valid event time is available (for example, sunset during polar day), the trigger remains inactive instead of using a default clock time.
+
 Some example use cases are:</br>
 1. Use the Scheduled Trigger to control lights that turn on/off randomly within a user specified window to give the appearance of being home when you are away on holiday.
 2. Use the Timed Trigger with a limit of 1 to provide the capability of delayed control of various accessories. For example to turn the lighs off in 30 minutes.

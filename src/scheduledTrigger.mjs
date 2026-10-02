@@ -15,6 +15,7 @@
 import _debugModule from 'debug';
 import _is from 'is-it-check';
 import {API_ASTRONOMICAL_DATA_EVENTS, AstronomicalDataAPI} from 'grumptech-astrodata';
+import * as SunCalc from 'suncalc';
 
 // Internal dependencies
 import {TRIGGER_STATES, TRIGGER_DAYS, ASTRONOMICAL_TRIGGERS, TIME_OFFSET_TYPES} from './triggerTypes.mjs';
@@ -357,8 +358,35 @@ export class ScheduledTrigger extends TimeTrigger {
      * @private
      */
     _makeAstronomicalRequest(date) {
+        this._astronomicalRequestDate = new Date(date);
         // Astronomical setting. Request the astronomical data.
         this._astroHelper.RequestAstronomicalOneDayData({id: 'gt_trigr', date: date, location: this._location});
+    }
+
+    /**
+     * @description Calculate local fallback data for the requested calendar day.
+     * @returns {object} Astronomical results in the same format as the USNO response.
+     * @private
+     */
+    _calculateLocalAstronomicalData() {
+        const date = new Date(this._astronomicalRequestDate);
+        const {latitude, longitude} = this._location;
+        const utcOffset = -date.getTimezoneOffset();
+        const solar = SunCalc.getTimes(date, latitude, longitude, 0, utcOffset);
+        const lunar = SunCalc.getMoonTimes(date, latitude, longitude, utcOffset);
+
+        return {
+            valid: true,
+            date: date,
+            solar_rise: solar.sunrise,
+            solar_set: solar.sunset,
+            solar_transit: solar.solarNoon,
+            twilight_start: solar.dawn,
+            twilight_end: solar.dusk,
+            lunar_rise: lunar.rise,
+            lunar_set: lunar.set,
+            lunar_transit: lunar.transit,
+        };
     }
 
     /**
@@ -385,88 +413,48 @@ export class ScheduledTrigger extends TimeTrigger {
      * @private
      */
     _processAstronomicalResults(e) {
-        _debug(`Received Astro Results. status=${e.status}`);
+        _debug(`Received Astro Results. status=${e?.status}`);
 
-        // Manage the state change
-        // Note: Even if there was an error getting the astronimical results,
-        //       when we have previously established the event time, we will just use
-        //       the previous results.
-        if (((_is.undefined(e) || _is.undefined(e.status) ||
-              _is.truthy(e.status)))) {
-            if (_is.not.undefined(this._time) &&
-                _is.not.undefined(this._time.nominal)) {
-                _debug(`Issue getting astro results. Defer to previous event settings.`);
-                // Update the new timer values using the default.
-                this._triggerDelta = this._computeTriggerTimeDelta(this._time);
-                this._doGenerateNewTimerValues();
-                // Move on
-                setImmediate(() => {
-                    this._currentState.Evaluate(TRIGGER_ACTIONS.Next);
-                });
+        let astroData = e?.data;
+        if (e?.status !== false || !astroData?.valid) {
+            _debug(`Issue getting astro results. Calculate locally with SunCalc.`);
+            try {
+                astroData = this._calculateLocalAstronomicalData();
             }
-            else {
-                // Abort.
+            catch (error) {
+                _debug(`SunCalc calculation failed: ${error}`);
                 this._currentState.Evaluate(TRIGGER_ACTIONS.Abort);
+                return;
             }
         }
+
+        const triggerDate = this._getAstroDateTime(astroData);
+        if (_is.undefined(triggerDate)) {
+            _debug(`No astronomical event available for the requested day.`);
+            this._currentState.Evaluate(TRIGGER_ACTIONS.Abort);
+            return;
+        }
+
+        this._time.nominal.hour = triggerDate.getHours();
+        this._time.nominal.minute = triggerDate.getMinutes();
+        this._triggerDelta = this._computeTriggerTimeDelta(this._time);
+        this._doGenerateNewTimerValues();
+
+        // Recalculate for the next eligible day when today's event has passed.
+        const astroDay = astroData.date;
+        const tripDate = new Date(Date.now() + this._timeout.nominal);
+        if ((astroDay.getFullYear() == tripDate.getFullYear()) &&
+            (astroDay.getMonth() == tripDate.getMonth()) &&
+            (astroDay.getDate() == tripDate.getDate())) {
+            setImmediate(() => {
+                this._currentState.Evaluate(TRIGGER_ACTIONS.Next);
+            });
+        }
         else {
-            // Get the astronomical time.
-            const triggerDate = this._getAstroDateTime(e.data);
-
-            // Extract the time of the desired 'phenomena', if the results indicate so.
-            if (e.data.valid) {
-                // Set the 'nominal' time
-                if (_is.not.undefined(triggerDate)) {
-                    this._time.nominal.hour = triggerDate.getHours();
-                    this._time.nominal.minute = triggerDate.getMinutes();
-                }
-            }
-
-            if ((this.Timeout > 0) ||
-                (_is.not.undefined(triggerDate))) {
-                // Update the new timer values.
-                this._triggerDelta = this._computeTriggerTimeDelta(this._time);
-                this._doGenerateNewTimerValues();
-
-                // Ensure that the resulting trigger occurs on the same day as our request.
-                const astroDay = e.data.date;
-                const tripDate = new Date(Date.now() + this._timeout.nominal);
-
-                if ((astroDay.getFullYear() == tripDate.getFullYear()) &&
-                    (astroDay.getMonth() == tripDate.getMonth()) &&
-                    (astroDay.getDate() == tripDate.getDate())) {
-                    // Move on
-                    setImmediate(() => {
-                        this._currentState.Evaluate(TRIGGER_ACTIONS.Next);
-                    });
-                }
-                else {
-                    // The event has passed. Make another request.
-                    _debug(`Requery for trigger time: day=${tripDate.toString()}`);
-                    // Decouple the request.
-                    setImmediate(() => {
-                        this._makeAstronomicalRequest(tripDate);
-                    });
-                }
-            }
-            else {
-                // Do we have a default time to work with? Could be the previous trigger time.
-                // Note: The desired trigger may be invalid on this particular date, so use what we have.
-                if (_is.not.undefined(this._time) &&
-                    _is.not.undefined(this._time.nominal)) {
-                    // Update the new timer values using the last known values.
-                    this._triggerDelta = this._computeTriggerTimeDelta(this._time);
-                    this._doGenerateNewTimerValues();
-                    // Move on
-                    setImmediate(() => {
-                        this._currentState.Evaluate(TRIGGER_ACTIONS.Next);
-                    });
-                }
-                else {
-                    // Abort.
-                    this._currentState.Evaluate(TRIGGER_ACTIONS.Abort);
-                }
-            }
+            _debug(`Requery for trigger time: day=${tripDate.toString()}`);
+            setImmediate(() => {
+                this._makeAstronomicalRequest(tripDate);
+            });
         }
     }
 
@@ -718,6 +706,11 @@ export class ScheduledTrigger extends TimeTrigger {
             }
         }
 
+        if (!(date instanceof Date) || !Number.isFinite(date.getTime())) {
+            return undefined;
+        }
+        // Do not mutate provider results when applying the configured offset.
+        date = new Date(date);
         // Adjust for the offset, if appropriate.
         if (_is.not.undefined(date) &&
             _is.not.undefined(this._astronomicalOffset)) {
